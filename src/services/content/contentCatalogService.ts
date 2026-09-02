@@ -1,10 +1,11 @@
 import { baseContent } from "../../data/mock/baseContent";
 import { basePCExercises, basePCFlashcards, basePCQuizzes, basePCRevisionSheets } from "../../data/mock/basePCContent";
+import { basePCHardExercises } from "../../data/mock/basePCHardExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
 const allBaseFlashcards: Flashcard[] = [...baseContent.flashcards, ...basePCFlashcards];
-const allBaseExercises: Exercise[] = [...baseContent.exercises, ...basePCExercises];
+const allBaseExercises: Exercise[] = [...baseContent.exercises, ...basePCExercises, ...basePCHardExercises];
 const allBaseQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
 const allBaseRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
 
