@@ -19,7 +19,7 @@ export function AppShell() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const examsArea = location.pathname.startsWith("/exams") || location.pathname.startsWith("/tests");
-  const subjectsArea = location.pathname.startsWith("/subjects") || location.pathname.startsWith("/lecons") || location.pathname.startsWith("/exercices");
+  const subjectsArea = location.pathname.startsWith("/subjects") || location.pathname.startsWith("/lecons");
   const aiArea = location.pathname.startsWith("/ai-help") || location.pathname.startsWith("/ai-studio");
 
   useEffect(() => {
@@ -71,6 +71,10 @@ export function AppShell() {
             <span>Recherche</span>
             <kbd>⌘K</kbd>
           </button>
+          <Link to="/exercices" className={`sidebar-secondary-item${location.pathname.startsWith("/exercices") ? " active" : ""}`}>
+            <Icon name="tests" size={18} />
+            <span>Exercices</span>
+          </Link>
           <Link to="/profil" className="sidebar-secondary-item">
             <Icon name="profile" size={18} />
             <span>Profil</span>
