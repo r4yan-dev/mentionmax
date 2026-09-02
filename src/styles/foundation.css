@@ -1,0 +1,16 @@
+.foundation-page { position: relative; }
+.foundation-subject-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.foundation-subject { display:grid; grid-template-columns:auto 1fr auto; gap:16px; align-items:center; min-height:132px; padding:22px; background:rgba(255,255,255,.72); border:1px solid var(--mm-border-soft); border-radius:22px; box-shadow:var(--mm-shadow-sm); transition:transform .18s ease, box-shadow .18s ease; }
+.foundation-subject:hover { transform:translateY(-2px); box-shadow:var(--mm-shadow-md,0 14px 36px rgba(7,59,58,.08)); }
+.foundation-subject__icon { width:42px; height:42px; display:grid; place-items:center; border-radius:14px; background:var(--mm-teal-50); color:var(--mm-teal-700); }
+.foundation-subject h2 { margin:4px 0 4px; font-size:20px; line-height:1.15; }
+.foundation-subject p { margin:0; color:var(--mm-ink-500); font-size:11px; line-height:1.5; }
+.foundation-subject__coefficient { color:var(--mm-ink-400); font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.foundation-subject--ruby .foundation-subject__icon { background:rgba(118,33,58,.08); color:var(--mm-ruby-500,#76213A); }
+.foundation-subject--gold .foundation-subject__icon { background:rgba(201,162,39,.12); color:#8a6a00; }
+.foundation-subject--mint .foundation-subject__icon { background:var(--mm-seafoam,#DDF5F1); }
+.foundation-note { margin-top:14px; color:var(--mm-ink-400); font-size:11px; }
+.foundation-back { display:inline-flex; align-items:center; gap:7px; margin-bottom:20px; color:var(--mm-ink-500); font-size:12px; font-weight:700; }
+.foundation-lesson-meta { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:12px; border-bottom:1px solid var(--mm-border-soft); }
+.foundation-source { padding:5px 9px; border-radius:999px; background:var(--mm-teal-50); color:var(--mm-teal-700); font-size:9px; font-weight:800; }
+@media (max-width: 767px) { .foundation-subject-grid { grid-template-columns:1fr; } .foundation-subject { min-height:110px; padding:18px; } .foundation-lesson-meta { align-items:flex-start; flex-direction:column; } }
