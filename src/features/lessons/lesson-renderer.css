@@ -1,0 +1,63 @@
+.lesson-document {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 12px 0 72px;
+  color: var(--mm-ink-900, #073b3a);
+}
+
+.lesson-document h1 {
+  margin: 0 0 28px;
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+}
+
+.lesson-block {
+  margin: 18px 0;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(221, 245, 241, .48);
+}
+
+.lesson-block h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.lesson-block p {
+  margin: 0;
+  line-height: 1.75;
+}
+
+.lesson-formula {
+  overflow-x: auto;
+  background: var(--mm-white, #fff);
+  border: 1px solid var(--mm-border-soft, #dcebe8);
+  font-size: 18px;
+}
+
+.lesson-formula code {
+  font-family: "SF Mono", "Roboto Mono", monospace;
+}
+
+.lesson-callout {
+  border-left: 4px solid var(--mm-teal-500, #0fa3a3);
+}
+
+.lesson-callout--warning {
+  border-left-color: var(--mm-ruby-500, #76213a);
+}
+
+.lesson-callout--tip {
+  border-left-color: var(--mm-gold-500, #c9a227);
+}
+
+.lesson-recap {
+  background: var(--mm-white, #fff);
+  border: 1px solid var(--mm-border-soft, #dcebe8);
+}
+
+@media (max-width: 767px) {
+  .lesson-document { padding-inline: 4px; }
+  .lesson-block { padding: 16px; }
+}
