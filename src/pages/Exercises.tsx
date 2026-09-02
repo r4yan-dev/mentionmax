@@ -4,6 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import { useAccount } from "../context/AccountContext";
 import { tracks } from "../data/curriculum/tracks";
 import { contentCatalogService } from "../services/content/contentCatalogService";
+import physicsPerson from "../assets/people/student-physics.webp";
+import physicsBg from "../assets/people-bg/student-physics-bg.webp";
 import type { Exercise, ExerciseType } from "../types/content";
 import type { TrackId } from "../types/academic";
 import "./Exercises.css";
@@ -15,7 +17,7 @@ const typeLabels: Record<ExerciseType, string> = {
   proof: "Démonstration",
   calculation: "Calcul",
   "document-analysis": "Analyse de document",
-  "multi-step": "Problème guidé",
+  "multi-step": "Problème composé",
 };
 
 const difficultyLabels = ["", "Très facile", "Facile", "Intermédiaire", "Difficile", "Très difficile"];
@@ -26,8 +28,9 @@ function resolveTrack(track: "SPC" | "SM" | null, section: "A" | "B" | null): Tr
 }
 
 function ExerciseCard({ exercise }: { exercise: Exercise }) {
+  const isHard = exercise.difficulty >= 4;
   return (
-    <article className="exercise-library-card">
+    <article className={`exercise-library-card${isHard ? " exercise-library-card--hard" : ""}`}>
       <div className="exercise-library-card__top">
         <span className="exercise-pill">{typeLabels[exercise.type]}</span>
         <span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>
@@ -161,6 +164,20 @@ export default function Exercises() {
           <span><BrainCircuit size={17} /> Base structurée</span>
         </div>
       </header>
+
+      <section className="physics-exercise-feature" style={{ backgroundImage: `url(${physicsBg})` }}>
+        <div className="physics-exercise-feature__content">
+          <span className="physics-exercise-feature__eyebrow">DÉFI PHYSIQUE</span>
+          <h2>Des problèmes qui mélangent vraiment les chapitres.</h2>
+          <p>Projectile, énergie, rotation, circuits, gravitation et chimie : les exercices composés te demandent de choisir toi-même les bons outils, comme au vrai Bac.</p>
+          <button type="button" className="btn btn-primary" onClick={() => setDifficulty("4")}>
+            Voir les exercices composés <ArrowRight size={15} />
+          </button>
+        </div>
+        <div className="physics-exercise-feature__person" aria-hidden="true">
+          <img src={physicsPerson} alt="" />
+        </div>
+      </section>
 
       <section className="exercise-mode-switch" aria-label="Source des exercices">
         <button type="button" className={mode === "base" ? "active" : ""} onClick={() => setMode("base")}>
