@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { exams as nationalExams } from "../features/exams/catalog";
 import "./Exams.css";
+import "./ExamsFocusLayout.css";
 
 type PublishedTest = {
   id: string;
