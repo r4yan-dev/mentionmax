@@ -6,11 +6,11 @@ import { CommandPalette } from "../command/CommandPalette";
 import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
 
 const primaryNav = [
-  { label: "Leçons", to: "/lecons", icon: "lessons" },
-  { label: "Exercices", to: "/exercices", icon: "practice" },
-  { label: "Examens", to: "/exams", icon: "tests" },
   { label: "Accueil", to: "/accueil", icon: "home" as const },
-  { label: "Focus", to: "/focus", icon: "sparkles" as const },
+  { label: "Matières", to: "/subjects", icon: "lessons" as const },
+  { label: "IA", to: "/ai-help", icon: "ai" as const },
+  { label: "Examens", to: "/exams", icon: "tests" as const },
+  { label: "Focus", to: "/focus", icon: "focus" as const },
 ];
 
 export function AppShell() {
@@ -19,6 +19,8 @@ export function AppShell() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const examsArea = location.pathname.startsWith("/exams") || location.pathname.startsWith("/tests");
+  const subjectsArea = location.pathname.startsWith("/subjects") || location.pathname.startsWith("/lecons") || location.pathname.startsWith("/exercices");
+  const aiArea = location.pathname.startsWith("/ai-help") || location.pathname.startsWith("/ai-studio");
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -35,6 +37,13 @@ export function AppShell() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  function itemIsActive(to: string, isActive: boolean) {
+    if (to === "/exams") return examsArea;
+    if (to === "/subjects") return subjectsArea;
+    if (to === "/ai-help") return aiArea;
+    return isActive;
+  }
+
   return (
     <div className="dashboard-shell">
       <nav className="sidebar">
@@ -49,11 +58,9 @@ export function AppShell() {
               key={item.to}
               to={item.to}
               end={item.to === "/accueil"}
-              className={({ isActive }) =>
-                `sidebar-item${(item.to === "/exams" ? examsArea : isActive) ? " active" : ""}`
-              }
+              className={({ isActive }) => `sidebar-item${itemIsActive(item.to, isActive) ? " active" : ""}`}
             >
-              <Icon name={item.icon as any} size={19} />
+              <Icon name={item.icon} size={19} />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -65,7 +72,7 @@ export function AppShell() {
             <kbd>⌘K</kbd>
           </button>
           <Link to="/profil" className="sidebar-secondary-item">
-            <Icon name="ranking" size={18} />
+            <Icon name="profile" size={18} />
             <span>Profil</span>
           </Link>
           <Link to="/preferences" className="sidebar-secondary-item">
@@ -110,11 +117,7 @@ export function AppShell() {
                 <div className="profile-dropdown-menu" role="menu">
                   <Link to="/profil" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>Profil</Link>
                   <Link to="/preferences" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>Paramètres</Link>
-                  <button
-                    type="button"
-                    className="profile-dropdown-item danger"
-                    onClick={async () => { setProfileOpen(false); await signOut(); }}
-                  >
+                  <button type="button" className="profile-dropdown-item danger" onClick={async () => { setProfileOpen(false); await signOut(); }}>
                     Déconnexion
                   </button>
                 </div>
@@ -131,11 +134,9 @@ export function AppShell() {
             key={item.to}
             to={item.to}
             end={item.to === "/accueil"}
-            className={({ isActive }) =>
-              `mobile-tab${(item.to === "/exams" ? examsArea : isActive) ? " active" : ""}`
-            }
+            className={({ isActive }) => `mobile-tab${itemIsActive(item.to, isActive) ? " active" : ""}`}
           >
-            <Icon name={item.icon as any} size={18} />
+            <Icon name={item.icon} size={18} />
             <span>{item.label}</span>
           </NavLink>
         ))}
