@@ -1,94 +1,48 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { Icon } from "../navigation/Icon";
 import { useAuth } from "../../context/AuthContext";
 import { CommandPalette } from "../command/CommandPalette";
 import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
 
 const primaryNav = [
-  {
-    label: "Leçons",
-    to: "/lecons",
-    icon: "lessons",
-  },
-  {
-    label: "Exercices",
-    to: "/exercices",
-    icon: "practice",
-  },
-  {
-    label: "Examens",
-    to: "/exams",
-    icon: "tests",
-  },
-  {
-    label: "Accueil",
-    to: "/accueil",
-    icon: "home" as const,
-  },
-  {
-    label: "Focus",
-    to: "/focus",
-    icon: "sparkles" as const,
-  },
+  { label: "Leçons", to: "/lecons", icon: "lessons" },
+  { label: "Exercices", to: "/exercices", icon: "practice" },
+  { label: "Examens", to: "/exams", icon: "tests" },
+  { label: "Accueil", to: "/accueil", icon: "home" as const },
+  { label: "Focus", to: "/focus", icon: "sparkles" as const },
 ];
 
 export function AppShell() {
   const { user, signOut } = useAuth();
-  const [profileOpen, setProfileOpen] =
-    useState(false);
-
-  const [commandOpen, setCommandOpen] =
-    useState(false);
+  const location = useLocation();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const examsArea = location.pathname.startsWith("/exams") || location.pathname.startsWith("/tests");
 
   useEffect(() => {
-    function handleKeyDown(
-      event: KeyboardEvent
-    ) {
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key.toLowerCase() === "k"
-      ) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setCommandOpen((value) => !value);
       }
-
       if (event.key === "Escape") {
         setProfileOpen(false);
         setCommandOpen(false);
       }
     }
-
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
-
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
-    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
     <div className="dashboard-shell">
       <nav className="sidebar">
         <div className="sidebar-brand">
-          <Link
-            to="/accueil"
-            className="sidebar-logo"
-            aria-label="MentionMax"
-          >
-            <img
-              src={MentionMaxMark}
-              alt="MentionMax"
-              className="sidebar-logo__mark"
-            />
+          <Link to="/accueil" className="sidebar-logo" aria-label="MentionMax">
+            <img src={MentionMaxMark} alt="MentionMax" className="sidebar-logo__mark" />
           </Link>
         </div>
-
         <div className="sidebar-nav">
           {primaryNav.map((item) => (
             <NavLink
@@ -96,57 +50,26 @@ export function AppShell() {
               to={item.to}
               end={item.to === "/accueil"}
               className={({ isActive }) =>
-                `sidebar-item${
-                  isActive ? " active" : ""
-                }`
+                `sidebar-item${(item.to === "/exams" ? examsArea : isActive) ? " active" : ""}`
               }
             >
-              <Icon
-                name={item.icon as any}
-                size={19}
-              />
-
+              <Icon name={item.icon as any} size={19} />
               <span>{item.label}</span>
             </NavLink>
           ))}
         </div>
-
         <div className="sidebar-footer">
-          <button
-            type="button"
-            className="sidebar-search"
-            onClick={() =>
-              setCommandOpen(true)
-            }
-          >
+          <button type="button" className="sidebar-search" onClick={() => setCommandOpen(true)}>
             <Icon name="search" size={18} />
-
             <span>Recherche</span>
-
             <kbd>⌘K</kbd>
           </button>
-
-          <Link
-            to="/profil"
-            className="sidebar-secondary-item"
-          >
-            <Icon
-              name="ranking"
-              size={18}
-            />
-
+          <Link to="/profil" className="sidebar-secondary-item">
+            <Icon name="ranking" size={18} />
             <span>Profil</span>
           </Link>
-
-          <Link
-            to="/preferences"
-            className="sidebar-secondary-item"
-          >
-            <Icon
-              name="settings"
-              size={18}
-            />
-
+          <Link to="/preferences" className="sidebar-secondary-item">
+            <Icon name="settings" size={18} />
             <span>Préférences</span>
           </Link>
         </div>
@@ -155,111 +78,42 @@ export function AppShell() {
       <main className="content">
         <header className="topbar">
           <div className="topbar-mobile-brand">
-            <Link
-              to="/accueil"
-              className="sidebar-logo"
-            >
-              <span className="sidebar-logo__mark">
-                M
-              </span>
-
-              <span className="sidebar-logo__text">
-                MentionMax
-              </span>
+            <Link to="/accueil" className="sidebar-logo">
+              <span className="sidebar-logo__mark">M</span>
+              <span className="sidebar-logo__text">MentionMax</span>
             </Link>
           </div>
-
           <div className="topbar-right">
-            <button
-              type="button"
-              className="topbar-search"
-              onClick={() =>
-                setCommandOpen(true)
-              }
-            >
-              <Icon
-                name="search"
-                size={17}
-              />
-
+            <button type="button" className="topbar-search" onClick={() => setCommandOpen(true)}>
+              <Icon name="search" size={17} />
               <span>Rechercher</span>
-
               <kbd>⌘K</kbd>
             </button>
-
-            <div className="streak-chip">
-              <Icon
-                name="flame"
-                size={16}
-              />
-            </div>
-
+            <div className="streak-chip"><Icon name="flame" size={16} /></div>
             <div className="profile-dropdown">
               <button
                 type="button"
                 className="profile-chip"
-                onClick={() =>
-                  setProfileOpen(
-                    (value) => !value
-                  )
-                }
-                aria-expanded={
-                  profileOpen
-                }
+                onClick={() => setProfileOpen((value) => !value)}
+                aria-expanded={profileOpen}
                 aria-haspopup="menu"
               >
                 <span className="profile-chip__avatar">
-                  {(user?.user_metadata?.display_name ||
-                    user?.email ||
-                    "U")
-                    .slice(0, 2)
-                    .toUpperCase()}
+                  {(user?.user_metadata?.display_name || user?.email || "U").slice(0, 2).toUpperCase()}
                 </span>
-
                 <span className="profile-chip__name">
-                  {user?.user_metadata?.display_name ||
-                    user?.email?.split("@")[0] ||
-                    "Compte"}
+                  {user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Compte"}
                 </span>
-
-                <Icon
-                  name="chevron"
-                  size={15}
-                />
+                <Icon name="chevron" size={15} />
               </button>
-
               {profileOpen && (
-                <div
-                  className="profile-dropdown-menu"
-                  role="menu"
-                >
-                  <Link
-                    to="/profil"
-                    className="profile-dropdown-item"
-                    onClick={() =>
-                      setProfileOpen(false)
-                    }
-                  >
-                    Profil
-                  </Link>
-
-                  <Link
-                    to="/preferences"
-                    className="profile-dropdown-item"
-                    onClick={() =>
-                      setProfileOpen(false)
-                    }
-                  >
-                    Paramètres
-                  </Link>
-
+                <div className="profile-dropdown-menu" role="menu">
+                  <Link to="/profil" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>Profil</Link>
+                  <Link to="/preferences" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>Paramètres</Link>
                   <button
                     type="button"
                     className="profile-dropdown-item danger"
-                    onClick={async () => {
-                      setProfileOpen(false);
-                      await signOut();
-                    }}
+                    onClick={async () => { setProfileOpen(false); await signOut(); }}
                   >
                     Déconnexion
                   </button>
@@ -268,10 +122,7 @@ export function AppShell() {
             </div>
           </div>
         </header>
-
-        <section className="content-body">
-          <Outlet />
-        </section>
+        <section className="content-body"><Outlet /></section>
       </main>
 
       <nav className="mobile-tabbar">
@@ -281,27 +132,15 @@ export function AppShell() {
             to={item.to}
             end={item.to === "/accueil"}
             className={({ isActive }) =>
-              `mobile-tab${
-                isActive ? " active" : ""
-              }`
+              `mobile-tab${(item.to === "/exams" ? examsArea : isActive) ? " active" : ""}`
             }
           >
-            <Icon
-              name={item.icon as any}
-              size={18}
-            />
-
+            <Icon name={item.icon as any} size={18} />
             <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
-
-      <CommandPalette
-        open={commandOpen}
-        onClose={() =>
-          setCommandOpen(false)
-        }
-      />
+      <CommandPalette open={commandOpen} onClose={() => setCommandOpen(false)} />
     </div>
   );
 }
