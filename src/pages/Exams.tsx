@@ -63,7 +63,7 @@ export default function Exams() {
   }, [query, tests]);
 
   return (
-    <main className="exams-page exams-ai-page">
+    <main className="app-page exams-page exams-ai-page">
       <header className="exams-page__header exams-ai-page__header">
         <div className="exams-page__heading">
           <span className="section-eyebrow">EXAMENS & CORRIGÉS</span>
