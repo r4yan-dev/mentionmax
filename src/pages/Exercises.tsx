@@ -4,8 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAccount } from "../context/AccountContext";
 import { tracks } from "../data/curriculum/tracks";
 import { contentCatalogService } from "../services/content/contentCatalogService";
-import physicsPerson from "../assets/people/student-physics.webp";
-import physicsBg from "../assets/people-bg/student-physics-bg.webp";
+import { LatexText } from "../components/ui/LatexText";
 import type { Exercise, ExerciseType } from "../types/content";
 import type { TrackId } from "../types/academic";
 import "./Exercises.css";
@@ -17,7 +16,7 @@ const typeLabels: Record<ExerciseType, string> = {
   proof: "Démonstration",
   calculation: "Calcul",
   "document-analysis": "Analyse de document",
-  "multi-step": "Problème composé",
+  "multi-step": "Problème guidé",
 };
 
 const difficultyLabels = ["", "Très facile", "Facile", "Intermédiaire", "Difficile", "Très difficile"];
@@ -28,9 +27,8 @@ function resolveTrack(track: "SPC" | "SM" | null, section: "A" | "B" | null): Tr
 }
 
 function ExerciseCard({ exercise }: { exercise: Exercise }) {
-  const isHard = exercise.difficulty >= 4;
   return (
-    <article className={`exercise-library-card${isHard ? " exercise-library-card--hard" : ""}`}>
+    <article className="exercise-library-card">
       <div className="exercise-library-card__top">
         <span className="exercise-pill">{typeLabels[exercise.type]}</span>
         <span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>
@@ -41,7 +39,7 @@ function ExerciseCard({ exercise }: { exercise: Exercise }) {
       <div className="exercise-library-card__body">
         <span className="exercise-library-card__chapter">{exercise.target.chapter}</span>
         <h3>{exercise.title}</h3>
-        <p>{exercise.statement}</p>
+        <p><LatexText>{exercise.statement}</LatexText></p>
       </div>
       <div className="exercise-library-card__footer">
         <span><Clock3 size={14} /> {exercise.estimatedMinutes} min · +{exercise.xpValue} XP</span>
@@ -68,13 +66,13 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
           </div>
           <span className="exercise-library-card__chapter">{exercise.target.chapter} · {exercise.target.topic}</span>
           <h1>{exercise.title}</h1>
-          <p className="exercise-detail-statement">{exercise.statement}</p>
+          <p className="exercise-detail-statement"><LatexText>{exercise.statement}</LatexText></p>
           {exercise.type === "mcq" && exercise.options ? (
             <div className="exercise-options">
               {exercise.options.map((option) => (
                 <label key={option.id} className="exercise-option">
                   <input type="radio" name="answer" value={option.id} />
-                  <span>{option.label}</span>
+                  <span><LatexText>{option.label}</LatexText></span>
                 </label>
               ))}
             </div>
@@ -117,8 +115,8 @@ function ExerciseDetail({ exercise }: { exercise: Exercise }) {
           <div>
             <span className="section-eyebrow">CORRECTION</span>
             <h2>Solution guidée</h2>
-            <p>{exercise.correction}</p>
-            {exercise.hint && <p className="exercise-hint"><strong>Réflexe :</strong> {exercise.hint}</p>}
+            <p><LatexText>{exercise.correction}</LatexText></p>
+            {exercise.hint && <p className="exercise-hint"><strong>Réflexe :</strong> <LatexText>{exercise.hint}</LatexText></p>}
           </div>
         </section>
       )}
@@ -164,20 +162,6 @@ export default function Exercises() {
           <span><BrainCircuit size={17} /> Base structurée</span>
         </div>
       </header>
-
-      <section className="physics-exercise-feature" style={{ backgroundImage: `url(${physicsBg})` }}>
-        <div className="physics-exercise-feature__content">
-          <span className="physics-exercise-feature__eyebrow">DÉFI PHYSIQUE</span>
-          <h2>Des problèmes qui mélangent vraiment les chapitres.</h2>
-          <p>Projectile, énergie, rotation, circuits, gravitation et chimie : les exercices composés te demandent de choisir toi-même les bons outils, comme au vrai Bac.</p>
-          <button type="button" className="btn btn-primary" onClick={() => setDifficulty("4")}>
-            Voir les exercices composés <ArrowRight size={15} />
-          </button>
-        </div>
-        <div className="physics-exercise-feature__person" aria-hidden="true">
-          <img src={physicsPerson} alt="" />
-        </div>
-      </section>
 
       <section className="exercise-mode-switch" aria-label="Source des exercices">
         <button type="button" className={mode === "base" ? "active" : ""} onClick={() => setMode("base")}>
