@@ -45,13 +45,14 @@ function loadMathJax(): Promise<void> {
 
 function toLatex(text: string): string {
   return text
-    .replace(/(\\d+(?:[.,]\\d+)?)(?:×|x|\\s*[×x]\\s*)(10)([⁻⁺]?)(\\d+)/g, (_match, coefficient: string, _ten: string, sign: string, exponent: string) => {
+    .replace(/(\d+(?:[.,]\d+)?)(?:×|x|\s*[×x]\s*)(10)([⁻⁺]?)(\d+)/g, (_match, coefficient: string, _ten: string, sign: string, exponent: string) => {
       const normalizedCoefficient = coefficient.replace(",", ".");
       const signedExponent = `${sign === "⁻" ? "-" : sign === "⁺" ? "+" : ""}${exponent}`;
       return `\\(${normalizedCoefficient}\\times10^{${signedExponent}}\\)`;
     })
     .replace(/10⁻([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_match, exponent: string) => `\\(10^{-${exponent.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => String("⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)))}}\\)`)
-    .replace(/([A-Za-zΔΩμ]+)·m/g, "\\($1\\,\\mathrm{m}\\)");
+    .replace(/\b([A-Za-zΔΩμ][A-Za-z0-9ΔΩμ]*)_([A-Za-z0-9]+)\b/g, (_match, base: string, index: string) => `\\(${base}_{${index}}\\)`)
+    .replace(/([A-Za-zΔΩμ]+)·m/g, "\\($1\,\\mathrm{m}\\)");
 }
 
 export function LatexText({ children, className }: { children: string; className?: string }) {
