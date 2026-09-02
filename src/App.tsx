@@ -2,6 +2,8 @@ import Exams from "./pages/Exams";
 import Tests from "./pages/Tests";
 import NationalExams from "./pages/NationalExams";
 import ExamReader from "./pages/ExamReader";
+import Subjects from "./pages/Subjects";
+import Lessons from "./pages/Lessons";
 import {
   BrowserRouter,
   Navigate,
@@ -43,6 +45,8 @@ import {
   GroupSettings,
 } from "./pages/FocusGroupTabs";
 
+import "./styles/foundation.css";
+
 function LoadingScreen() {
   return (
     <div className="auth-page">
@@ -66,6 +70,12 @@ function ProtectedApp() {
         <Routes>
           <Route element={<AppShell />}>
             <Route path="/accueil" element={<Home />} />
+
+            <Route path="/subjects" element={<Subjects />} />
+            <Route path="/subjects/:subjectId" element={<Subjects />} />
+            <Route path="/lecons" element={<Subjects />} />
+            <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
+
             <Route path="/focus" element={<Focus />} />
             <Route path="/focus/timer" element={<Focus />} />
 
@@ -94,7 +104,6 @@ function ProtectedApp() {
             </Route>
 
             <Route path="/dashboard" element={<Navigate to="/accueil" replace />} />
-            <Route path="/subjects" element={<Navigate to="/lecons" replace />} />
             <Route path="/progression" element={<Navigate to="/accueil" replace />} />
             <Route path="/classement" element={<Navigate to="/focus" replace />} />
             <Route path="/ai-studio" element={<Navigate to="/ai-studio/handnotes" replace />} />
