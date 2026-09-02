@@ -125,7 +125,7 @@ export const basePCExercises: Exercise[] = exerciseDefinitions.map(([number, tit
     "Transformations forcées / électrolyse",
     "Réactions d'estérification et d'hydrolyse",
     "Contrôle de l'évolution des systèmes chimiques",
-  ][number - 1], String(topic)),
+  ][number - 1]), String(topic)),
   type: title.includes("Sens") || title.includes("Critère") ? "short-answer" : "calculation",
   difficulty,
   title: String(title),
