@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Bot, Clock3, FileCheck2, FileText, ScanLine, Sparkles, Upload, Wand2 } from "lucide-react";
+import { ArrowRight, Bot, Clock3, FileText, ScanLine, Sparkles, Upload, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { exams as nationalExams, subjectLabels } from "../features/exams/catalog";
+import { exams as nationalExams } from "../features/exams/catalog";
 import "./Exams.css";
 
 type PublishedTest = {
