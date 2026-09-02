@@ -1,6 +1,12 @@
 import { baseContent } from "../../data/mock/baseContent";
+import { basePCExercises, basePCFlashcards, basePCQuizzes, basePCRevisionSheets } from "../../data/mock/basePCContent";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
+
+const allBaseFlashcards: Flashcard[] = [...baseContent.flashcards, ...basePCFlashcards];
+const allBaseExercises: Exercise[] = [...baseContent.exercises, ...basePCExercises];
+const allBaseQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
+const allBaseRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
 
 function matchesTarget(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) {
   return (item: { target: { trackIds: TrackId[]; subjectId: SubjectId; chapter: string; topic: string } }) =>
@@ -12,19 +18,19 @@ function matchesTarget(trackId: TrackId, subjectId: SubjectId, chapter?: string,
 
 export const contentCatalogService = {
   getBaseFlashcards(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Flashcard[] {
-    return baseContent.flashcards.filter(matchesTarget(trackId, subjectId, chapter, topic));
+    return allBaseFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
 
   getBaseExercises(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Exercise[] {
-    return baseContent.exercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
+    return allBaseExercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
 
   getBaseQuizzes(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Quiz[] {
-    return baseContent.quizzes.filter(matchesTarget(trackId, subjectId, chapter, topic));
+    return allBaseQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
 
   getBaseRevisionSheets(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): RevisionSheet[] {
-    return baseContent.revisionSheets.filter(matchesTarget(trackId, subjectId, chapter, topic));
+    return allBaseRevisionSheets.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
 
   getCounts(trackId: TrackId, subjectId: SubjectId) {
