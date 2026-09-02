@@ -1,27 +1,185 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, BookOpen, Clock3, FileText, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Bot, Clock3, FileCheck2, FileText, ScanLine, Sparkles, Upload, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { exams as nationalExams, subjectLabels, subjectOrder } from "../features/exams/catalog";
-import type { ExamSubject } from "../features/exams/catalog";
+import { exams as nationalExams, subjectLabels } from "../features/exams/catalog";
 import "./Exams.css";
 
-type ExamTab = "all" | "official" | "created";
-type PublishedTest = { id:string; title:string; description:string|null; source_type:"custom"|"national_exam"|"ai_generated"; duration_minutes:number|null; level:string|null; section:string|null; year:number|null; total_points:number|null; created_at:string; subject:{id:string;name:string;short_name:string|null;icon:string|null;color:string|null}|null };
-const tabLabels:Record<ExamTab,string>={all:"Tous les tests",official:"Examens nationaux",created:"Tests MentionMax"};
-const subjectSearchLabels:Record<ExamSubject,string[]>={maths:["math","mathématique","mathématiques","maths"],pc:["physique","chimie","physique-chimie","pc"],svt:["svt","sciences de la vie","terre"],philo:["philo","philosophie"],english:["english","anglais"]};
-function getTestLabel(test:PublishedTest){return test.source_type==="ai_generated"?"Généré par IA":test.source_type==="national_exam"?"Sujet national":"MentionMax";}
-function getSubjectLabel(test:PublishedTest){return test.subject?.short_name||test.subject?.name||"Général";}
-export default function Exams(){
- const [tab,setTab]=useState<ExamTab>("all"); const [query,setQuery]=useState(""); const [subject,setSubject]=useState<"all"|ExamSubject>("all"); const [tests,setTests]=useState<PublishedTest[]>([]); const [loading,setLoading]=useState(true); const [loadError,setLoadError]=useState(""); const [showGenerator,setShowGenerator]=useState(false); const [sourceText,setSourceText]=useState("");
- useEffect(()=>{let cancelled=false; async function load(){setLoading(true);setLoadError("");const {data,error}=await supabase.from("tests").select(`id,title,description,source_type,duration_minutes,level,section,year,total_points,created_at,subject:subjects(id,name,short_name,icon,color)`).eq("is_published",true).order("created_at",{ascending:false}).limit(24);if(cancelled)return;if(error){console.error(error);setLoadError("Impossible de charger les tests pour le moment.");setTests([]);}else setTests((data??[]) as unknown as PublishedTest[]);setLoading(false);}void load();return()=>{cancelled=true;};},[]);
- const filteredTests=useMemo(()=>{const q=query.trim().toLowerCase();return tests.filter(test=>{const tabMatch=tab==="all"||(tab==="official"&&test.source_type==="national_exam")||(tab==="created"&&test.source_type!=="national_exam");const subjectMatch=subject==="all"||subjectSearchLabels[subject].some(x=>`${test.subject?.name??""} ${test.subject?.short_name??""}`.toLowerCase().includes(x));const hay=[test.title,test.description??"",test.subject?.name??"",test.subject?.short_name??"",test.year??"",test.level??"",test.section??""].join(" ").toLowerCase();return tabMatch&&subjectMatch&&(!q||hay.includes(q));});},[query,subject,tab,tests]);
- const yearSummary=useMemo(()=>{const m=new Map<number,number>();for(const exam of nationalExams)m.set(exam.year,(m.get(exam.year)??0)+1);return [...m.entries()].slice(0,3);},[]); const latestOfficial=nationalExams.slice(0,5);
- return <main className="exams-page">
-  <header className="exams-page__header"><div className="exams-page__heading"><span className="section-eyebrow">Tests & examens</span><h1>Prépare le Bac dans les vraies conditions.</h1><p>Les sujets officiels d'un côté. Tes tests de préparation de l'autre. Et l'IA pour transformer rapidement un texte extrait en véritable test structuré.</p></div><div className="exams-page__actions"><Link to="/exams/nationaux" className="btn btn-secondary"><BookOpen size={16}/>Voir les nationaux</Link><button type="button" className="btn btn-primary" onClick={()=>setShowGenerator(true)}><Sparkles size={16}/>Créer avec l'IA</button></div></header>
-  <section className="exams-hero-grid"><Link to="/exams/nationaux" className="exams-hero-card"><div className="exams-hero-card__glow"/><div className="exams-hero-card__topline"><span className="exams-kicker">Bibliothèque officielle</span><span className="exams-pill">{nationalExams.length} sujets</span></div><div className="exams-hero-card__content"><span className="exams-hero-card__icon"><FileText size={21}/></span><div><h2>Examens nationaux</h2><p>Les vrais sujets du Bac, classés par matière et par année, avec ouverture directe du document.</p></div></div><div className="exams-hero-card__bottom"><span>Parcourir la banque</span><ArrowRight size={17}/></div></Link><button type="button" className="exams-ai-card" onClick={()=>setShowGenerator(true)}><div className="exams-ai-card__topline"><span className="exams-kicker">MentionMax AI</span><span className="exams-ai-card__spark"><Sparkles size={16}/></span></div><div><h2>Transformer un texte en test</h2><p>Colle le texte extrait d'un cours ou d'un sujet. Le pipeline IA pourra ensuite produire les questions et leur structure.</p></div><span className="exams-ai-card__cta">Commencer <ArrowRight size={16}/></span></button></section>
-  <section className="exams-stats-row"><div className="exams-stat"><span className="exams-stat__label">Sujets officiels</span><strong>{nationalExams.length}</strong><small>dans la banque actuelle</small></div><div className="exams-stat"><span className="exams-stat__label">Tests publiés</span><strong>{loading?"—":tests.length}</strong><small>depuis Supabase</small></div><div className="exams-stat exams-stat--wide"><span className="exams-stat__label">Années visibles</span><div className="exams-years">{yearSummary.length?yearSummary.map(([year,count])=><span key={year}>{year} <b>{count}</b></span>):<span>Ajout des sujets en cours</span>}</div></div></section>
-  <section className="exams-library card"><div className="exams-library__header"><div><span className="section-eyebrow">Bibliothèque</span><h2 className="section-title">Tests et examens</h2></div><div className="exams-library__search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher un sujet, une matière..." aria-label="Rechercher un test"/></div></div><div className="exams-library__controls"><div className="exams-tabs" role="tablist">{(Object.keys(tabLabels) as ExamTab[]).map(item=><button key={item} type="button" className={`exams-tab ${tab===item?"active":""}`} onClick={()=>setTab(item)}>{tabLabels[item]}</button>)}</div><label className="exams-subject-filter"><span>Matière</span><select value={subject} onChange={e=>setSubject(e.target.value as "all"|ExamSubject)}><option value="all">Toutes</option>{subjectOrder.map(item=><option key={item} value={item}>{subjectLabels[item]}</option>)}</select></label></div>{loadError&&<div className="exams-inline-error">{loadError}</div>}{loading?<div className="exams-skeleton-grid">{[0,1,2].map(x=><div className="exams-skeleton" key={x}/>)}</div>:filteredTests.length?<div className="exams-test-grid">{filteredTests.map(test=><article className="exams-test-card" key={test.id}><div className="exams-test-card__meta"><span>{getTestLabel(test)}</span>{test.year&&<span>{test.year}</span>}</div><h3>{test.title||getSubjectLabel(test)}</h3><p>{test.description||"Un test structuré pour ta préparation au Bac."}</p><div className="exams-test-card__footer"><span>{test.duration_minutes?<><Clock3 size={14}/> {test.duration_minutes} min</>:"Temps libre"}</span><span>{getSubjectLabel(test)}</span></div></article>)}</div>:<div className="exams-empty"><div className="exams-empty__icon"><Plus size={19}/></div><div><span className="section-eyebrow">Aucun test</span><h3>La bibliothèque de tests est encore vide.</h3><p>Les examens nationaux sont accessibles séparément. Les tests MentionMax apparaîtront ici dès leur publication dans Supabase.</p></div><button type="button" className="btn btn-secondary" onClick={()=>setShowGenerator(true)}>Créer un test</button></div>}<div className="exams-library__footer"><span>{latestOfficial.length?`Derniers sujets : ${latestOfficial.map(exam=>`${subjectLabels[exam.subject]} ${exam.year}`).join(" · ")}`:"La banque officielle sera alimentée prochainement."}</span><Link to="/exams/nationaux">Voir toute la banque <ArrowRight size={15}/></Link></div></section>
-  {showGenerator&&<div className="exams-modal-backdrop" role="presentation" onMouseDown={()=>setShowGenerator(false)}><div className="exams-modal" role="dialog" aria-modal="true" onMouseDown={e=>e.stopPropagation()}><div className="exams-modal__header"><div><span className="section-eyebrow">MentionMax AI</span><h2>Créer un test depuis un texte</h2></div><button type="button" className="exams-modal__close" onClick={()=>setShowGenerator(false)} aria-label="Fermer">×</button></div><p className="exams-modal__lead">Colle le texte déjà extrait du document. Cette zone devient l'entrée du générateur IA qui transformera le contenu en test structuré.</p><textarea value={sourceText} onChange={e=>setSourceText(e.target.value)} placeholder="Colle ici le texte du cours, du sujet ou du document..." rows={12}/><div className="exams-modal__footer"><span>{sourceText.trim().length} caractères</span><button type="button" className="btn btn-primary" disabled={!sourceText.trim()} onClick={()=>setShowGenerator(false)}><Sparkles size={15}/>Continuer vers le générateur</button></div></div></div>}
- </main>;
+type PublishedTest = {
+  id: string;
+  title: string;
+  description: string | null;
+  source_type: "custom" | "national_exam" | "ai_generated";
+  duration_minutes: number | null;
+  level: string | null;
+  section: string | null;
+  year: number | null;
+  subject: { name: string; short_name: string | null } | null;
+};
+
+function testSourceLabel(source: PublishedTest["source_type"]) {
+  if (source === "ai_generated") return "Généré par IA";
+  if (source === "national_exam") return "Sujet national";
+  return "Communauté";
+}
+
+export default function Exams() {
+  const [tests, setTests] = useState<PublishedTest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sourceText, setSourceText] = useState("");
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      const { data } = await supabase
+        .from("tests")
+        .select("id,title,description,source_type,duration_minutes,level,section,year,subject:subjects(name,short_name)")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(12);
+
+      if (!cancelled) {
+        setTests((data ?? []) as unknown as PublishedTest[]);
+        setLoading(false);
+      }
+    }
+
+    void load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const filteredTests = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return tests;
+    return tests.filter((test) =>
+      `${test.title} ${test.description ?? ""} ${test.subject?.name ?? ""} ${test.year ?? ""}`
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [query, tests]);
+
+  return (
+    <main className="exams-page exams-ai-page">
+      <header className="exams-page__header exams-ai-page__header">
+        <div className="exams-page__heading">
+          <span className="section-eyebrow">EXAMENS & CORRIGÉS</span>
+          <h1>Travaille les examens avec l'IA.</h1>
+          <p>
+            Génère un vrai sujet depuis ton cours, ou fais corriger ton travail par MentionMax.
+            Les sujets PDF classiques restent dans l'espace Tests.
+          </p>
+        </div>
+        <div className="exam-mode-switch" role="tablist" aria-label="Mode des examens">
+          <Link className="exam-mode-switch__item active" to="/exams" role="tab" aria-selected="true">
+            <Sparkles size={15} /> IA & Correction
+          </Link>
+          <Link className="exam-mode-switch__item" to="/tests" role="tab" aria-selected="false">
+            <FileText size={15} /> Tests classiques
+          </Link>
+        </div>
+      </header>
+
+      <section className="exams-ai-workspace">
+        <article className="exams-ai-generator">
+          <div className="exams-ai-generator__head">
+            <div>
+              <span className="exams-kicker">GÉNÉRATEUR D'EXAMEN</span>
+              <h2>Transforme ton cours en véritable sujet.</h2>
+              <p>Colle le texte extrait de tes notes ou d'un document. Le contenu devient la matière première du générateur.</p>
+            </div>
+            <span className="exams-ai-icon"><Wand2 size={24} /></span>
+          </div>
+          <textarea
+            className="exams-generator-input"
+            value={sourceText}
+            onChange={(event) => setSourceText(event.target.value)}
+            placeholder="Colle ici le texte de ton cours, d'un chapitre ou d'un sujet..."
+            rows={9}
+            aria-label="Texte source pour le générateur d'examen"
+          />
+          <div className="exams-ai-generator__footer">
+            <span>{sourceText.trim().length} caractères</span>
+            <button className="btn btn-primary" type="button" disabled={!sourceText.trim()}>
+              <Sparkles size={16} /> Générer l'examen
+            </button>
+          </div>
+        </article>
+
+        <article className="exams-ai-corrector">
+          <div>
+            <span className="exams-kicker">CORRECTEUR IA</span>
+            <h2>Scanne. Corrige. Comprends.</h2>
+            <p>Envoie ton devoir ou une photo de ta copie pour obtenir une correction guidée et exploitable.</p>
+          </div>
+          <div className="exams-corrector-visual">
+            <div className="exams-corrector-ring"><ScanLine size={34} /></div>
+            <div className="exams-corrector-brain"><Bot size={30} /></div>
+            <span className="exams-corrector-line exams-corrector-line--one" />
+            <span className="exams-corrector-line exams-corrector-line--two" />
+          </div>
+          <div className="exams-corrector-actions">
+            <button type="button" className="btn btn-primary"><Upload size={16} /> Scanner pour corriger</button>
+            <span>PDF, image ou copie scannée</span>
+          </div>
+        </article>
+      </section>
+
+      <section className="exams-ai-library card">
+        <div className="exams-ai-library__header">
+          <div>
+            <span className="section-eyebrow">IA TESTS & COMMUNAUTÉ</span>
+            <h2 className="section-title">Tes tests en notes & communauté</h2>
+          </div>
+          <div className="exams-library__search">
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un test..." aria-label="Rechercher un test" />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="exams-test-grid">
+            {[0, 1, 2].map((item) => <div className="exams-skeleton" key={item} />)}
+          </div>
+        ) : filteredTests.length ? (
+          <div className="exams-test-grid">
+            {filteredTests.map((test) => (
+              <article className="exams-test-card exams-test-card--ai" key={test.id}>
+                <div className="exams-test-card__meta">
+                  <span>{testSourceLabel(test.source_type)}</span>
+                  {test.year && <span>{test.year}</span>}
+                </div>
+                <h3>{test.title}</h3>
+                <p>{test.description || "Un test structuré pour ta préparation au Bac."}</p>
+                <div className="exams-test-card__footer">
+                  <span>{test.duration_minutes ? <><Clock3 size={14} /> {test.duration_minutes} min</> : "Temps libre"}</span>
+                  <span>{test.subject?.short_name || test.subject?.name || "Général"}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="exams-ai-empty">
+            <div className="exams-empty__icon"><Bot size={19} /></div>
+            <div>
+              <h3>Commence avec ton premier test.</h3>
+              <p>Les tests publiés depuis Supabase apparaîtront ici.</p>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section className="exams-national-strip">
+        <div>
+          <span className="section-eyebrow">BANQUE OFFICIELLE</span>
+          <h2>Les vrais examens nationaux restent à portée de clic.</h2>
+          <p>{nationalExams.length} sujets disponibles par matière et par année.</p>
+        </div>
+        <Link className="btn btn-secondary" to="/exams/nationaux">
+          Parcourir les nationaux <ArrowRight size={16} />
+        </Link>
+      </section>
+    </main>
+  );
 }
