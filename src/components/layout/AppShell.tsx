@@ -6,7 +6,6 @@ import { CommandPalette } from "../command/CommandPalette";
 import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
 
 const primaryNav = [
-
   {
     label: "Leçons",
     to: "/lecons",
@@ -19,7 +18,7 @@ const primaryNav = [
   },
   {
     label: "Examens",
-    to: "/tests",
+    to: "/exams",
     icon: "tests",
   },
   {
@@ -82,9 +81,9 @@ export function AppShell() {
             className="sidebar-logo"
             aria-label="MentionMax"
           >
-            <img 
-              src={MentionMaxMark} 
-              alt="MentionMax" 
+            <img
+              src={MentionMaxMark}
+              alt="MentionMax"
               className="sidebar-logo__mark"
             />
           </Link>
