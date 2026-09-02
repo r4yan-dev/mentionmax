@@ -1,0 +1,388 @@
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  useFocus,
+} from "../../context/FocusContext";
+
+interface FocusTimerProps {
+  onCompleted?: () => void;
+}
+
+function formatTime(
+  seconds: number
+) {
+  const hours =
+    Math.floor(seconds / 3600);
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+  const remaining =
+    seconds % 60;
+
+  if (hours > 0) {
+    return [
+      hours
+        .toString()
+        .padStart(2, "0"),
+      minutes
+        .toString()
+        .padStart(2, "0"),
+      remaining
+        .toString()
+        .padStart(2, "0"),
+    ].join(":");
+  }
+
+  return [
+    minutes
+      .toString()
+      .padStart(2, "0"),
+    remaining
+      .toString()
+      .padStart(2, "0"),
+  ].join(":");
+}
+
+export function FocusTimer({
+  onCompleted,
+}: FocusTimerProps) {
+  const {
+    groups,
+    saveFocusSession,
+  } = useFocus();
+
+  const [running, setRunning] =
+    useState(false);
+
+  const [elapsed, setElapsed] =
+    useState(0);
+
+  const [startedAt, setStartedAt] =
+    useState<string | null>(
+      null
+    );
+
+  const [subject, setSubject] =
+    useState("");
+
+  const [groupId, setGroupId] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+
+  // The timer is timestamp-based, not tick-based.
+  // Browser intervals are throttled when the tab is hidden,
+  // so counting interval callbacks is inherently inaccurate.
+  useEffect(() => {
+    if (!running || !startedAt) {
+      return;
+    }
+
+    const updateElapsed = () => {
+      const startMs = new Date(startedAt).getTime();
+      const elapsedSeconds = Math.max(
+        0,
+        Math.floor((Date.now() - startMs) / 1000)
+      );
+
+      setElapsed(elapsedSeconds);
+    };
+
+    updateElapsed();
+
+    const interval = window.setInterval(
+      updateElapsed,
+      1000
+    );
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        updateElapsed();
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+
+    window.addEventListener(
+      "focus",
+      updateElapsed
+    );
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+      window.removeEventListener(
+        "focus",
+        updateElapsed
+      );
+    };
+  }, [running, startedAt]);
+
+  const selectedGroup =
+    useMemo(
+      () =>
+        groups.find(
+          (group) =>
+            group.id === groupId
+        ),
+      [groups, groupId]
+    );
+
+  function start() {
+    if (running) {
+      return;
+    }
+
+    // Start a fresh timestamp only when there is no existing
+    // timestamp. This preserves the current session across
+    // pause/resume without relying on interval ticks.
+    setStartedAt(
+      (value) =>
+        value ??
+        new Date().toISOString()
+    );
+
+    setRunning(true);
+  }
+
+  function pause() {
+    if (!running || !startedAt) {
+      return;
+    }
+
+    // Capture the exact elapsed time before pausing.
+    const startMs = new Date(startedAt).getTime();
+
+    setElapsed(
+      Math.max(
+        0,
+        Math.floor((Date.now() - startMs) / 1000)
+      )
+    );
+
+    setRunning(false);
+  }
+
+  function reset() {
+    setRunning(false);
+    setElapsed(0);
+    setStartedAt(null);
+  }
+
+  async function stop() {
+    if (
+      elapsed <= 0 ||
+      !startedAt
+    ) {
+      reset();
+      return;
+    }
+
+    try {
+      setError("");
+
+      await saveFocusSession({
+        id:
+          crypto.randomUUID(),
+        userId:
+          "current-user",
+        groupId:
+          selectedGroup?.id ||
+          undefined,
+        subject:
+          subject || undefined,
+        startedAt,
+        endedAt:
+          new Date().toISOString(),
+        durationSeconds:
+          elapsed,
+      });
+
+      setRunning(false);
+
+      if (onCompleted) {
+        onCompleted();
+      }
+
+      setElapsed(0);
+      setStartedAt(null);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Impossible d'enregistrer la session."
+      );
+    }
+  }
+
+  const progress =
+    Math.min(
+      (elapsed % 3600) / 3600,
+      1
+    ) * 100;
+
+  return (
+    <section className="focus-timer-card">
+      <div className="focus-timer-card__header">
+        <div>
+          <span className="section-eyebrow">
+            Session de focus
+          </span>
+
+          <h2>
+            Concentre-toi sur une chose.
+          </h2>
+
+          <p>
+            Le temps compte pour tes statistiques
+            personnelles et, si choisi, ton groupe.
+          </p>
+        </div>
+
+        <div className="focus-timer-status">
+          <span
+            className={
+              running
+                ? "status-dot active"
+                : "status-dot"
+            }
+          />
+
+          {running
+            ? "En cours"
+            : "En pause"}
+        </div>
+      </div>
+
+      <div
+        className="focus-timer-circle"
+        style={{
+          background:
+            `conic-gradient(#0FA3A3 ${progress}%, #E5EFED ${progress}%)`,
+        }}
+      >
+        <div className="focus-timer-circle__inner">
+          <span>
+            Focus
+          </span>
+
+          <strong>
+            {formatTime(elapsed)}
+          </strong>
+
+          <small>
+            {selectedGroup
+              ? `Avec ${selectedGroup.name}`
+              : "Solo"}
+          </small>
+        </div>
+      </div>
+
+      {error && (
+        <div className="focus-timer-error">
+          {error}
+        </div>
+      )}
+
+      <div className="focus-timer-controls">
+        {!running ? (
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
+            onClick={start}
+          >
+            ▶ Commencer
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-secondary btn-lg"
+            onClick={pause}
+          >
+            ❚❚ Pause
+          </button>
+        )}
+
+        <button
+          type="button"
+          className="btn btn-ghost"
+          disabled={elapsed === 0}
+          onClick={stop}
+        >
+          Terminer
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-ghost"
+          disabled={elapsed === 0}
+          onClick={reset}
+        >
+          Réinitialiser
+        </button>
+      </div>
+
+      <div className="focus-timer-options">
+        <label className="field">
+          <span className="field__label">
+            Je travaille sur
+          </span>
+
+          <input
+            className="input"
+            value={subject}
+            onChange={(event) =>
+              setSubject(
+                event.target.value
+              )
+            }
+            placeholder="Mathématiques, Physique..."
+          />
+        </label>
+
+        <label className="field">
+          <span className="field__label">
+            Session
+          </span>
+
+          <select
+            className="input"
+            value={groupId}
+            onChange={(event) =>
+              setGroupId(
+                event.target.value
+              )
+            }
+          >
+            <option value="">
+                Focus général
+            </option>
+            {groups.map((group) => (
+              <option
+                key={group.id}
+                value={group.id}
+              >
+                Focus avec {group.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </section>
+  );
+}
