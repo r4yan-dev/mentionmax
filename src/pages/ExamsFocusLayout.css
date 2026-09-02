@@ -1,8 +1,7 @@
-/* Exams follows the same inner rhythm as Focus, without adding a second gutter on top of the app shell. */
+/* Exams uses the exact same page geometry as .app-page / Focus. */
 .exams-page {
-  width: 100%;
-  max-width: none;
-  margin: 0;
+  width: min(calc(100% - 48px), var(--mm-content-max));
+  margin: 0 auto;
   padding: 32px 0 80px;
   color: var(--mm-ink-900, #073B3A);
 }
@@ -189,14 +188,14 @@
 
 @media (max-width: 900px) {
   .exams-page {
-    width: 100%;
+    width: calc(100% - 48px);
     padding-top: 32px;
   }
 }
 
 @media (max-width: 767px) {
   .exams-page {
-    width: 100%;
+    width: calc(100% - 28px);
     padding: 24px 0 70px;
   }
 }
