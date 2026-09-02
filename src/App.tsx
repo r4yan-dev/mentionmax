@@ -4,6 +4,7 @@ import NationalExams from "./pages/NationalExams";
 import ExamReader from "./pages/ExamReader";
 import Subjects from "./pages/Subjects";
 import Lessons from "./pages/Lessons";
+import Exercises from "./pages/Exercises";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AccountProvider } from "./context/AccountContext";
@@ -45,7 +46,8 @@ function ProtectedApp() {
             <Route path="/subjects/:subjectId" element={<Subjects />} />
             <Route path="/lecons" element={<Subjects />} />
             <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
-            <Route path="/exercices" element={<Navigate to="/subjects" replace />} />
+            <Route path="/exercices" element={<Exercises />} />
+            <Route path="/exercices/:exerciseId" element={<Exercises />} />
             <Route path="/focus" element={<Focus />} />
             <Route path="/focus/timer" element={<Focus />} />
             <Route path="/exams" element={<Exams />} />
