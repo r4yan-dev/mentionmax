@@ -82,7 +82,8 @@ function ProtectedApp() {
               path="/accueil"
               element={<Home />}
             />
-<Route
+
+            <Route
               path="/focus"
               element={<Focus />}
             />
@@ -90,6 +91,41 @@ function ProtectedApp() {
             <Route
               path="/focus/timer"
               element={<Focus />}
+            />
+
+            <Route
+              path="/exams"
+              element={<Exams />}
+            />
+
+            <Route
+              path="/exams/nationaux"
+              element={<NationalExams />}
+            />
+
+            <Route
+              path="/exams/:examId"
+              element={<ExamReader />}
+            />
+
+            <Route
+              path="/tests"
+              element={
+                <Navigate
+                  to="/exams"
+                  replace
+                />
+              }
+            />
+
+            <Route
+              path="/tests/nationaux"
+              element={
+                <Navigate
+                  to="/exams/nationaux"
+                  replace
+                />
+              }
             />
 
             <Route
@@ -275,38 +311,7 @@ export default function App() {
             element={<ProtectedFocus />}
           />
 
-            <Route
-              path="/tests/nationaux"
-              element={<NationalExams />}
-            />
-            <Route path="/exams" element={<Exams />} />
-            <Route
-              path="/exams/nationaux"
-              element={<NationalExams />}
-            />
-            <Route
-              path="/exams/:examId"
-              element={<ExamReader />}
-            />
-            <Route path="/exams" element={<Exams />} />
-            <Route
-              path="/exams/nationaux"
-              element={<NationalExams />}
-            />
-            <Route
-              path="/exams/:examId"
-              element={<ExamReader />}
-            />
-            <Route
-              path="/tests/nationaux"
-              element={<NationalExams />}
-            />
-
-
-
-
-
-<Route
+          <Route
             path="*"
             element={<ProtectedApp />}
           />
