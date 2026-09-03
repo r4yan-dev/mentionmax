@@ -14,7 +14,7 @@ export type ExerciseType =
 export type ContentDifficulty = 1 | 2 | 3 | 4 | 5;
 
 export interface ContentTarget {
-  trackIds: TrackId[];
+  trackIds: readonly TrackId[];
   subjectId: SubjectId;
   chapter: string;
   topic: string;
