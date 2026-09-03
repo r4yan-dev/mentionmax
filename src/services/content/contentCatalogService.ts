@@ -10,8 +10,8 @@ import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
-const allBaseFlashcards: Flashcard[] = [...baseContent.flashcards, ...basePCFlashcards];
-const allBaseExercises: Exercise[] = [
+const allFlashcards: Flashcard[] = [...baseContent.flashcards, ...basePCFlashcards];
+const allExercises: Exercise[] = [
   ...basePCExercises,
   ...basePCHardExercises,
   ...baseSMMathExercises,
@@ -21,32 +21,33 @@ const allBaseExercises: Exercise[] = [
   ...base2BacSPMathExercises,
   ...helios300MathExercises,
 ];
-const allBaseQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
-const allBaseRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
+const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
+const allRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
 
-function matchesTarget(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) {
-  return (item: { target: { trackIds: TrackId[]; subjectId: SubjectId; chapter: string; topic: string }; tags?: string[] }) => {
-    const isHelios = item.tags?.includes("MISSION_HELIOS") ?? false;
-    return (isHelios || item.target.trackIds.includes(trackId)) &&
-      item.target.subjectId === subjectId &&
-      (!chapter || item.target.chapter === chapter) &&
-      (!topic || item.target.topic === topic);
-  };
-}
+type TargetedItem = {
+  target: { trackIds: readonly TrackId[]; subjectId: SubjectId; chapter: string; topic: string };
+};
+
+const matchesTarget = (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
+  (item: TargetedItem) =>
+    item.target.trackIds.includes(trackId) &&
+    item.target.subjectId === subjectId &&
+    (!chapter || item.target.chapter === chapter) &&
+    (!topic || item.target.topic === topic);
 
 export const contentCatalogService = {
-  getBaseFlashcards(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Flashcard[] {
-    return allBaseFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic));
-  },
-  getBaseExercises(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Exercise[] {
-    return allBaseExercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
-  },
-  getBaseQuizzes(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Quiz[] {
-    return allBaseQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic));
-  },
-  getBaseRevisionSheets(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): RevisionSheet[] {
-    return allBaseRevisionSheets.filter(matchesTarget(trackId, subjectId, chapter, topic));
-  },
+  getBaseFlashcards: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
+    allFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+
+  getBaseExercises: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
+    allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+
+  getBaseQuizzes: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
+    allQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+
+  getBaseRevisionSheets: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
+    allRevisionSheets.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+
   getCounts(trackId: TrackId, subjectId: SubjectId) {
     return {
       flashcards: this.getBaseFlashcards(trackId, subjectId).length,
