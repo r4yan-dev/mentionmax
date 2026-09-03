@@ -6,6 +6,7 @@ import { baseSMPCExercises } from "../../data/mock/baseSMPCExercises";
 import { base2BacHumanExercises } from "../../data/mock/base2BacHumanExercises";
 import { extended2BacExercises } from "../../data/mock/base2BacHumanExercisesExtended";
 import { base2BacSPMathExercises } from "../../data/mock/base2BacSPMathExercises";
+import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
@@ -18,6 +19,7 @@ const allBaseExercises: Exercise[] = [
   ...base2BacHumanExercises,
   ...extended2BacExercises,
   ...base2BacSPMathExercises,
+  ...helios300MathExercises,
 ];
 const allBaseQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
 const allBaseRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
