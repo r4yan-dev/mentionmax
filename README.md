@@ -1,75 +1,62 @@
-# React + TypeScript + Vite
+# MentionMax
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MentionMax est une plateforme non-profit de préparation au 2BAC marocain. Le produit est organisé autour du parcours scolaire, des leçons, de la pratique, de la progression, des examens et d'outils IA contextuels.
 
-Currently, two official plugins are available:
+## Parcours
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **2BAC Sciences Physiques** : maths, physique-chimie, SVT, anglais, philosophie
+- **2BAC Sciences Mathématiques A** : maths, physique-chimie, anglais, philosophie
+- **2BAC Sciences Mathématiques B** : maths, physique-chimie, anglais, philosophie
 
-## React Compiler
+Le changement de parcours contrôle réellement les matières et le contenu disponibles. La SVT n'est pas exposée en SM B.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Architecture
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+UI / pages
+  ↓
+features
+  ↓
+services
+  ↓
+Supabase / API externe
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Les contenus locaux restent séparés de l'interface. Les services sont remplaçables sans réécrire les pages.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Mission Helios
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+La banque contient 300 exercices de mathématiques répartis sur 15 jours, avec 20 exercices par journée, difficulté progressive, contexte narratif et progression utilisateur.
 
+Le fichier `src/data/mock/missionHeliosBank.ts` est la source canonique côté interface. Supabase possède également les tables `mission_helios_chapters` et `mission_helios_exercises` pour la persistance et l'évolution du contenu.
+
+## IA
+
+Les pages parlent à `src/services/ai/aiService.ts` via l'interface `AIProvider`.
+
+Le fournisseur local actuel rend l'application entièrement utilisable sans clé API. Pour connecter un vrai modèle, il suffit d'implémenter `AIProvider` côté serveur puis de l'enregistrer auprès du service. Les clés secrètes ne doivent jamais être exposées dans Vite côté client.
+
+## Développement
+
+```bash
+npm install
+npm run dev
 ```
+
+Validation locale :
+
+```bash
+npm run lint
+npm run build
+```
+
+CI exécute les mêmes contrôles sur chaque push et pull request.
+
+## Variables d'environnement
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Aucun secret serveur ne doit être placé dans `VITE_*`.
