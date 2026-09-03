@@ -1,61 +1,61 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { ArrowRight, Bot, FileText, Lightbulb, Send, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { aiService } from "../services/ai";
+import "./AIHelp.css";
+
+type Message = { role: "user" | "assistant"; text: string };
+
+const quickActions = [
+  { label: "Explique une notion", task: "explain" as const },
+  { label: "Corrige mon raisonnement", task: "correct" as const },
+  { label: "Crée un exercice", task: "generate" as const },
+  { label: "Personnalise ma révision", task: "personalize" as const },
+];
 
 export default function AIHelp() {
-  const navigate = useNavigate();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function ask(text = input, task: (typeof quickActions)[number]["task"] = "explain") {
+    const prompt = text.trim();
+    if (!prompt || busy) return;
+    setBusy(true);
+    setError(null);
+    setInput("");
+    setMessages((current) => [...current, { role: "user", text: prompt }]);
+    try {
+      const response = await aiService.run<string>({ task, input: prompt, context: { product: "MentionMax", level: "2BAC" } });
+      setMessages((current) => [...current, { role: "assistant", text: response.data }]);
+    } catch (requestError) {
+      console.error(requestError);
+      setError("L’assistant n’est pas configuré. Le connecteur API pourra remplacer le fournisseur local sans modifier cette page.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="app-page ai-help-page">
-      <header className="page-header">
-        <div>
-          <span className="section-eyebrow">AI Help</span>
-          <h1 className="page-title">Ton assistant de révision.</h1>
-          <p className="page-lead">
-            Questions, notes et explications contextualisées.
-          </p>
-        </div>
+    <main className="ai-page">
+      <header className="ai-page__header">
+        <div><span className="ai-eyebrow"><Sparkles size={14} /> MentionMax AI</span><h1>Un assistant qui connaît ton travail.</h1><p>Explique une notion, construis un exercice, corrige une méthode ou prépare une session ciblée.</p></div>
+        <Link to="/ai-studio/handnotes" className="ai-secondary"><FileText size={16} /> Ouvrir mes notes <ArrowRight size={15} /></Link>
       </header>
 
-      <section className="ai-chat-shell">
-        <div className="ai-chat-header">
-          <div className="ai-chat-avatar">✦</div>
-          <div>
-            <strong>MentionMax AI</strong>
-            <span>Assistant pédagogique</span>
+      <section className="ai-workspace">
+        <div className="ai-chat">
+          <div className="ai-chat__bar"><div className="ai-avatar"><Bot size={18} /></div><div><strong>MentionMax AI</strong><span>Assistant pédagogique · mode local</span></div><span className="ai-status"><i /> Prêt</span></div>
+          <div className="ai-chat__body">
+            {messages.length === 0 ? <div className="ai-empty"><div className="ai-empty__icon"><Sparkles size={25} /></div><h2>Que veux-tu travailler ?</h2><p>Le connecteur est déjà séparé de l’interface. Aujourd’hui, les réponses passent par le fournisseur local.</p><div className="ai-quick">{quickActions.map((action) => <button key={action.label} onClick={() => void ask(action.label, action.task)}><Lightbulb size={15} />{action.label}</button>)}</div></div> : <div className="ai-messages">{messages.map((message, index) => <div className={`ai-message ai-message--${message.role}`} key={`${message.role}-${index}`}><span>{message.role === "assistant" ? "M" : "Toi"}</span><p>{message.text}</p></div>)}</div>}
+            {busy && <div className="ai-typing"><i /><i /><i /> MentionMax réfléchit…</div>}
+            {error && <div className="ai-error">{error}</div>}
           </div>
+          <form className="ai-composer" onSubmit={(event) => { event.preventDefault(); void ask(); }}><input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Pose ta question..." aria-label="Question à MentionMax AI" /><button type="submit" disabled={!input.trim() || busy}><Send size={17} /></button></form>
         </div>
-
-        <div className="ai-chat-empty">
-          <div className="ai-chat-empty__icon">✦</div>
-          <h2>Que veux-tu comprendre ?</h2>
-          <p>Pose une question, colle un passage de cours ou ajoute tes notes.</p>
-          <div className="ai-suggestions">
-            <button className="ai-suggestion">Explique cette notion</button>
-            <button className="ai-suggestion">Résume mes notes</button>
-            <button className="ai-suggestion">Donne-moi un exemple</button>
-          </div>
-        </div>
-
-        <div className="ai-input">
-          <input type="text" placeholder="Pose ta question..." disabled />
-          <button className="btn btn-primary" disabled>Envoyer</button>
-        </div>
+        <aside className="ai-side"><div className="ai-side-card"><span className="ai-eyebrow">Contexte</span><h2>2BAC · ton parcours</h2><p>Les futurs appels API pourront recevoir le parcours, la matière, le chapitre, l’exercice et l’historique utile.</p></div><div className="ai-side-card"><span className="ai-eyebrow">AI Studio</span><h2>Transformer tes notes.</h2><p>Les notes restent un espace séparé du chat pour pouvoir brancher plus tard résumé, fiches, flashcards et quiz.</p><Link to="/ai-studio/handnotes">Accéder aux notes <ArrowRight size={14} /></Link></div></aside>
       </section>
-
-      <section className="ai-notes-card">
-        <span className="section-eyebrow">Mes notes</span>
-        <h2>Notes enregistrées</h2>
-        <p>
-          Écris librement dans un espace de notes inspiré de Notes sur iPad.
-          Tes notes sont privées et synchronisées avec ton compte.
-        </p>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => navigate("/ai-studio/handnotes")}
-        >
-          Ajouter des notes
-        </button>
-      </section>
-    </div>
+    </main>
   );
 }
