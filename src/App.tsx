@@ -29,7 +29,7 @@ import FocusGroupDetail from "./pages/FocusGroupDetail";
 import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } from "./pages/FocusGroupTabs";
 import "./styles/foundation.css";
 
-function LoadingScreen() { return <div className="auth-page"><div className="auth-loading">Chargement...</div>; }
+function LoadingScreen() { return <div className="auth-page"><div className="auth-loading">Chargement...</div></div>; }
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
