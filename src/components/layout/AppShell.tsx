@@ -8,6 +8,7 @@ import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
 const primaryNav = [
   { label: "Accueil", to: "/accueil", icon: "home" as const },
   { label: "Matières", to: "/subjects", icon: "lessons" as const },
+  { label: "Exercices", to: "/exercices", icon: "tests" as const },
   { label: "IA", to: "/ai-help", icon: "ai" as const },
   { label: "Examens", to: "/exams", icon: "tests" as const },
   { label: "Focus", to: "/focus", icon: "focus" as const },
@@ -20,7 +21,9 @@ export function AppShell() {
   const [commandOpen, setCommandOpen] = useState(false);
   const examsArea = location.pathname.startsWith("/exams") || location.pathname.startsWith("/tests");
   const subjectsArea = location.pathname.startsWith("/subjects") || location.pathname.startsWith("/lecons");
+  const exercisesArea = location.pathname.startsWith("/exercices") || location.pathname.startsWith("/pratique");
   const aiArea = location.pathname.startsWith("/ai-help") || location.pathname.startsWith("/ai-studio");
+  const focusArea = location.pathname.startsWith("/focus");
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -40,7 +43,9 @@ export function AppShell() {
   function itemIsActive(to: string, isActive: boolean) {
     if (to === "/exams") return examsArea;
     if (to === "/subjects") return subjectsArea;
+    if (to === "/exercices") return exercisesArea;
     if (to === "/ai-help") return aiArea;
+    if (to === "/focus") return focusArea;
     return isActive;
   }
 
@@ -52,6 +57,7 @@ export function AppShell() {
             <img src={MentionMaxMark} alt="MentionMax" className="sidebar-logo__mark" />
           </Link>
         </div>
+        <div className="sidebar-section-label">Apprendre & pratiquer</div>
         <div className="sidebar-nav">
           {primaryNav.map((item) => (
             <NavLink
@@ -66,15 +72,12 @@ export function AppShell() {
           ))}
         </div>
         <div className="sidebar-footer">
+          <div className="sidebar-section-label sidebar-section-label--footer">Compte</div>
           <button type="button" className="sidebar-search" onClick={() => setCommandOpen(true)}>
             <Icon name="search" size={18} />
             <span>Recherche</span>
             <kbd>⌘K</kbd>
           </button>
-          <Link to="/exercices" className={`sidebar-secondary-item${location.pathname.startsWith("/exercices") ? " active" : ""}`}>
-            <Icon name="tests" size={18} />
-            <span>Exercices</span>
-          </Link>
           <Link to="/profil" className="sidebar-secondary-item">
             <Icon name="profile" size={18} />
             <span>Profil</span>
@@ -90,9 +93,20 @@ export function AppShell() {
         <header className="topbar">
           <div className="topbar-mobile-brand">
             <Link to="/accueil" className="sidebar-logo">
-              <span className="sidebar-logo__mark">M</span>
+              <img src={MentionMaxMark} alt="MentionMax" className="sidebar-logo__mark" />
               <span className="sidebar-logo__text">MentionMax</span>
             </Link>
+          </div>
+          <div className="topbar-context">
+            <span className="topbar-context__eyebrow">MentionMax</span>
+            <strong>
+              {location.pathname.startsWith("/accueil") ? "Accueil" :
+                subjectsArea ? "Matières" :
+                exercisesArea ? "Exercices" :
+                aiArea ? "IA" :
+                examsArea ? "Examens" :
+                focusArea ? "Focus" : "Espace étudiant"}
+            </strong>
           </div>
           <div className="topbar-right">
             <button type="button" className="topbar-search" onClick={() => setCommandOpen(true)}>
@@ -100,7 +114,7 @@ export function AppShell() {
               <span>Rechercher</span>
               <kbd>⌘K</kbd>
             </button>
-            <div className="streak-chip"><Icon name="flame" size={16} /></div>
+            <div className="streak-chip"><Icon name="flame" size={16} /><span>5 jours</span></div>
             <div className="profile-dropdown">
               <button
                 type="button"
