@@ -7,7 +7,6 @@ import { AppShell } from "./components/layout/AppShell";
 import { FocusMode } from "./components/layout/FocusMode";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
-import Home from "./pages/Home";
 import Subjects from "./pages/Subjects";
 import Lessons from "./pages/Lessons";
 import Exercises from "./pages/Exercises";
@@ -46,7 +45,7 @@ function ProtectedLayout() {
         <FocusProvider>
           <Routes>
             <Route element={<AppShell />}>
-              <Route path="/accueil" element={<Home />} />
+              <Route path="/accueil" element={<Navigate to="/" replace />} />
               <Route path="/subjects" element={<Subjects />} />
               <Route path="/subjects/:subjectId" element={<Subjects />} />
               <Route path="/lecons" element={<Navigate to="/subjects" replace />} />
@@ -79,8 +78,8 @@ function ProtectedLayout() {
                 <Route path="settings" element={<GroupSettings />} />
               </Route>
               <Route path="/design-lab" element={<DesignLab />} />
-              <Route path="/dashboard" element={<Navigate to="/accueil" replace />} />
-              <Route path="/progression" element={<Navigate to="/accueil" replace />} />
+              <Route path="/dashboard" element={<Navigate to="/" replace />} />
+              <Route path="/progression" element={<Navigate to="/focus" replace />} />
               <Route path="/classement" element={<Navigate to="/focus" replace />} />
             </Route>
           </Routes>
