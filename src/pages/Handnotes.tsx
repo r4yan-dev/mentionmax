@@ -3,15 +3,15 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   Bold,
   CheckSquare,
-  ChevronLeft,
   ChevronDown,
+  ChevronLeft,
   Folder,
   Italic,
   List,
   ListOrdered,
-  Plus,
   Pin,
   PinOff,
+  Plus,
   Search,
   Trash2,
   Underline,
@@ -32,21 +32,9 @@ type Note = {
   chapterId: string | null;
 };
 
-type Subject = {
-  id: string;
-  slug: string;
-  name: string;
-  shortName: string | null;
-};
+type Subject = { id: string; slug: string; name: string; shortName: string | null };
+type Chapter = { id: string; subjectId: string; name: string; slug: string };
 
-type Chapter = {
-  id: string;
-  subjectId: string;
-  name: string;
-  slug: string;
-};
-
-const EMPTY_CONTENT = "";
 const DEFAULT_FOLDER = "notes";
 
 function excerpt(html: string) {
@@ -70,10 +58,10 @@ export default function Handnotes() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState(EMPTY_CONTENT);
+  const [content, setContent] = useState("");
   const [query, setQuery] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState<string>(searchParams.get("subject") || "all");
-  const [chapterFilter, setChapterFilter] = useState<string>(searchParams.get("chapter") || "all");
+  const [subjectFilter, setSubjectFilter] = useState(searchParams.get("subject") || "all");
+  const [chapterFilter, setChapterFilter] = useState(searchParams.get("chapter") || "all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -123,10 +111,12 @@ export default function Handnotes() {
     const uid = auth.user?.id ?? null;
     setUserId(uid);
 
+    const noteRequest = uid
+      ? supabase.from("handnotes").select("id,title,content,created_at,updated_at,is_pinned,folder,subject_id,chapter_id").eq("user_id", uid).order("updated_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null });
+
     const [{ data: noteRows, error: noteError }, { data: subjectRows, error: subjectError }, { data: chapterRows, error: chapterError }] = await Promise.all([
-      uid
-        ? supabase.from("handnotes").select("id,title,content,created_at,updated_at,is_pinned,folder,subject_id,chapter_id").eq("user_id", uid).order("updated_at", { ascending: false })
-        : Promise.resolve({ data: [], error: null }),
+      noteRequest,
       supabase.from("subjects").select("id,slug,name,short_name").eq("is_active", true).order("sort_order", { ascending: true, nullsFirst: false }),
       supabase.from("chapters").select("id,subject_id,name,slug,order_index").order("order_index", { ascending: true, nullsFirst: false }),
     ]);
@@ -138,22 +128,12 @@ export default function Handnotes() {
     if (subjectError) console.error("Failed to load subjects", subjectError);
     if (chapterError) console.error("Failed to load chapters", chapterError);
 
-    const loadedSubjects: Subject[] = (subjectRows ?? []).map((row) => ({
-      id: row.id,
-      slug: row.slug,
-      name: row.name,
-      shortName: row.short_name,
-    }));
-    const loadedChapters: Chapter[] = (chapterRows ?? []).map((row) => ({
-      id: row.id,
-      subjectId: row.subject_id,
-      name: row.name,
-      slug: row.slug,
-    }));
+    const loadedSubjects: Subject[] = (subjectRows ?? []).map((row) => ({ id: row.id, slug: row.slug, name: row.name, shortName: row.short_name }));
+    const loadedChapters: Chapter[] = (chapterRows ?? []).map((row) => ({ id: row.id, subjectId: row.subject_id, name: row.name, slug: row.slug }));
     const loadedNotes: Note[] = (noteRows ?? []).map((row) => ({
       id: row.id,
       title: row.title || "",
-      content: typeof row.content?.html === "string" ? row.content.html : EMPTY_CONTENT,
+      content: typeof row.content?.html === "string" ? row.content.html : "",
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       pinned: row.is_pinned ?? false,
@@ -170,11 +150,8 @@ export default function Handnotes() {
     const requestedSubject = searchParams.get("subject");
     const requestedChapter = searchParams.get("chapter");
     const requestedNote = searchParams.get("note");
-    const contextualNote = requestedNote ? loadedNotes.find((note) => note.id === requestedNote) : undefined;
-    const firstVisible = requestedNote
-      ? contextualNote
-      : loadedNotes.find((note) => (!requestedSubject || note.subjectId === requestedSubject) && (!requestedChapter || note.chapterId === requestedChapter));
-
+    const requested = requestedNote ? loadedNotes.find((note) => note.id === requestedNote) : undefined;
+    const firstVisible = requested || loadedNotes.find((note) => (!requestedSubject || note.subjectId === requestedSubject) && (!requestedChapter || note.chapterId === requestedChapter));
     if (firstVisible) openNote(firstVisible);
   }
 
@@ -185,7 +162,7 @@ export default function Handnotes() {
     latestRef.current = { id: note.id, title: note.title, content: note.content };
     setMobileList(false);
     requestAnimationFrame(() => {
-      if (editorRef.current) editorRef.current.innerHTML = note.content || "<p><br></p>";
+      if (editorRef.current) editorRef.current.innerHTML = note.content || "";
     });
   }
 
@@ -194,33 +171,22 @@ export default function Handnotes() {
       setSaveError("Connecte-toi pour créer une note.");
       return;
     }
-
     const now = new Date().toISOString();
     const localId = crypto.randomUUID();
     const nextSubject = subjectFilter === "all" ? null : subjectFilter;
     const nextChapter = chapterFilter === "all" ? null : chapterFilter;
-    const newNote: Note = {
-      id: localId,
-      title: "",
-      content: EMPTY_CONTENT,
-      createdAt: now,
-      updatedAt: now,
-      pinned: false,
-      folder: DEFAULT_FOLDER,
-      subjectId: nextSubject,
-      chapterId: nextChapter,
-    };
+    const newNote: Note = { id: localId, title: "", content: "", createdAt: now, updatedAt: now, pinned: false, folder: DEFAULT_FOLDER, subjectId: nextSubject, chapterId: nextChapter };
 
     setSaveError(null);
     setNotes((current) => [newNote, ...current]);
     setActiveId(localId);
     setTitle("");
-    setContent(EMPTY_CONTENT);
-    latestRef.current = { id: localId, title: "", content: EMPTY_CONTENT };
+    setContent("");
+    latestRef.current = { id: localId, title: "", content: "" };
     setMobileList(false);
     requestAnimationFrame(() => {
       if (editorRef.current) {
-        editorRef.current.innerHTML = "<p><br></p>";
+        editorRef.current.innerHTML = "";
         editorRef.current.focus();
       }
     });
@@ -233,7 +199,7 @@ export default function Handnotes() {
       subject_id: nextSubject,
       chapter_id: nextChapter,
       title: "",
-      content: { version: 1, html: EMPTY_CONTENT, text: "" },
+      content: { version: 1, html: "", text: "" },
       is_pinned: false,
       folder: DEFAULT_FOLDER,
     });
@@ -244,7 +210,6 @@ export default function Handnotes() {
       setActiveId(null);
       setMobileList(true);
       setSaveError("La note n’a pas pu être enregistrée.");
-      return;
     }
   }
 
@@ -266,7 +231,6 @@ export default function Handnotes() {
       content: { version: 1, html: nextContent, text: excerpt(nextContent) },
       updated_at: new Date().toISOString(),
     }).eq("id", id).eq("user_id", userId);
-
     setSaving(false);
     if (error) {
       console.error("Failed to save note", error);
@@ -278,7 +242,6 @@ export default function Handnotes() {
     if (!activeId || !userId) return;
     const current = notes.find((note) => note.id === activeId);
     if (!current) return;
-
     const patch = {
       subject_id: next.subjectId === undefined ? current.subjectId : next.subjectId,
       chapter_id: next.chapterId === undefined ? current.chapterId : next.chapterId,
@@ -286,27 +249,17 @@ export default function Handnotes() {
       folder: next.folder === undefined ? current.folder : next.folder,
       updated_at: new Date().toISOString(),
     };
-
     const { error } = await supabase.from("handnotes").update(patch).eq("id", activeId).eq("user_id", userId);
     if (error) {
       console.error("Failed to update note metadata", error);
       setSaveError("Impossible de mettre à jour cette note.");
       return;
     }
-
-    setNotes((all) => all.map((note) => note.id === activeId ? {
-      ...note,
-      subjectId: patch.subject_id,
-      chapterId: patch.chapter_id,
-      pinned: patch.is_pinned,
-      folder: patch.folder,
-      updatedAt: patch.updated_at,
-    } : note));
+    setNotes((all) => all.map((note) => note.id === activeId ? { ...note, subjectId: patch.subject_id, chapterId: patch.chapter_id, pinned: patch.is_pinned, folder: patch.folder, updatedAt: patch.updated_at } : note));
   }
 
   async function togglePin() {
-    if (!activeNote) return;
-    await updateMetadata({ pinned: !activeNote.pinned });
+    if (activeNote) await updateMetadata({ pinned: !activeNote.pinned });
   }
 
   async function deleteActiveNote() {
@@ -321,12 +274,12 @@ export default function Handnotes() {
     }
     const remaining = notes.filter((note) => note.id !== id);
     setNotes(remaining);
-    const next = filteredNotes.find((note) => note.id !== id) || remaining[0];
+    const next = remaining.find((note) => (subjectFilter === "all" || note.subjectId === subjectFilter) && (chapterFilter === "all" || note.chapterId === chapterFilter)) || remaining[0];
     if (next) openNote(next);
     else {
       setActiveId(null);
       setTitle("");
-      setContent(EMPTY_CONTENT);
+      setContent("");
       setMobileList(true);
     }
   }
@@ -334,7 +287,7 @@ export default function Handnotes() {
   function apply(command: string, value?: string) {
     editorRef.current?.focus();
     document.execCommand(command, false, value);
-    const next = editorRef.current?.innerHTML || EMPTY_CONTENT;
+    const next = editorRef.current?.innerHTML || "";
     setContent(next);
     scheduleSave(title, next);
   }
@@ -345,7 +298,7 @@ export default function Handnotes() {
   }
 
   function updateContent() {
-    const next = editorRef.current?.innerHTML || EMPTY_CONTENT;
+    const next = editorRef.current?.innerHTML || "";
     setContent(next);
     scheduleSave(latestRef.current.title, next);
   }
@@ -356,130 +309,40 @@ export default function Handnotes() {
     <div className="notes-app">
       <aside className={`notes-sidebar ${mobileList ? "is-mobile-open" : ""}`}>
         <div className="notes-sidebar__top">
-          <div>
-            <Link to="/ai-help" className="notes-back"><ChevronLeft size={17} /> AI</Link>
-            <h1>Notes</h1>
-          </div>
+          <div><Link to="/ai-help" className="notes-back"><ChevronLeft size={17} /> AI</Link><h1>Notes</h1></div>
           <button className="notes-icon-button notes-new" onClick={() => void createNote()} aria-label="Nouvelle note"><Plus size={21} /></button>
         </div>
-
-        <label className="notes-search">
-          <Search size={16} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher" />
-        </label>
-
+        <label className="notes-search"><Search size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher" /></label>
         <div className="notes-filters">
-          <div className="notes-filter">
-            <Folder size={15} />
-            <select value={subjectFilter} onChange={(event) => { setSubjectFilter(event.target.value); setChapterFilter("all"); }} aria-label="Filtrer par matière">
-              <option value="all">Toutes les matières</option>
-              {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.shortName || subject.name}</option>)}
-            </select>
-            <ChevronDown size={14} />
-          </div>
-          <div className="notes-filter">
-            <select value={chapterFilter} onChange={(event) => setChapterFilter(event.target.value)} aria-label="Filtrer par chapitre" disabled={visibleChapters.length === 0}>
-              <option value="all">Tous les chapitres</option>
-              {visibleChapters.map((chapter) => <option key={chapter.id} value={chapter.id}>{chapter.name}</option>)}
-            </select>
-            <ChevronDown size={14} />
-          </div>
+          <div className="notes-filter"><Folder size={15} /><select value={subjectFilter} onChange={(event) => { setSubjectFilter(event.target.value); setChapterFilter("all"); }} aria-label="Filtrer par matière"><option value="all">Toutes les matières</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.shortName || subject.name}</option>)}</select><ChevronDown size={14} /></div>
+          <div className="notes-filter"><select value={chapterFilter} onChange={(event) => setChapterFilter(event.target.value)} aria-label="Filtrer par chapitre" disabled={visibleChapters.length === 0}><option value="all">Tous les chapitres</option>{visibleChapters.map((chapter) => <option key={chapter.id} value={chapter.id}>{chapter.name}</option>)}</select><ChevronDown size={14} /></div>
         </div>
-
         <div className="notes-list">
           {loading && <div className="notes-empty-list">Chargement...</div>}
-          {!loading && filteredNotes.length === 0 && (
-            <button className="notes-first-note" onClick={() => void createNote()}>
-              <Plus size={17} /> {subjectFilter !== "all" ? "Créer une note ici" : "Créer ta première note"}
-            </button>
-          )}
+          {!loading && filteredNotes.length === 0 && <button className="notes-first-note" onClick={() => void createNote()}><Plus size={17} /> {subjectFilter !== "all" ? "Créer une note ici" : "Créer ta première note"}</button>}
           {filteredNotes.map((note) => {
             const subject = subjects.find((item) => item.id === note.subjectId);
-            return (
-              <button key={note.id} className={`note-row ${note.id === activeId ? "active" : ""}`} onClick={() => openNote(note)}>
-                <div className="note-row__title"><strong>{note.title || "Note sans titre"}</strong>{note.pinned && <Pin size={12} fill="currentColor" />}</div>
-                <span>{excerpt(note.content)}</span>
-                <small>{subject?.shortName || subject?.name || "Notes personnelles"} · {formatDate(note.updatedAt)}</small>
-              </button>
-            );
+            return <button key={note.id} className={`note-row ${note.id === activeId ? "active" : ""}`} onClick={() => openNote(note)}><div className="note-row__title"><strong>{note.title || "Note sans titre"}</strong>{note.pinned && <Pin size={12} fill="currentColor" />}</div><span>{excerpt(note.content)}</span><small>{subject?.shortName || subject?.name || "Notes personnelles"} · {formatDate(note.updatedAt)}</small></button>;
           })}
         </div>
-
-        <div className="notes-sidebar__footer">
-          <span>{notes.length} {notes.length === 1 ? "note" : "notes"}</span>
-          <span className={saveError ? "has-error" : ""}>{saveError || (saving ? "Enregistrement..." : "Synchronisé")}</span>
-        </div>
+        <div className="notes-sidebar__footer"><span>{notes.length} {notes.length === 1 ? "note" : "notes"}</span><span className={saveError ? "has-error" : ""}>{saveError || (saving ? "Enregistrement..." : "Synchronisé")}</span></div>
       </aside>
 
       <main className="note-editor-shell">
         <header className="note-editor-topbar">
           <button className="notes-mobile-back" onClick={() => setMobileList(true)} aria-label="Retour aux notes"><ChevronLeft size={19} /></button>
-          <div className="note-context-chip">
-            {activeSubject ? <span>{activeSubject.shortName || activeSubject.name}</span> : <span>Note personnelle</span>}
-            {activeChapter && <><span>·</span><span>{activeChapter.name}</span></>}
-          </div>
+          <div className="note-context-chip">{activeSubject ? <span>{activeSubject.shortName || activeSubject.name}</span> : <span>Note personnelle</span>}{activeChapter && <><span>·</span><span>{activeChapter.name}</span></>}</div>
           <span className={`notes-save-state ${saveError ? "has-error" : ""}`}>{saveError ? "À vérifier" : saving ? "Enregistrement..." : "Enregistré"}</span>
-          <div className="note-editor-actions">
-            <button onClick={() => void togglePin()} disabled={!activeId} title={activeNote?.pinned ? "Désépingler" : "Épingler"}>{activeNote?.pinned ? <PinOff size={18} /> : <Pin size={18} />}</button>
-            <button onClick={() => setShowOrganize((value) => !value)} disabled={!activeId} title="Organiser"><Folder size={18} /></button>
-            <button onClick={() => void deleteActiveNote()} disabled={!activeId} title="Supprimer"><Trash2 size={18} /></button>
-          </div>
+          <div className="note-editor-actions"><button onClick={() => void togglePin()} disabled={!activeId} title={activeNote?.pinned ? "Désépingler" : "Épingler"}>{activeNote?.pinned ? <PinOff size={18} /> : <Pin size={18} />}</button><button onClick={() => setShowOrganize((value) => !value)} disabled={!activeId} title="Organiser"><Folder size={18} /></button><button onClick={() => void deleteActiveNote()} disabled={!activeId} title="Supprimer"><Trash2 size={18} /></button></div>
         </header>
 
-        {showOrganize && activeNote && (
-          <div className="notes-organize-panel">
-            <div>
-              <label>Matière</label>
-              <select value={activeNote.subjectId || ""} onChange={(event) => void updateMetadata({ subjectId: event.target.value || null, chapterId: null })}>
-                <option value="">Aucune</option>
-                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label>Chapitre</label>
-              <select value={activeNote.chapterId || ""} onChange={(event) => void updateMetadata({ chapterId: event.target.value || null })} disabled={!activeNote.subjectId}>
-                <option value="">Aucun</option>
-                {activeChapters.map((chapter) => <option key={chapter.id} value={chapter.id}>{chapter.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label>Dossier</label>
-              <input value={activeNote.folder} onChange={(event) => void updateMetadata({ folder: event.target.value || DEFAULT_FOLDER })} placeholder="notes" />
-            </div>
-          </div>
-        )}
+        {showOrganize && activeNote && <div className="notes-organize-panel"><div><label>Matière</label><select value={activeNote.subjectId || ""} onChange={(event) => void updateMetadata({ subjectId: event.target.value || null, chapterId: null })}><option value="">Aucune</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}</select></div><div><label>Chapitre</label><select value={activeNote.chapterId || ""} onChange={(event) => void updateMetadata({ chapterId: event.target.value || null })} disabled={!activeNote.subjectId}><option value="">Aucun</option>{activeChapters.map((chapter) => <option key={chapter.id} value={chapter.id}>{chapter.name}</option>)}</select></div><div><label>Dossier</label><input value={activeNote.folder} onChange={(event) => void updateMetadata({ folder: event.target.value || DEFAULT_FOLDER })} placeholder="notes" /></div></div>}
 
         <div className="note-paper">
-          {activeId ? (
-            <>
-              <input className="note-title" value={title} onChange={(event) => updateTitle(event.target.value)} placeholder="Titre" aria-label="Titre de la note" />
-              <div className="note-meta">Créée le {formatDate(activeNote?.createdAt || new Date().toISOString())} · Dernière modification {formatDate(activeNote?.updatedAt || new Date().toISOString())}</div>
-              <div ref={editorRef} className="note-content" contentEditable suppressContentEditableWarning onInput={updateContent} onBlur={updateContent} data-placeholder="Commence à écrire..." spellCheck />
-            </>
-          ) : (
-            <div className="note-welcome">
-              <div className="note-welcome__icon">✦</div>
-              <h2>Tes notes, sans formulaire.</h2>
-              <p>Écris librement, épingle les notes importantes et rattache-les à une matière ou à un chapitre.</p>
-              <button className="btn btn-primary" onClick={() => void createNote()}><Plus size={17} /> Nouvelle note</button>
-            </div>
-          )}
+          {activeId ? <><input className="note-title" value={title} onChange={(event) => updateTitle(event.target.value)} placeholder="Titre" aria-label="Titre de la note" /><div className="note-meta">Créée le {formatDate(activeNote?.createdAt || new Date().toISOString())} · Dernière modification {formatDate(activeNote?.updatedAt || new Date().toISOString())}</div><div ref={editorRef} className="note-content" contentEditable suppressContentEditableWarning onInput={updateContent} onBlur={updateContent} data-placeholder="Commence à écrire..." spellCheck /></> : <div className="note-welcome"><div className="note-welcome__icon">✦</div><h2>Tes notes, sans formulaire.</h2><p>Écris librement, épingle les notes importantes et rattache-les à une matière ou à un chapitre.</p><button className="btn btn-primary" onClick={() => void createNote()}><Plus size={17} /> Nouvelle note</button></div>}
         </div>
 
-        {activeId && (
-          <div className="note-toolbar" role="toolbar" aria-label="Mise en forme">
-            <button onClick={() => apply("bold")} title="Gras"><Bold size={17} /></button>
-            <button onClick={() => apply("italic")} title="Italique"><Italic size={17} /></button>
-            <button onClick={() => apply("underline")} title="Souligné"><Underline size={17} /></button>
-            <span />
-            <button onClick={() => apply("formatBlock", "h2")} title="Titre"><b>H</b><sup>2</sup></button>
-            <button onClick={() => apply("insertUnorderedList")} title="Liste"><List size={18} /></button>
-            <button onClick={() => apply("insertOrderedList")} title="Liste numérotée"><ListOrdered size={18} /></button>
-            <button onClick={() => apply("insertHTML", "<div>☐ À faire</div>")} title="Case à cocher"><CheckSquare size={18} /></button>
-            <span />
-            <button onClick={() => apply("removeFormat")} title="Effacer la mise en forme"><X size={17} /></button>
-          </div>
-        )}
+        {activeId && <div className="note-toolbar" role="toolbar" aria-label="Mise en forme"><button onClick={() => apply("bold")} title="Gras"><Bold size={17} /></button><button onClick={() => apply("italic")} title="Italique"><Italic size={17} /></button><button onClick={() => apply("underline")} title="Souligné"><Underline size={17} /></button><span /><button onClick={() => apply("formatBlock", "h2")} title="Titre"><b>H</b><sup>2</sup></button><button onClick={() => apply("insertUnorderedList")} title="Liste"><List size={18} /></button><button onClick={() => apply("insertOrderedList")} title="Liste numérotée"><ListOrdered size={18} /></button><button onClick={() => apply("insertHTML", '<div class="note-check"><label><input type="checkbox" /> <span>À faire</span></label></div>')} title="Case à cocher"><CheckSquare size={18} /></button><span /><button onClick={() => apply("removeFormat")} title="Effacer la mise en forme"><X size={17} /></button></div>}
       </main>
     </div>
   );
