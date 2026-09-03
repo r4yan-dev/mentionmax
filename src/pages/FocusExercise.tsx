@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FlaskConical, Lightbulb, Sparkles, Target } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FlaskConical, Lightbulb, Loader2, Sparkles, Target } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { contentCatalogService } from "../services/content/contentCatalogService";
+import { getMissionHeliosProgress, saveMissionHeliosProgress } from "../features/exercises/missionHeliosProgress";
 import { helios300MathExercises } from "../data/mock/helios300MathExercises";
 import ExerciseEngine, { type ExerciseQuestion } from "../features/exercises/ExerciseEngine";
 import { LatexText } from "../components/ui/LatexText";
@@ -32,17 +34,54 @@ function toEngineExercise(exercise: Exercise): ExerciseQuestion {
 
 function HeliosRunner({ exerciseId }: { exerciseId: string }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const exercise = useMemo(() => helios300MathExercises.find((item) => item.id === exerciseId), [exerciseId]);
   const [answers, setAnswers] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(true);
+  const [savingProgress, setSavingProgress] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
-    setAnswers(exercise?.parts.map(() => "") ?? []);
-    setSubmitted(false);
-    setShowHint(false);
-    window.scrollTo(0, 0);
-  }, [exerciseId, exercise]);
+    let active = true;
+
+    async function loadProgress() {
+      setLoadingProgress(true);
+      setSaveError(null);
+      setSubmitted(false);
+      setShowHint(false);
+
+      try {
+        if (!exercise || !user) {
+          if (active) setAnswers(exercise?.parts.map(() => "") ?? []);
+          return;
+        }
+
+        const progress = await getMissionHeliosProgress(exercise.id);
+        if (!active) return;
+
+        const nextAnswers = exercise.parts.map((_, index) => progress?.answers[index] ?? "");
+        setAnswers(nextAnswers);
+        setSubmitted(Boolean(progress?.completed));
+      } catch (error) {
+        console.error("Failed to load Mission Helios progress:", error);
+        if (active) {
+          setAnswers(exercise?.parts.map(() => "") ?? []);
+          setSaveError("Impossible de charger ta progression. Tes réponses restent disponibles pour cette session.");
+        }
+      } finally {
+        if (active) setLoadingProgress(false);
+      }
+    }
+
+    loadProgress();
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+
+    return () => {
+      active = false;
+    };
+  }, [exerciseId, exercise, user]);
 
   if (!exercise) {
     return (
@@ -63,6 +102,38 @@ function HeliosRunner({ exerciseId }: { exerciseId: string }) {
   const next = missionExercises[currentIndex + 1];
   const answeredCount = answers.filter((answer) => answer.trim().length > 0).length;
 
+  async function finishExercise() {
+    if (!user || answeredCount === 0 || savingProgress) return;
+
+    setSavingProgress(true);
+    setSaveError(null);
+
+    try {
+      await saveMissionHeliosProgress(exercise.id, answers, true);
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Failed to save Mission Helios progress:", error);
+      setSaveError("La correction s'affiche, mais la progression n'a pas pu être enregistrée. Réessaie une fois connecté.");
+    } finally {
+      setSavingProgress(false);
+    }
+  }
+
+  async function saveDraft() {
+    if (!user || answeredCount === 0 || savingProgress || submitted) return;
+
+    setSavingProgress(true);
+    setSaveError(null);
+    try {
+      await saveMissionHeliosProgress(exercise.id, answers, false);
+    } catch (error) {
+      console.error("Failed to save Mission Helios draft:", error);
+      setSaveError("Brouillon non enregistré.");
+    } finally {
+      setSavingProgress(false);
+    }
+  }
+
   return (
     <main className="focus-exercise-page helios-runner-page">
       <div className="helios-runner-shell">
@@ -82,24 +153,29 @@ function HeliosRunner({ exerciseId }: { exerciseId: string }) {
         </section>
 
         <section className="focus-question-card helios-question-card">
-          <div className="helios-question-meta"><span><Sparkles size={15} /> MISSION HELIOS</span><span><Clock3 size={14} /> {exercise.estimatedMinutes} min</span></div>
+          <div className="helios-question-meta"><span><Sparkles size={15} /> MISSION HELIOS</span><span><Clock3 size={14} /> {exercise.estimatedMinutes} min</span>{submitted ? <span className="helios-complete-badge"><CheckCircle2 size={14} /> Terminé</span> : null}</div>
           <h1>{exercise.title}</h1>
           <div className="helios-context-box"><span className="section-eyebrow">CONTEXTE</span><LatexText>{exercise.context}</LatexText></div>
           <div className="helios-objective-box"><Target size={17} /><div><span>Mission</span><strong>{exercise.missionObjective}</strong></div></div>
 
-          <div className="helios-parts">
-            <div className="helios-parts__header"><div><span className="section-eyebrow">TRAVAIL À EFFECTUER</span><h2>{exercise.parts.length} partie{exercise.parts.length > 1 ? "s" : ""}</h2></div><span>{answeredCount}/{exercise.parts.length} commencée{answeredCount > 1 ? "s" : ""}</span></div>
-            {exercise.parts.map((part, index) => (
-              <label className="helios-part" key={`${exercise.id}-part-${index}`}>
-                <span className="helios-part__number">{String.fromCharCode(97 + index)}</span>
-                <div className="helios-part__content"><LatexText>{part}</LatexText><textarea value={answers[index] ?? ""} onChange={(event) => { setSubmitted(false); setAnswers((current) => current.map((answer, answerIndex) => answerIndex === index ? event.target.value : answer)); }} placeholder="Écris ton raisonnement ici..." rows={4} disabled={submitted} /></div>
-              </label>
-            ))}
-          </div>
+          {loadingProgress ? (
+            <div className="helios-loading-state"><Loader2 size={18} className="helios-spin" /> Chargement de ta progression...</div>
+          ) : (
+            <div className="helios-parts">
+              <div className="helios-parts__header"><div><span className="section-eyebrow">TRAVAIL À EFFECTUER</span><h2>{exercise.parts.length} partie{exercise.parts.length > 1 ? "s" : ""}</h2></div><span>{answeredCount}/{exercise.parts.length} commencée{answeredCount > 1 ? "s" : ""}</span></div>
+              {exercise.parts.map((part, index) => (
+                <label className="helios-part" key={`${exercise.id}-part-${index}`}>
+                  <span className="helios-part__number">{String.fromCharCode(97 + index)}</span>
+                  <div className="helios-part__content"><LatexText>{part}</LatexText><textarea value={answers[index] ?? ""} onBlur={saveDraft} onChange={(event) => { setSaveError(null); setSubmitted(false); setAnswers((current) => current.map((answer, answerIndex) => answerIndex === index ? event.target.value : answer)); }} placeholder="Écris ton raisonnement ici..." rows={4} disabled={loadingProgress || submitted} /></div>
+                </label>
+              ))}
+            </div>
+          )}
 
-          <div className="helios-work-footer"><div className="helios-animation-note"><Sparkles size={15} /><span>{exercise.animation}</span></div><button type="button" className="btn btn-primary" disabled={answeredCount === 0} onClick={() => setSubmitted(true)}>Terminer l'exercice <CheckCircle2 size={16} /></button></div>
-          <div className="helios-runner-tools"><button type="button" className="runner-tool-button" onClick={() => setShowHint((value) => !value)}><Lightbulb size={16} /> {showHint ? "Masquer l'aide" : "Afficher un rappel"}</button></div>
+          <div className="helios-work-footer"><div className="helios-animation-note"><Sparkles size={15} /><span>{exercise.animation}</span></div><button type="button" className="btn btn-primary" disabled={loadingProgress || answeredCount === 0 || savingProgress || submitted} onClick={finishExercise}>{savingProgress ? <><Loader2 size={16} className="helios-spin" /> Enregistrement...</> : submitted ? <><CheckCircle2 size={16} /> Exercice terminé</> : <>Terminer l'exercice <CheckCircle2 size={16} /></>}</button></div>
+          <div className="helios-runner-tools"><button type="button" className="runner-tool-button" onClick={() => setShowHint((value) => !value)}><Lightbulb size={16} /> {showHint ? "Masquer l'aide" : "Afficher un rappel"}</button>{savingProgress ? <span className="helios-saving-status">Enregistrement...</span> : submitted ? <span className="helios-saving-status helios-saving-status--done"><CheckCircle2 size={14} /> Progression enregistrée</span> : null}</div>
           {showHint && <div className="helios-hint-box"><strong>Rappel de méthode</strong><p>Identifie d'abord la notion du chapitre, écris les étapes avant de calculer, puis vérifie les hypothèses.</p></div>}
+          {saveError && <div className="helios-save-error">{saveError}</div>}
           {submitted && <section className="helios-correction-panel"><div className="helios-correction-panel__icon"><CheckCircle2 size={21} /></div><div><span className="section-eyebrow">CORRECTION GUIDÉE</span><h2>Compare ton raisonnement</h2><p><LatexText>{exercise.correction}</LatexText></p></div></section>}
         </section>
 
