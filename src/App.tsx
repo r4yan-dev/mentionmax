@@ -5,6 +5,7 @@ import ExamReader from "./pages/ExamReader";
 import Subjects from "./pages/Subjects";
 import Lessons from "./pages/Lessons";
 import Exercises from "./pages/Exercises";
+import DesignLab from "./pages/DesignLab";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AccountProvider } from "./context/AccountContext";
@@ -71,6 +72,7 @@ function ProtectedApp() {
               <Route path="members" element={<GroupMembers />} />
               <Route path="settings" element={<GroupSettings />} />
             </Route>
+            <Route path="/design-lab" element={<DesignLab />} />
             <Route path="/dashboard" element={<Navigate to="/accueil" replace />} />
             <Route path="/progression" element={<Navigate to="/accueil" replace />} />
             <Route path="/classement" element={<Navigate to="/focus" replace />} />
