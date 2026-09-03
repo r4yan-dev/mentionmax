@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AccountProvider } from "./context/AccountContext";
@@ -32,7 +33,7 @@ function LoadingScreen() {
   return <div className="auth-page"><div className="auth-loading">Chargement...</div></div>;
 }
 
-function RequireAuth({ children }: { children: React.ReactNode }) {
+function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   return user ? <>{children}</> : <Navigate to="/connexion" replace />;
