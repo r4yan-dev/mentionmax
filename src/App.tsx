@@ -46,7 +46,7 @@ function ProtectedApp() {
             <Route path="/lecons/:subjectId" element={<Lessons />} />
             <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
             <Route path="/exercices" element={<Exercises />} />
-            <Route path="/exercices/:exerciseId" element={<Exercises />} />
+            <Route path="/exercices/:exerciseId" element={<FocusExercise />} />
             <Route path="/focus" element={<Focus />} />
             <Route path="/focus/timer" element={<Focus />} />
             <Route path="/exams" element={<Exams />} />
