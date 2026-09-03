@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, BookOpen, GraduationCap, Sparkles, Target } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpen, Sparkles, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import MentionMaxLogo from "../assets/brand/mentionmax-logo.svg";
 import "./Landing.css";
