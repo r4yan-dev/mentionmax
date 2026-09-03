@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, BookOpen, BrainCircuit, CheckCircle2, Clock3, Filter, FlaskConical, Lightbulb, Sparkles, Target } from "lucide-react";
+import { ArrowRight, BookOpen, BrainCircuit, CheckCircle2, Clock3, Filter, FlaskConical, Sparkles, Target } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useAccount } from "../context/AccountContext";
 import { tracks, getTrackSubjects } from "../data/curriculum/tracks";
 import { resolveUserPath } from "../data/curriculum/secondBac";
 import { contentCatalogService } from "../services/content/contentCatalogService";
-import { missionHeliosExercises, missionHeliosByDay } from "../data/mock/missionHeliosBank";
+import { missionHeliosExercises } from "../data/mock/missionHeliosBank";
 import { LatexText } from "../components/ui/LatexText";
 import type { Exercise, ExerciseType } from "../types/content";
 import type { SubjectId, TrackId } from "../types/academic";
@@ -16,13 +16,16 @@ const difficultyLabels = ["", "Très facile", "Facile", "Intermédiaire", "Diffi
 const typeLabels: Record<ExerciseType, string> = { mcq: "QCM", numeric: "Numérique", "short-answer": "Réponse courte", proof: "Démonstration", calculation: "Calcul", "document-analysis": "Analyse de document", "multi-step": "Problème guidé" };
 const subjectLabels: Record<SubjectId, string> = { maths: "Mathématiques", "physique-chimie": "Physique-Chimie", svt: "SVT", anglais: "Anglais", philosophie: "Philosophie" };
 type Collection = "helios" | "existing" | "all";
-type DisplayExercise = Exercise & { missionDay?: number; missionObjective?: string; context?: string; parts?: string[]; animation?: string; };
+type DisplayExercise = Exercise & { missionDay?: number; missionObjective?: string; context?: string; parts?: string[]; animation?: string };
 
-function resolveTrack(track: "SPC" | "SM" | null, section: "A" | "B" | null): TrackId { return resolveUserPath(track, section) === "SP" ? "SP" : resolveUserPath(track, section) === "SMA" ? "SMA" : "SMB"; }
+function resolveTrack(track: "SPC" | "SM" | null, section: "A" | "B" | null): TrackId {
+  const path = resolveUserPath(track, section);
+  return path === "SP" ? "SP" : path === "SMA" ? "SMA" : "SMB";
+}
 
 function HeliosExerciseWidget({ exercise }: { exercise: DisplayExercise }) {
   const number = exercise.id.match(/-e(\d+)$/)?.[1] ?? "01";
-  return <article className="helios-exercise-widget"><div className="helios-widget__top"><div className="helios-widget__mission"><FlaskConical size={15} /><span>MISSION HELIOS</span><b>J{String(exercise.missionDay ?? 1).padStart(2, "0")}</b></div><span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>{difficultyLabels[exercise.difficulty]}</span></div><div className="helios-widget__identity"><span>EXERCICE {number}/20</span><span>{exercise.target.chapter}</span></div><h3>{exercise.title}</h3><p className="helios-widget__context"><LatexText>{exercise.context ?? exercise.statement}</LatexText></p><div className="helios-widget__objective"><Target size={15} /><span>MISSION</span><strong>{exercise.missionObjective ?? "Maîtriser ce chapitre"}</strong></div><div className="helios-widget__parts">{(exercise.parts ?? [exercise.statement]).map((part, index) => <div key={`${exercise.id}-${index}`}><b>{String.fromCharCode(97 + index)}</b><LatexText>{part}</LatexText></div>)}</div><div className="helios-widget__bottom"><span><Sparkles size={14} /> {exercise.animation ?? "Visualisation interactive prévue dans le runner."}</span><Link to={`/exercices/${exercise.id}`} className="helios-widget__open">Commencer <ArrowRight size={15} /></Link></div></article>;
+  return <article className="helios-exercise-widget"><div className="helios-widget__top"><div className="helios-widget__mission"><FlaskConical size={15} /><span>MISSION HELIOS</span><b>J{String(exercise.missionDay ?? 1).padStart(2, "0")}</b></div><span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>{difficultyLabels[exercise.difficulty]}</span></div><div className="helios-widget__identity"><span>EXERCICE {number}/20</span><span>{exercise.target.chapter}</span></div><h3>{exercise.title}</h3><p className="helios-widget__context"><LatexText>{exercise.context ?? exercise.statement}</LatexText></p><div className="helios-widget__objective"><Target size={15} /><span>MISSION</span><strong>{exercise.missionObjective ?? "Maîtriser ce chapitre"}</strong></div><div className="helios-widget__parts">{(exercise.parts ?? [exercise.statement]).map((part, index) => <div key={`${exercise.id}-${index}`}><b>{String.fromCharCode(97 + index)}</b><LatexText>{part}</LatexText></div>)}</div><div className="helios-widget__bottom"><span><Sparkles size={14} /> {exercise.animation ?? "Visualisation prévue dans le runner."}</span><Link to={`/exercices/${exercise.id}`} className="helios-widget__open">Commencer <ArrowRight size={15} /></Link></div></article>;
 }
 
 function ExistingExerciseCard({ exercise }: { exercise: DisplayExercise }) {
@@ -32,7 +35,7 @@ function ExistingExerciseCard({ exercise }: { exercise: DisplayExercise }) {
 function ExerciseDetail({ exercise }: { exercise: DisplayExercise }) {
   const [showCorrection, setShowCorrection] = useState(false);
   const helios = exercise.tags.includes("MISSION_HELIOS");
-  return <main className="exercises-page exercises-detail-page"><Link to="/exercices?collection=helios&subject=maths" className="exercises-back"><ArrowRight size={16} style={{ transform: "rotate(180deg)" }} /> Retour</Link><article className="exercise-detail-card"><div className="exercise-library-card__top"><span className="exercise-pill">{helios ? <><FlaskConical size={13} /> Mission Helios</> : typeLabels[exercise.type]}</span><span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>{difficultyLabels[exercise.difficulty]}</span></div><span className="exercise-library-card__chapter">{exercise.target.chapter} · {exercise.target.topic}</span><h1>{exercise.title}</h1>{helios ? <div className="helios-detail-banner"><span className="section-eyebrow">MISSION HELIOS · JOUR {String(exercise.missionDay).padStart(2, "0")}</span><strong>{exercise.missionObjective}</strong><p>{exercise.context}</p></div> : null}<section className="helios-detail-parts"><span className="section-eyebrow">TRAVAIL À EFFECTUER</span><ol>{(helios ? exercise.parts ?? [] : [exercise.statement]).map((part, index) => <li key={`${exercise.id}-detail-${index}`}><LatexText>{part}</LatexText></li>)}</ol></section>{helios && exercise.animation ? <div className="helios-detail-animation"><strong>Animation</strong><span>{exercise.animation}</span></div> : null}<div className="exercise-detail-actions"><Link to={`/exercices/${exercise.id}`} className="btn btn-primary">Ouvrir le runner <ArrowRight size={15} /></Link><button type="button" className="btn btn-secondary" onClick={() => setShowCorrection((value) => !value)}><CheckCircle2 size={15} /> {showCorrection ? "Masquer" : "Voir"} la correction</button></div>{showCorrection && <section className="exercise-correction-card"><span className="section-eyebrow">CORRECTION</span><h2>Solution guidée</h2><p><LatexText>{exercise.correction}</LatexText></p></section>}</article></main>;
+  return <main className="exercises-page exercises-detail-page"><Link to="/exercices?collection=helios&subject=maths" className="exercises-back"><ArrowRight size={16} style={{ transform: "rotate(180deg)" }} /> Retour</Link><article className="exercise-detail-card"><div className="exercise-library-card__top"><span className="exercise-pill">{helios ? <><FlaskConical size={13} /> Mission Helios</> : typeLabels[exercise.type]}</span><span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>{difficultyLabels[exercise.difficulty]}</span></div><span className="exercise-library-card__chapter">{exercise.target.chapter} · {exercise.target.topic}</span><h1>{exercise.title}</h1>{helios ? <div className="helios-detail-banner"><span className="section-eyebrow">MISSION HELIOS · JOUR {String(exercise.missionDay).padStart(2,"0")}</span><strong>{exercise.missionObjective}</strong><p>{exercise.context}</p></div> : null}<section className="helios-detail-parts"><span className="section-eyebrow">TRAVAIL À EFFECTUER</span><ol>{(helios ? exercise.parts ?? [] : [exercise.statement]).map((part, index) => <li key={`${exercise.id}-detail-${index}`}><LatexText>{part}</LatexText></li>)}</ol></section>{helios && exercise.animation ? <div className="helios-detail-animation"><strong>Animation</strong><span>{exercise.animation}</span></div> : null}<div className="exercise-detail-actions"><Link to={`/exercices/${exercise.id}`} className="btn btn-primary">Ouvrir le runner <ArrowRight size={15} /></Link><button type="button" className="btn btn-secondary" onClick={() => setShowCorrection((value) => !value)}><CheckCircle2 size={15} /> {showCorrection ? "Masquer" : "Voir"} la correction</button></div>{showCorrection && <section className="exercise-correction-card"><span className="section-eyebrow">CORRECTION</span><h2>Solution guidée</h2><p><LatexText>{exercise.correction}</LatexText></p></section>}</article></main>;
 }
 
 export default function Exercises() {
@@ -40,18 +43,17 @@ export default function Exercises() {
   const [searchParams] = useSearchParams();
   const { schoolPreferences } = useAccount();
   const path = resolveUserPath(schoolPreferences?.track ?? null, schoolPreferences?.section ?? null);
-  const trackId = path === "SP" ? "SP" : path === "SMA" ? "SMA" : "SMB";
+  const trackId = resolveTrack(schoolPreferences?.track ?? null, schoolPreferences?.section ?? null);
   const allowedSubjects = getTrackSubjects(path).map((item) => item.id);
   const requestedSubject = searchParams.get("subject") as SubjectId | null;
   const requestedCollection = searchParams.get("collection");
-  const defaultCollection: Collection = subjectOrMath(requestedSubject) && requestedCollection !== "existing" ? "helios" : requestedCollection === "existing" ? "existing" : "all";
-  const [collection, setCollection] = useState<Collection>(defaultCollection);
+  const [collection, setCollection] = useState<Collection>(requestedCollection === "existing" ? "existing" : requestedCollection === "helios" || subjectOrMath(requestedSubject) ? "helios" : "all");
   const [subject, setSubject] = useState<SubjectId>(requestedSubject && allowedSubjects.includes(requestedSubject) ? requestedSubject : allowedSubjects[0]);
   const [chapter, setChapter] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
 
   function subjectOrMath(value: SubjectId | null) { return value === null || value === "maths"; }
-  useEffect(() => { const requested = searchParams.get("subject") as SubjectId | null; const requestedCollection = searchParams.get("collection"); if (requested && allowedSubjects.includes(requested)) setSubject(requested); else if (!allowedSubjects.includes(subject)) setSubject(allowedSubjects[0]); if (requestedCollection === "helios" || requestedCollection === "existing") setCollection(requestedCollection); else setCollection(subjectOrMath(requested) ? "helios" : "all"); setChapter("all"); }, [trackId, searchParams, allowedSubjects.join(",")]);
+  useEffect(() => { const requested = searchParams.get("subject") as SubjectId | null; const nextCollection = searchParams.get("collection"); if (requested && allowedSubjects.includes(requested)) setSubject(requested); else if (!allowedSubjects.includes(subject)) setSubject(allowedSubjects[0]); if (nextCollection === "helios" || nextCollection === "existing") setCollection(nextCollection); else setCollection(subjectOrMath(requested) ? "helios" : "all"); setChapter("all"); }, [trackId, searchParams, allowedSubjects.join(",")]);
 
   const heliosExercises = useMemo<DisplayExercise[]>(() => subject === "maths" ? missionHeliosExercises.filter((exercise) => exercise.target.trackIds.includes(trackId)) : [], [subject, trackId]);
   const existingExercises = useMemo<DisplayExercise[]>(() => contentCatalogService.getBaseExercises(trackId, subject).filter((exercise) => !exercise.tags.includes("MISSION_HELIOS")), [trackId, subject]);
