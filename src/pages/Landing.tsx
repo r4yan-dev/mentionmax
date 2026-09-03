@@ -1,318 +1,76 @@
+import { ArrowRight, BookOpen, BrainCircuit, FlaskConical, LineChart, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import "./Landing.css";
 
-type SubjectProgress = {
-  name: string;
-  value: number;
-  className: string;
-};
-
-const progress: SubjectProgress[] = [
-  {
-    name: "Mathématiques",
-    value: 91,
-    className: "dot--math",
-  },
-  {
-    name: "Physique-Chimie",
-    value: 84,
-    className: "dot--phys",
-  },
-  {
-    name: "SVT",
-    value: 78,
-    className: "dot--svt",
-  },
-  {
-    name: "Français",
-    value: 75,
-    className: "dot--fr",
-  },
+const features = [
+  { icon: BookOpen, title: "Cours clairs", text: "Des leçons structurées autour du programme 2BAC, sans bruit inutile." },
+  { icon: BrainCircuit, title: "Pratique ciblée", text: "Travaille une notion, puis passe directement à des exercices adaptés." },
+  { icon: LineChart, title: "Progression réelle", text: "Suis tes habitudes, tes chapitres et les notions qui demandent encore du travail." },
 ];
 
-function ProgressCard() {
-  return (
-    <aside className="progress-card">
-      <div className="progress-card__header">
-        <span className="progress-card__eyebrow">
-          Cette semaine
-        </span>
-
-        <span className="progress-card__count">
-          12 exercices
-        </span>
-      </div>
-
-      <div className="progress-ring">
-        <svg
-          viewBox="0 0 100 100"
-          aria-label="Progression globale 82%"
-        >
-          <circle
-            className="ring-bg"
-            cx="50"
-            cy="50"
-            r="42"
-          />
-
-          <circle
-            className="ring-value"
-            cx="50"
-            cy="50"
-            r="42"
-            style={
-              {
-                "--pct": 82,
-              } as React.CSSProperties
-            }
-          />
-        </svg>
-
-        <div className="ring-center">
-          <strong>82%</strong>
-          <span>Très bien !</span>
-        </div>
-      </div>
-
-      <ul className="progress-list">
-        {progress.map((item) => (
-          <li key={item.name}>
-            <span className="progress-list__subject">
-              <span className={`dot ${item.className}`} />
-              {item.name}
-            </span>
-
-            <b>{item.value}%</b>
-          </li>
-        ))}
-      </ul>
-
-      <div className="progress-card__streak">
-        🔥 5 jours de série
-      </div>
-    </aside>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <article className="feature-card">
-      <div className="feature-card__icon">
-        {icon}
-      </div>
-
-      <h3>{title}</h3>
-
-      <p>{description}</p>
-    </article>
-  );
-}
+const tracks = [
+  ["SPC", "Sciences Physiques", "Maths · Physique-Chimie · SVT · Philo · Anglais"],
+  ["SM A", "Sciences Mathématiques A", "Maths · Physique-Chimie · Philo · Anglais"],
+  ["SM B", "Sciences Mathématiques B", "Maths · Physique-Chimie · Philo · Anglais"],
+];
 
 export default function Landing() {
   return (
-    <div className="landing-page">
-      <header className="navbar">
-        <Link
-          to="/"
-          className="brand"
-          aria-label="MentionMax accueil"
-        >
-          <div
-            className="brand__mark brand__mark--fallback"
-            aria-hidden="true"
-          >
-            M
-          </div>
-
-          <span className="brand__wordmark">
-            MentionMax
-          </span>
-        </Link>
-
-        <nav
-          className="navbar__links"
-          aria-label="Navigation principale"
-        >
-          <Link
-            to="/subjects"
-            className="nav-link active"
-          >
-            Matières
-          </Link>
-
-          <Link
-            to="/exercises"
-            className="nav-link"
-          >
-            Exercices
-          </Link>
-
-          <Link
-            to="/progress"
-            className="nav-link"
-          >
-            Progression
-          </Link>
-        </nav>
-
-        <Link
-          to="/dashboard"
-          className="btn btn-primary"
-        >
-          Commencer
-        </Link>
-      </header>
+    <div className="landing">
+      <nav className="landing-nav">
+        <Link to="/" className="landing-brand"><span>M</span><strong>MentionMax</strong></Link>
+        <div className="landing-nav__links">
+          <a href="#fonctionnement">Fonctionnement</a>
+          <a href="#parcours">Parcours</a>
+          <a href="#mission">Mission Helios</a>
+        </div>
+        <div className="landing-nav__actions">
+          <Link to="/connexion" className="landing-login">Se connecter</Link>
+          <Link to="/connexion" className="landing-cta">Commencer <ArrowRight size={16} /></Link>
+        </div>
+      </nav>
 
       <main>
-        <section className="hero">
-          <div className="hero-content">
-            <span className="badge-pill">
-              Plateforme n°1 pour réussir ton Bac
-            </span>
-
-            <h1 className="hero-title">
-              Ta{" "}
-              <span className="accent-word">
-                réussite
-              </span>{" "}
-              au Bac commence ici.
-            </h1>
-
-            <p className="hero-description">
-              Prépare ton Bac avec des exercices ciblés,
-              un suivi clair de ta progression et une
-              méthode conçue pour le programme marocain.
-            </p>
-
-            <div className="hero-actions">
-              <Link
-                to="/exercises"
-                className="btn btn-primary btn-lg"
-              >
-                Commencer à réviser
-              </Link>
-
-              <Link
-                to="/subjects"
-                className="btn btn-ghost btn-lg"
-              >
-                Explorer les matières
-              </Link>
+        <section className="landing-hero">
+          <div className="landing-hero__copy">
+            <span className="landing-eyebrow"><Sparkles size={14} /> Plateforme de préparation au Bac marocain</span>
+            <h1>Travaille le cours.<br /><em>Maîtrise le Bac.</em></h1>
+            <p>Une plateforme conçue pour le 2BAC, avec des cours structurés, des exercices contextualisés, un suivi de progression et un assistant IA qui connaît ton travail.</p>
+            <div className="landing-hero__actions">
+              <Link to="/connexion" className="landing-button landing-button--primary">Commencer gratuitement <ArrowRight size={17} /></Link>
+              <a href="#fonctionnement" className="landing-button landing-button--ghost">Voir comment ça marche</a>
             </div>
-
-            <div className="stat-strip">
-              <div>
-                <strong>10K+</strong>
-                <span>exercices</span>
-              </div>
-
-              <div>
-                <strong>5</strong>
-                <span>matières</span>
-              </div>
-
-              <div>
-                <strong>24/7</strong>
-                <span>accessible</span>
-              </div>
-            </div>
+            <div className="landing-proof"><span>2BAC</span><span>5 matières</span><span>3 parcours</span><span>Mission Helios · 300 exercices</span></div>
           </div>
 
-          <div className="hero-aside">
-            <div className="hero-illustration">
-              <div className="hero-illustration__grid" />
-
-              <div className="hero-illustration__content">
-                <span className="hero-illustration__symbol">
-                  ∫
-                </span>
-
-                <span className="hero-illustration__label">
-                  Prépare ton Bac
-                </span>
-              </div>
-
-              <div className="hero-illustration__orb hero-illustration__orb--one" />
-              <div className="hero-illustration__orb hero-illustration__orb--two" />
-            </div>
-
-            <ProgressCard />
+          <div className="landing-hero__visual" aria-hidden="true">
+            <div className="hero-grid" />
+            <div className="hero-orbit hero-orbit--one" />
+            <div className="hero-orbit hero-orbit--two" />
+            <div className="hero-card hero-card--main"><span>MISSION HELIOS</span><strong>Exercice 08/20</strong><p>Théorème des valeurs intermédiaires</p><div><i /><i /><i /><i /></div><small>Intermédiaire · +30 XP</small></div>
+            <div className="hero-card hero-card--float"><span>PROGRESSION</span><strong>82%</strong><small>Cette semaine</small></div>
+            <div className="hero-mark">M</div>
           </div>
         </section>
 
-        <section className="landing-section">
-          <div className="section-heading">
-            <span className="section-eyebrow">
-              Pourquoi MentionMax ?
-            </span>
-
-            <h2 className="section-title">
-              Tout ce qu'il faut pour mieux réviser.
-            </h2>
-
-            <p className="section-description">
-              Moins de temps perdu à chercher quoi faire,
-              plus de temps à résoudre les exercices qui
-              comptent.
-            </p>
-          </div>
-
-          <div className="feature-grid">
-            <FeatureCard
-              icon="◎"
-              title="Exercices ciblés"
-              description="Travaille exactement les notions dont tu as besoin avec des exercices organisés par matière et chapitre."
-            />
-
-            <FeatureCard
-              icon="↗"
-              title="Progression claire"
-              description="Visualise tes résultats, identifie tes points faibles et vois concrètement tes progrès semaine après semaine."
-            />
-
-            <FeatureCard
-              icon="✦"
-              title="Pensé pour le Bac marocain"
-              description="Une expérience construite autour du programme et des habitudes de travail des lycéens marocains."
-            />
-          </div>
+        <section className="landing-section" id="fonctionnement">
+          <div className="landing-heading"><span className="landing-eyebrow">Le produit</span><h2>Tout ce qu’il faut pour réviser sérieusement.</h2><p>Pas un chatbot avec un joli logo. Un espace de travail construit autour de ton programme.</p></div>
+          <div className="landing-feature-grid">{features.map(({ icon: Icon, title, text }) => <article key={title} className="landing-feature"><div><Icon size={20} /></div><h3>{title}</h3><p>{text}</p></article>)}</div>
         </section>
 
-        <section className="landing-section landing-section--soft">
-          <div className="container">
-            <div className="cta-panel">
-              <div>
-                <span className="section-eyebrow">
-                  Prêt à commencer ?
-                </span>
-
-                <h2 className="section-title">
-                  Passe directement à l'exercice.
-                </h2>
-
-                <p className="section-description">
-                  Choisis une matière, sélectionne un
-                  chapitre et commence à travailler.
-                </p>
-              </div>
-
-              <Link
-                to="/exercises"
-                className="btn btn-primary btn-lg"
-              >
-                Voir les exercices
-              </Link>
-            </div>
-          </div>
+        <section className="landing-section landing-section--soft" id="parcours">
+          <div className="landing-heading"><span className="landing-eyebrow">Ton parcours</span><h2>Choisis ta série. Le contenu suit.</h2><p>Le parcours actif contrôle les matières, les leçons et les exercices affichés.</p></div>
+          <div className="landing-track-grid">{tracks.map(([code, name, subjects]) => <article className="landing-track" key={code}><div className="landing-track__top"><span>{code}</span><BookOpen size={17} /></div><h3>{name}</h3><p>{subjects}</p><Link to="/connexion">Choisir ce parcours <ArrowRight size={15} /></Link></article>)}</div>
         </section>
+
+        <section className="landing-section" id="mission">
+          <div className="helios-panel"><div className="helios-panel__icon"><FlaskConical size={25} /></div><div><span className="landing-eyebrow">Mission Helios</span><h2>300 exercices de maths, en 15 jours.</h2><p>Une progression narrative : chaque journée correspond à un chapitre, avec 20 exercices et une synthèse finale.</p></div><Link to="/connexion" className="landing-button landing-button--light">Explorer Helios <ArrowRight size={16} /></Link></div>
+        </section>
+
+        <section className="landing-bottom-cta"><div><span className="landing-eyebrow">Prêt à travailler ?</span><h2>Commence par une leçon. Termine par un exercice.</h2></div><Link to="/connexion" className="landing-button landing-button--primary">Entrer dans MentionMax <ArrowRight size={17} /></Link></section>
       </main>
+
+      <footer className="landing-footer"><span>© MentionMax</span><span>Préparation 2BAC · Maroc</span></footer>
     </div>
   );
 }
