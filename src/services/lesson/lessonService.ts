@@ -1,5 +1,6 @@
 import type { LessonDocument, SubjectId } from "../../types/academic";
 import { mathLessons } from "./mathLessons";
+import { pcLessons } from "./pcLessons";
 
 const lessons: LessonDocument[] = [
   {
@@ -21,6 +22,7 @@ const lessons: LessonDocument[] = [
     ],
   },
   ...mathLessons,
+  ...pcLessons,
 ];
 
 export const lessonService = {
