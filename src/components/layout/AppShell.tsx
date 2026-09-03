@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CommandPalette } from "../command/CommandPalette";
 import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
 import "../../styles/navigation-overrides.css";
+import "../../styles/navigation-rebuild.css";
 
 const primaryNav = [
   { label: "Accueil", to: "/accueil", icon: "home" as const },
@@ -66,6 +67,7 @@ export function AppShell() {
               to={item.to}
               end={item.to === "/accueil"}
               className={({ isActive }) => `sidebar-item${itemIsActive(item.to, isActive) ? " active" : ""}`}
+              title={item.label}
             >
               <Icon name={item.icon} size={19} />
               <span>{item.label}</span>
