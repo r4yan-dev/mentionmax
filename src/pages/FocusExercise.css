@@ -1,0 +1,58 @@
+.helios-runner-page{min-height:100%;padding:32px 36px 48px;background:var(--surface-page,#f7fbfa)}
+.helios-runner-shell{max-width:1120px;margin:0 auto}
+.helios-runner-header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;margin-bottom:22px}
+.runner-back{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--text-secondary,#52706d);font:inherit;font-weight:700;cursor:pointer;padding:8px 0}
+.helios-runner-progress{min-width:0}
+.helios-runner-progress__top{display:flex;justify-content:space-between;gap:16px;margin-bottom:8px;color:var(--text-secondary,#52706d);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.helios-runner-progress__top strong{color:var(--text-primary,#173f3d);letter-spacing:0;text-transform:none}
+.helios-progress-track{height:7px;overflow:hidden;border-radius:999px;background:#dcebe8}
+.helios-progress-track div{height:100%;border-radius:999px;background:#0fa3a3;transition:width .25s ease}
+.helios-mission-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;margin-bottom:20px;padding:18px 20px;border:1px solid #cfe6e2;border-radius:18px;background:linear-gradient(120deg,#edf9f7,#f9fcfb);box-shadow:0 8px 24px rgba(7,59,58,.05)}
+.helios-mission-banner__icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#d9f3ef;color:#0f8787}
+.helios-mission-banner .section-eyebrow{display:block;margin-bottom:3px}
+.helios-mission-banner strong{display:block;color:#174c49;font-size:16px}
+.helios-mission-banner__chapter{min-width:190px;padding-left:18px;border-left:1px solid #cfe6e2}
+.helios-mission-banner__chapter span{display:block;color:#77928f;font-size:10px;font-weight:800;letter-spacing:.08em}
+.helios-mission-banner__chapter strong{font-size:14px;margin-top:3px}
+.helios-question-card{padding:32px}
+.helios-question-card h1{max-width:840px;margin:8px 0 22px;font-size:clamp(28px,4vw,42px);line-height:1.06;color:#153f3c}
+.helios-question-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#718b88;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.helios-question-meta span{display:inline-flex;align-items:center;gap:7px}
+.helios-context-box{padding:18px 20px;border:1px solid #dceae8;border-radius:15px;background:#fbfefd;color:#476561;line-height:1.7}
+.helios-context-box .section-eyebrow{display:block;margin-bottom:7px}
+.helios-objective-box{display:flex;align-items:flex-start;gap:12px;margin-top:14px;padding:15px 18px;border-radius:14px;background:#eef8f6;color:#0c7575}
+.helios-objective-box div{display:flex;flex-direction:column;gap:3px}
+.helios-objective-box span{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5c8883}
+.helios-objective-box strong{color:#174c49}
+.helios-parts{margin-top:28px}
+.helios-parts__header{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}
+.helios-parts__header h2{margin:5px 0 0;font-size:21px;color:#173f3d}
+.helios-parts__header>span{color:#78908e;font-size:12px;font-weight:700}
+.helios-part{display:grid;grid-template-columns:38px 1fr;gap:14px;padding:18px 0;border-top:1px solid #e4eeec}
+.helios-part__number{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#e8f5f2;color:#0b7f80;font-weight:900;text-transform:lowercase}
+.helios-part__content{min-width:0;color:#274d4a;line-height:1.65}
+.helios-part textarea{display:block;width:100%;margin-top:13px;min-height:105px;resize:vertical;box-sizing:border-box;border:1px solid #d6e5e2;border-radius:12px;padding:13px 14px;background:#fff;color:#193f3d;font:inherit;line-height:1.5;outline:none;transition:border-color .15s,box-shadow .15s}
+.helios-part textarea:focus{border-color:#0fa3a3;box-shadow:0 0 0 3px rgba(15,163,163,.1)}
+.helios-part textarea:disabled{background:#f5f9f8;color:#6c8581}
+.helios-work-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:22px;margin-top:8px;border-top:1px solid #e4eeec}
+.helios-animation-note{display:flex;gap:9px;align-items:flex-start;max-width:60%;color:#718985;font-size:12px;line-height:1.5}
+.helios-animation-note svg{flex:0 0 auto;color:#0fa3a3;margin-top:1px}
+.helios-work-footer .btn:disabled{opacity:.45;cursor:not-allowed}
+.helios-runner-tools{margin-top:16px}
+.runner-tool-button{display:inline-flex;align-items:center;gap:8px;padding:8px 0;border:0;background:transparent;color:#0a7d7d;font:inherit;font-weight:800;cursor:pointer}
+.helios-hint-box{margin-top:12px;padding:14px 16px;border:1px dashed #b9dcd6;border-radius:13px;background:#f3fbf9;color:#456560;font-size:13px;line-height:1.6}
+.helios-hint-box strong{color:#184f4c}
+.helios-hint-box p{margin:4px 0 0}
+.helios-correction-panel{display:grid;grid-template-columns:auto 1fr;gap:14px;margin-top:22px;padding:20px;border:1px solid #cce5d9;border-radius:15px;background:#f1faf5}
+.helios-correction-panel__icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#daf2e5;color:#21814d}
+.helios-correction-panel h2{margin:5px 0 8px;font-size:20px;color:#174c3a}
+.helios-correction-panel p{margin:0;color:#45635a;line-height:1.7}
+.helios-runner-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;margin-top:18px}
+.runner-day-status{color:#78908d;font-size:12px;font-weight:900;text-align:center;letter-spacing:.05em}
+.runner-nav-button{display:flex;align-items:center;gap:10px;min-width:0;padding:12px 14px;border:1px solid #d8e8e5;border-radius:13px;background:#fff;color:#335855;text-align:left;cursor:pointer}
+.runner-nav-button--next{justify-content:flex-end;text-align:right}
+.runner-nav-button:disabled{opacity:.4;cursor:not-allowed}
+.runner-nav-button span{display:flex;flex-direction:column;min-width:0}
+.runner-nav-button small{color:#839996;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+.runner-nav-button strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px;font-size:12px;color:#28504d}
+@media(max-width:800px){.helios-runner-page{padding:20px 14px 36px}.helios-runner-header{grid-template-columns:1fr;gap:10px}.helios-runner-header>.exercise-difficulty{justify-self:start}.helios-mission-banner{grid-template-columns:auto 1fr}.helios-mission-banner__chapter{grid-column:1/-1;padding:12px 0 0;border-left:0;border-top:1px solid #cfe6e2}.helios-question-card{padding:22px}.helios-work-footer{align-items:stretch;flex-direction:column}.helios-animation-note{max-width:none}.helios-runner-nav{grid-template-columns:1fr 1fr}.runner-day-status{grid-column:1/-1;grid-row:1}.runner-nav-button--next{grid-column:2}.runner-nav-button strong{max-width:150px}}
