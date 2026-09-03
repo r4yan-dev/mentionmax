@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, GraduationCap, Lightbulb, PenLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, GraduationCap, PenLine } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useAccount } from "../context/AccountContext";
 import { getTrackSubjects, subjects as subjectCatalog } from "../data/curriculum/tracks";
@@ -28,13 +28,9 @@ export default function Lessons() {
   const active = lessonId ? lessons.find((lesson) => lesson.id === lessonId) : undefined;
   const label = subject ? subjectCatalog[subject].name : "Matière";
 
-  if (!valid) {
-    return <main className="lessons-page"><Header path={path} /><section className="lessons-empty"><div className="lessons-empty__icon"><BookOpen size={24} /></div><span className="lessons-eyebrow">PARCOURS ACTIF</span><h1>Cette matière n’est pas dans ton programme.</h1><p>{path === "SMB" ? "La SVT n’est pas proposée en 2BAC Sciences Mathématiques B." : "Choisis une matière disponible pour ouvrir ses cours."}</p><Link to="/subjects" className="lessons-button lessons-button--primary">Voir les matières <ArrowRight size={16} /></Link></section></main>;
-  }
+  if (!valid) return <main className="lessons-page"><Header path={path} /><section className="lessons-empty"><div className="lessons-empty__icon"><BookOpen size={24} /></div><span className="lessons-eyebrow">PARCOURS ACTIF</span><h1>Cette matière n’est pas dans ton programme.</h1><p>{path === "SMB" ? "La SVT n’est pas proposée en 2BAC Sciences Mathématiques B." : "Choisis une matière disponible pour ouvrir ses cours."}</p><Link to="/subjects" className="lessons-button lessons-button--primary">Voir les matières <ArrowRight size={16} /></Link></section></main>;
 
-  if (!active) {
-    return <main className="lessons-page"><Header path={path} /><header className="lessons-title"><div><Link to="/subjects" className="lessons-back"><ArrowLeft size={15} /> Matières</Link><span className="lessons-eyebrow">{label} · {lessons.length} LEÇONS</span><h1>Comprendre avant de pratiquer.</h1><p>Chaque leçon contient l’essentiel du cours, une méthode Bac, les pièges fréquents et un récapitulatif.</p></div><div className="lessons-title__badge"><GraduationCap size={18} /><span>2BAC</span><strong>{pathLabels[path]}</strong></div></header><section className="lessons-grid">{lessons.map((lesson, index) => <Link key={lesson.id} to={`/lecons/${subject}/${lesson.id}`} className="lesson-card"><div className="lesson-card__top"><span className="lesson-number">{String(index + 1).padStart(2,"0")}</span><span className="lesson-status"><CheckCircle2 size={13} /> Prêt</span></div><span className="lessons-eyebrow">{lesson.chapter}</span><h2>{lesson.title}</h2><p>{lesson.blocks.find((block) => block.type === "intro")?.text ?? "Cours structuré et adapté au programme 2BAC."}</p><div className="lesson-card__footer"><span>Voir le cours</span><ArrowRight size={16} /></div></Link>)}</section></main>;
-  }
+  if (!active) return <main className="lessons-page"><Header path={path} /><header className="lessons-title"><div><Link to="/subjects" className="lessons-back"><ArrowLeft size={15} /> Matières</Link><span className="lessons-eyebrow">{label} · {lessons.length} LEÇONS</span><h1>Comprendre avant de pratiquer.</h1><p>Chaque leçon contient l’essentiel du cours, une méthode Bac, les pièges fréquents et un récapitulatif.</p></div><div className="lessons-title__badge"><GraduationCap size={18} /><span>2BAC</span><strong>{pathLabels[path]}</strong></div></header><section className="lessons-grid">{lessons.map((lesson, index) => <Link key={lesson.id} to={`/lecons/${subject}/${lesson.id}`} className="lesson-card"><div className="lesson-card__top"><span className="lesson-number">{String(index + 1).padStart(2,"0")}</span><span className="lesson-status"><CheckCircle2 size={13} /> Prêt</span></div><span className="lessons-eyebrow">{lesson.chapter}</span><h2>{lesson.title}</h2><p>{lesson.blocks.find((block) => block.type === "intro")?.text ?? "Cours structuré et adapté au programme 2BAC."}</p><div className="lesson-card__footer"><span>Voir le cours</span><ArrowRight size={16} /></div></Link>)}</section></main>;
 
   const index = lessons.findIndex((lesson) => lesson.id === active.id);
   const previous = lessons[index - 1];
