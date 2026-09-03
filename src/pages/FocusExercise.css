@@ -16,8 +16,9 @@
 .helios-mission-banner__chapter strong{font-size:14px;margin-top:3px}
 .helios-question-card{padding:32px}
 .helios-question-card h1{max-width:840px;margin:8px 0 22px;font-size:clamp(28px,4vw,42px);line-height:1.06;color:#153f3c}
-.helios-question-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#718b88;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.helios-question-meta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;color:#718b88;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .helios-question-meta span{display:inline-flex;align-items:center;gap:7px}
+.helios-complete-badge{padding:6px 9px;border-radius:999px;background:#e8f7ee;color:#25764a;letter-spacing:0;text-transform:none}
 .helios-context-box{padding:18px 20px;border:1px solid #dceae8;border-radius:15px;background:#fbfefd;color:#476561;line-height:1.7}
 .helios-context-box .section-eyebrow{display:block;margin-bottom:7px}
 .helios-objective-box{display:flex;align-items:flex-start;gap:12px;margin-top:14px;padding:15px 18px;border-radius:14px;background:#eef8f6;color:#0c7575}
@@ -38,11 +39,17 @@
 .helios-animation-note{display:flex;gap:9px;align-items:flex-start;max-width:60%;color:#718985;font-size:12px;line-height:1.5}
 .helios-animation-note svg{flex:0 0 auto;color:#0fa3a3;margin-top:1px}
 .helios-work-footer .btn:disabled{opacity:.45;cursor:not-allowed}
-.helios-runner-tools{margin-top:16px}
+.helios-runner-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
 .runner-tool-button{display:inline-flex;align-items:center;gap:8px;padding:8px 0;border:0;background:transparent;color:#0a7d7d;font:inherit;font-weight:800;cursor:pointer}
+.helios-saving-status{display:inline-flex;align-items:center;gap:6px;color:#788f8c;font-size:12px;font-weight:700}
+.helios-saving-status--done{color:#28784d}
+.helios-loading-state{display:flex;align-items:center;gap:10px;margin-top:28px;padding:18px;border-radius:14px;background:#f2f8f7;color:#577572;font-size:13px;font-weight:700}
+.helios-spin{animation:helios-spin .8s linear infinite}
+@keyframes helios-spin{to{transform:rotate(360deg)}}
 .helios-hint-box{margin-top:12px;padding:14px 16px;border:1px dashed #b9dcd6;border-radius:13px;background:#f3fbf9;color:#456560;font-size:13px;line-height:1.6}
 .helios-hint-box strong{color:#184f4c}
 .helios-hint-box p{margin:4px 0 0}
+.helios-save-error{margin-top:12px;padding:11px 14px;border:1px solid #efd6d6;border-radius:12px;background:#fff7f7;color:#934c4c;font-size:12px;font-weight:700}
 .helios-correction-panel{display:grid;grid-template-columns:auto 1fr;gap:14px;margin-top:22px;padding:20px;border:1px solid #cce5d9;border-radius:15px;background:#f1faf5}
 .helios-correction-panel__icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#daf2e5;color:#21814d}
 .helios-correction-panel h2{margin:5px 0 8px;font-size:20px;color:#174c3a}
