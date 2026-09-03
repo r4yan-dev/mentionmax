@@ -1,9 +1,11 @@
+import { baseContent } from "../../data/mock/baseContent";
 import { basePCExercises, basePCFlashcards, basePCQuizzes, basePCRevisionSheets } from "../../data/mock/basePCContent";
 import { basePCHardExercises } from "../../data/mock/basePCHardExercises";
 import { baseSMMathExercises } from "../../data/mock/baseSMMathExercises";
 import { baseSMPCExercises } from "../../data/mock/baseSMPCExercises";
 import { base2BacHumanExercises } from "../../data/mock/base2BacHumanExercises";
-import { baseContent } from "../../data/mock/baseContent";
+import { extended2BacExercises } from "../../data/mock/base2BacHumanExercisesExtended";
+import { base2BacSPMathExercises } from "../../data/mock/base2BacSPMathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
@@ -14,6 +16,8 @@ const allBaseExercises: Exercise[] = [
   ...baseSMMathExercises,
   ...baseSMPCExercises,
   ...base2BacHumanExercises,
+  ...extended2BacExercises,
+  ...base2BacSPMathExercises,
 ];
 const allBaseQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
 const allBaseRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
@@ -30,19 +34,15 @@ export const contentCatalogService = {
   getBaseFlashcards(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Flashcard[] {
     return allBaseFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
-
   getBaseExercises(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Exercise[] {
     return allBaseExercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
-
   getBaseQuizzes(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): Quiz[] {
     return allBaseQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
-
   getBaseRevisionSheets(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string): RevisionSheet[] {
     return allBaseRevisionSheets.filter(matchesTarget(trackId, subjectId, chapter, topic));
   },
-
   getCounts(trackId: TrackId, subjectId: SubjectId) {
     return {
       flashcards: this.getBaseFlashcards(trackId, subjectId).length,
