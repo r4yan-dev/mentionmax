@@ -28,15 +28,12 @@ import FocusGroupDetail from "./pages/FocusGroupDetail";
 import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } from "./pages/FocusGroupTabs";
 import "./styles/foundation.css";
 
-function LoadingScreen() {
-  return <div className="auth-page"><div className="auth-loading">Chargement...</div></div>;
-}
+function LoadingScreen() { return <div className="auth-page"><div className="auth-loading">Chargement...</div></div>; }
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/connexion" replace />;
-
   return (
     <AccountProvider>
       <FocusProvider>
@@ -89,30 +86,9 @@ function ProtectedFocus() {
   const { user, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/connexion" replace />;
-  return (
-    <AccountProvider>
-      <FocusProvider>
-        <Routes>
-          <Route element={<FocusMode />}>
-            <Route path="/pratique/:matiere/:chapitre/:exerciseId" element={<FocusExercise />} />
-          </Route>
-        </Routes>
-      </FocusProvider>
-    </AccountProvider>
-  );
+  return <AccountProvider><FocusProvider><Routes><Route element={<FocusMode />}><Route path="/pratique/:matiere/:chapitre/:exerciseId" element={<FocusExercise />} /></Route></Routes></FocusProvider></AccountProvider>;
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/connexion" element={<Auth />} />
-          <Route path="/pratique/:matiere/:chapitre/:exerciseId" element={<ProtectedFocus />} />
-          <Route path="*" element={<ProtectedApp />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
-  );
+  return <AuthProvider><BrowserRouter><Routes><Route path="/" element={<Landing />} /><Route path="/connexion" element={<Auth />} /><Route path="/pratique/:matiere/:chapitre/:exerciseId" element={<ProtectedFocus />} /><Route path="*" element={<ProtectedApp />} /></Routes></BrowserRouter></AuthProvider>;
 }
