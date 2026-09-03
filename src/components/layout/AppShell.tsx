@@ -4,6 +4,7 @@ import { Icon } from "../navigation/Icon";
 import { useAuth } from "../../context/AuthContext";
 import { CommandPalette } from "../command/CommandPalette";
 import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
+import "../../styles/navigation-overrides.css";
 
 const primaryNav = [
   { label: "Accueil", to: "/accueil", icon: "home" as const },
