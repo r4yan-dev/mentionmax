@@ -45,7 +45,8 @@ function ProtectedApp() {
             <Route path="/accueil" element={<Home />} />
             <Route path="/subjects" element={<Subjects />} />
             <Route path="/subjects/:subjectId" element={<Subjects />} />
-            <Route path="/lecons" element={<Subjects />} />
+            <Route path="/lecons" element={<Navigate to="/subjects" replace />} />
+            <Route path="/lecons/:subjectId" element={<Lessons />} />
             <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
             <Route path="/exercices" element={<Exercises />} />
             <Route path="/exercices/:exerciseId" element={<Exercises />} />
