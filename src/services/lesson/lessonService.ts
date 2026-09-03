@@ -1,7 +1,13 @@
 import type { LessonDocument, SubjectId, TrackId } from "../../types/academic";
 import { secondBacLessons } from "../../data/curriculum/secondBac";
+import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
 
-const lessons: LessonDocument[] = secondBacLessons;
+const lessons: LessonDocument[] = [
+  ...secondBacLessons,
+  ...secondBacSvtLessons,
+  ...secondBacEnglishLessons,
+  ...secondBacPhilosophyLessons,
+];
 
 export const lessonService = {
   list(subjectId?: SubjectId, trackId?: TrackId): LessonDocument[] {
