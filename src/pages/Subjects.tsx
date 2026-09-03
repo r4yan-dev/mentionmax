@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, FileText, Plus, Pin, BookOpen } from 'lucide-react';
+import { ArrowLeft, ArrowRight, FileText, Plus, Pin } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SubjectIcon, type SubjectType } from '../components/ui/SubjectIcon';
@@ -52,7 +52,7 @@ export default function Subjects() {
   }
 
   const notesByChapter = useMemo(() => new Map(chapters.map((chapter) => [chapter.id, recentNotes.filter((note) => note.chapter_id === chapter.id).length])), [chapters, recentNotes]);
-  const lessons = useMemo(() => detail ? lessonService.list(mapLessonSubject(detail.slug) ?? undefined) : [], [detail]);
+  const lessons = useMemo(() => { const subject = detail ? mapLessonSubject(detail.slug) : null; return subject ? lessonService.list(subject) : []; }, [detail]);
 
   if (subjectId) {
     const subjectFallback = subjects.find((subject) => subject.slug === subjectId);
