@@ -1,18 +1,32 @@
-import { ArrowRight, BookOpen, CheckCircle2, Clock3, FlaskConical, Flame, GraduationCap, Sparkles, Target, Trophy } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  Clock3,
+  FileText,
+  Flame,
+  FlaskConical,
+  GraduationCap,
+  Play,
+  Sparkles,
+  Target,
+  Trophy,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAccount } from "../context/AccountContext";
+import { useAuth } from "../context/AuthContext";
 import { getTrackSubjects } from "../data/curriculum/tracks";
 import { pathLabels, resolveUserPath } from "../data/curriculum/secondBac";
 import { helios300MathExercises } from "../data/mock/helios300MathExercises";
-import { useAuth } from "../context/AuthContext";
 import "./Home.css";
 
-const subjectMeta: Record<string, { short: string; tone: string }> = {
-  maths: { short: "MATHS", tone: "home-subject--teal" },
-  "physique-chimie": { short: "PC", tone: "home-subject--green" },
-  svt: { short: "SVT", tone: "home-subject--olive" },
-  anglais: { short: "EN", tone: "home-subject--blue" },
-  philosophie: { short: "PHILO", tone: "home-subject--burgundy" },
+const subjectMeta: Record<string, { code: string; className: string; icon: string }> = {
+  maths: { code: "MA", className: "home-subject--maths", icon: "∑" },
+  "physique-chimie": { code: "PC", className: "home-subject--pc", icon: "φ" },
+  svt: { code: "SV", className: "home-subject--svt", icon: "⌁" },
+  anglais: { code: "EN", className: "home-subject--english", icon: "A" },
+  philosophie: { code: "PH", className: "home-subject--philo", icon: "π" },
 };
 
 function daysUntilBac() {
@@ -20,50 +34,131 @@ function daysUntilBac() {
   return Math.max(0, Math.ceil((target - Date.now()) / 86_400_000));
 }
 
+function pathId(path: string) {
+  return path === "SP" ? "SP" : path === "SMA" ? "SMA" : "SMB";
+}
+
 export default function Home() {
   const { user } = useAuth();
   const { schoolPreferences, profile } = useAccount();
   const path = resolveUserPath(schoolPreferences?.track ?? null, schoolPreferences?.section ?? null);
+  const trackId = pathId(path);
   const subjects = getTrackSubjects(path);
   const name = profile?.display_name?.trim() || user?.email?.split("@")[0] || "Étudiant";
-  const heliosCount = helios300MathExercises.filter((exercise) => exercise.target.trackIds.includes(path === "SP" ? "SP" : path === "SMA" ? "SMA" : "SMB")).length;
+  const heliosCount = helios300MathExercises.filter((exercise) => exercise.target.trackIds.includes(trackId)).length;
+  const activeSubjects = subjects.length;
 
   return (
     <main className="home-page">
-      <header className="home-header">
-        <div>
-          <span className="home-eyebrow">ESPACE DE TRAVAIL · 2BAC</span>
-          <h1>Bonjour, {name} <span>👋</span></h1>
-          <p>{pathLabels[path]} · Voilà ce qui mérite ton attention aujourd’hui.</p>
-        </div>
-        <div className="home-header__actions">
-          <div className="home-countdown"><Clock3 size={17} /><strong>{daysUntilBac()}</strong><span>jours avant le BAC</span></div>
-          <Link to="/preferences" className="home-profile-link">Mon parcours</Link>
-        </div>
-      </header>
+      <div className="home-wrap">
+        <header className="home-top">
+          <div>
+            <div className="home-kicker"><span className="home-kicker-dot" /> ESPACE ÉTUDIANT · 2BAC</div>
+            <h1>Bonjour, {name.split(" ")[0]}.</h1>
+            <p>{pathLabels[path]} <span className="home-top-separator">·</span> Ton espace pour apprendre, t’entraîner et avancer sans te perdre.</p>
+          </div>
+          <div className="home-top-meta">
+            <div className="home-countdown">
+              <Clock3 size={17} />
+              <div><strong>{daysUntilBac()}</strong><span>jours avant le BAC</span></div>
+            </div>
+            <Link to="/preferences" className="home-path-button">{pathLabels[path]}</Link>
+          </div>
+        </header>
 
-      <section className="home-hero-grid">
-        <article className="home-card home-focus-card">
-          <div className="home-card__top"><span><Target size={15} /> AUJOURD’HUI</span><span>0 min planifiées</span></div>
-          <div className="home-focus-card__body"><div className="home-focus-icon"><Sparkles size={22} /></div><div><span className="home-eyebrow">REPRISE RAPIDE</span><h2>Continue directement dans Pratique.</h2><p>Une session courte vaut mieux qu’une heure à choisir ce que tu devrais faire.</p><Link to="/focus" className="home-primary">Commencer une session <ArrowRight size={16} /></Link></div></div>
-        </article>
-        <article className="home-card home-score-card"><div className="home-score-ring"><span>2BAC</span><strong>{path === "SMB" ? "SM B" : path === "SMA" ? "SM A" : "SPC"}</strong></div><div><span className="home-eyebrow">TON PARCOURS</span><h2>{pathLabels[path]}</h2><p>{subjects.length} matières actives</p></div></article>
-      </section>
+        <section className="home-main-grid">
+          <article className="home-card home-today">
+            <div className="home-card-heading">
+              <div><span className="home-overline">À FAIRE MAINTENANT</span><h2>Ta prochaine session</h2></div>
+              <span className="home-status-pill"><span /> prête</span>
+            </div>
+            <div className="home-today-content">
+              <div className="home-session-icon"><Target size={24} /></div>
+              <div className="home-session-copy">
+                <span className="home-session-label">SESSION LIBRE</span>
+                <h3>Commence par 20 minutes de pratique.</h3>
+                <p>Choisis une matière, travaille un chapitre et garde l’IA à portée de main quand ça bloque.</p>
+                <div className="home-session-actions">
+                  <Link to="/focus" className="home-primary-button"><Play size={15} fill="currentColor" /> Commencer</Link>
+                  <Link to="/exercices" className="home-text-button">Choisir un exercice <ArrowRight size={14} /></Link>
+                </div>
+              </div>
+            </div>
+            <div className="home-session-footer">
+              <span><Clock3 size={14} /> 20–30 min</span>
+              <span><Brain size={14} /> tutorat IA disponible</span>
+              <span><Sparkles size={14} /> niveau adaptatif</span>
+            </div>
+          </article>
 
-      <section className="home-section">
-        <div className="home-section__heading"><div><span className="home-eyebrow">TES MATIÈRES</span><h2>Travaille au bon endroit.</h2></div><Link to="/subjects">Voir tout <ArrowRight size={14} /></Link></div>
-        <div className="home-subject-grid">{subjects.map((subject) => { const meta = subjectMeta[subject.id] ?? { short: subject.name.slice(0, 3).toUpperCase(), tone: "home-subject--teal" }; return <Link to={`/lecons/${subject.id}`} className={`home-subject ${meta.tone}`} key={subject.id}><div className="home-subject__top"><span>{meta.short}</span><BookOpen size={17} /></div><h3>{subject.name}</h3><p>Cours, méthodes et entraînement du programme.</p><span className="home-subject__open">Ouvrir <ArrowRight size={14} /></span></Link>; })}</div>
-      </section>
+          <aside className="home-card home-overview">
+            <div className="home-card-heading"><div><span className="home-overline">TON PARCOURS</span><h2>Vue d’ensemble</h2></div></div>
+            <div className="home-overview-path">
+              <div className="home-path-code">{path === "SP" ? "SPC" : path === "SMA" ? "SM A" : "SM B"}</div>
+              <div><strong>{pathLabels[path]}</strong><span>{activeSubjects} matières actives</span></div>
+            </div>
+            <div className="home-overview-divider" />
+            <div className="home-overview-stat"><div><strong>{daysUntilBac}</strong><span>jours restants</span></div><Clock3 size={17} /></div>
+            <div className="home-overview-stat"><div><strong>0</strong><span>sessions enregistrées</span></div><Flame size={17} /></div>
+            <Link to="/preferences" className="home-outline-button">Modifier mon parcours <ArrowRight size={14} /></Link>
+          </aside>
+        </section>
 
-      <section className="home-section">
-        <div className="home-section__heading"><div><span className="home-eyebrow">MISSION HELIOS</span><h2>Une progression de 15 jours.</h2></div><Link to="/exercices?collection=helios&subject=maths">Explorer <ArrowRight size={14} /></Link></div>
-        <Link to="/exercices?collection=helios&subject=maths" className="home-helios"><div className="home-helios__icon"><FlaskConical size={24} /></div><div><strong>300 exercices de mathématiques</strong><p>20 exercices par chapitre, difficulté progressive et synthèse de fin de journée.</p></div><div className="home-helios__stats"><span><CheckCircle2 size={15} /> {heliosCount || 300} exercices</span><span><Trophy size={15} /> +XP</span></div><ArrowRight size={20} /></Link>
-      </section>
+        <section className="home-section">
+          <div className="home-section-head">
+            <div><span className="home-overline">TES MATIÈRES</span><h2>Choisis ton terrain de travail.</h2></div>
+            <Link to="/subjects" className="home-head-link">Toutes les matières <ArrowRight size={14} /></Link>
+          </div>
+          <div className="home-subjects-grid">
+            {subjects.map((subject) => {
+              const meta = subjectMeta[subject.id] ?? { code: subject.name.slice(0, 2).toUpperCase(), className: "home-subject--maths", icon: "•" };
+              return (
+                <Link to={`/lecons/${subject.id}`} className={`home-subject ${meta.className}`} key={subject.id}>
+                  <div className="home-subject-top"><span className="home-subject-code">{meta.code}</span><span className="home-subject-symbol">{meta.icon}</span></div>
+                  <h3>{subject.name}</h3>
+                  <p>Cours, méthodes, exercices et entraînement.</p>
+                  <span className="home-subject-open">Ouvrir <ArrowRight size={13} /></span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
 
-      <section className="home-bottom-grid">
-        <article className="home-card home-progress-card"><div className="home-section__heading"><div><span className="home-eyebrow">PROGRESSION</span><h2>Construis ta régularité.</h2></div><Flame size={20} /></div><div className="home-progress-big"><strong>0%</strong><span>aucune session enregistrée ici pour le moment</span></div><div className="home-progress-track"><span /></div><Link to="/focus" className="home-secondary">Lancer une session <ArrowRight size={15} /></Link></article>
-        <article className="home-card home-exam-card"><GraduationCap size={23} /><span className="home-eyebrow">ANNEXE BAC</span><h2>Annales, examens et tests.</h2><p>Entraîne-toi sur des formats plus proches de l’épreuve lorsque les fondamentaux sont solides.</p><Link to="/exams" className="home-secondary">Voir les examens <ArrowRight size={15} /></Link></article>
-      </section>
+        <section className="home-lower-grid">
+          <article className="home-card home-helios-card">
+            <div className="home-helios-top"><span className="home-overline">MISSION HELIOS</span><span className="home-helios-badge">15 JOURS</span></div>
+            <div className="home-helios-title"><div className="home-helios-icon"><FlaskConical size={23} /></div><div><h2>300 exercices de maths.</h2><p>Une progression construite pour travailler sérieusement, pas pour collectionner des badges.</p></div></div>
+            <div className="home-helios-progress"><div className="home-helios-progress-head"><span>Progression</span><strong>0 / 300</strong></div><div className="home-progress-track"><span style={{ width: "0%" }} /></div></div>
+            <div className="home-helios-footer"><span><CheckCircle2 size={14} /> {heliosCount || 300} exercices disponibles</span><Link to="/exercices?collection=helios&subject=maths">Entrer dans la mission <ArrowRight size={14} /></Link></div>
+          </article>
+
+          <article className="home-card home-tools-card">
+            <div className="home-card-heading"><div><span className="home-overline">OUTILS</span><h2>Tout ce dont tu as besoin.</h2></div></div>
+            <div className="home-tools-list">
+              <Link to="/ai-help" className="home-tool-row"><span className="home-tool-icon home-tool-icon--ai"><Sparkles size={16} /></span><span><strong>Assistant IA</strong><small>Explique, corrige et débloque un exercice.</small></span><ArrowRight size={14} /></Link>
+              <Link to="/exams" className="home-tool-row"><span className="home-tool-icon"><FileText size={16} /></span><span><strong>Examens & annales</strong><small>Travaille sur des formats proches de l’épreuve.</small></span><ArrowRight size={14} /></Link>
+              <Link to="/focus" className="home-tool-row"><span className="home-tool-icon"><Flame size={16} /></span><span><strong>Focus</strong><small>Une session sans distraction, centrée sur le travail.</small></span><ArrowRight size={14} /></Link>
+            </div>
+          </article>
+        </section>
+
+        <section className="home-bottom-grid">
+          <article className="home-card home-progress-card">
+            <div className="home-card-heading"><div><span className="home-overline">PROGRESSION</span><h2>Tu pars de zéro ici.</h2></div><Trophy size={19} /></div>
+            <div className="home-big-progress"><strong>0%</strong><div><span>progression enregistrée</span><small>Commence une session pour alimenter ton historique.</small></div></div>
+            <div className="home-progress-track home-progress-track--large"><span style={{ width: "0%" }} /></div>
+            <Link to="/focus" className="home-bottom-link">Démarrer ma première session <ArrowRight size={14} /></Link>
+          </article>
+
+          <article className="home-card home-exam-card">
+            <div className="home-exam-mark"><GraduationCap size={20} /></div>
+            <span className="home-overline">OBJECTIF FINAL</span>
+            <h2>Arriver au BAC avec des bases solides.</h2>
+            <p>Apprends le cours, pratique régulièrement, puis passe aux annales quand le chapitre est maîtrisé.</p>
+            <Link to="/exams" className="home-bottom-link">Voir les examens <ArrowRight size={14} /></Link>
+          </article>
+        </section>
+      </div>
     </main>
   );
 }
