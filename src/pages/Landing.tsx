@@ -1,114 +1,22 @@
-import { ArrowRight, BarChart3, BookOpen, CheckCircle2, Clock3, Flame, GraduationCap, LayoutDashboard, Sparkles, Target, Trophy } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles, Target, BarChart3, GraduationCap, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import MentionMaxLogo from "../assets/brand/mentionmax-logo.svg";
 import "./Landing.css";
 
-const tracks = [
-  { code: "SPC", name: "Sciences Physiques", subjects: "Maths · Physique-Chimie · SVT · Philo · Anglais" },
-  { code: "SM A", name: "Sciences Mathématiques A", subjects: "Maths · Physique-Chimie · Philo · Anglais" },
-  { code: "SM B", name: "Sciences Mathématiques B", subjects: "Maths · Physique-Chimie · Philo · Anglais" },
-];
-
-const subjects = [
-  ["01", "Mathématiques", "Cours, méthodes, exercices"],
-  ["02", "Physique-Chimie", "Comprendre puis appliquer"],
-  ["03", "SVT", "Notions et entraînement"],
-  ["04", "Philosophie", "Notions, auteurs, dissertations"],
-  ["05", "Anglais", "Compréhension et expression"],
-];
-
 export default function Landing() {
-  return (
-    <div className="landing-new">
-      <header className="landing-new__nav">
-        <Link to="/" className="landing-new__brand" aria-label="MentionMax">
-          <span className="landing-new__mark">M</span>
-          <span>MentionMax</span>
-        </Link>
-        <nav>
-          <a href="#method">Méthode</a>
-          <a href="#parcours">Parcours</a>
-          <a href="#matieres">Matières</a>
-        </nav>
-        <div className="landing-new__actions">
-          <Link to="/connexion" className="landing-new__login">Connexion</Link>
-          <Link to="/connexion" className="landing-new__button landing-new__button--dark">Commencer <ArrowRight size={15} /></Link>
-        </div>
-      </header>
-
-      <main>
-        <section className="landing-new__hero">
-          <div className="landing-new__hero-copy">
-            <div className="landing-new__label"><span className="landing-new__label-dot" /> Préparation 2BAC · Maroc</div>
-            <h1>Ton année de Bac, <em>organisée.</em></h1>
-            <p className="landing-new__lead">MentionMax réunit tes cours, tes exercices, tes annales et ta progression dans un seul espace de travail pensé pour le programme marocain.</p>
-            <div className="landing-new__hero-actions">
-              <Link to="/connexion" className="landing-new__button landing-new__button--teal">Créer mon espace <ArrowRight size={16} /></Link>
-              <a href="#method" className="landing-new__text-link">Voir la méthode <ArrowRight size={15} /></a>
-            </div>
-            <div className="landing-new__hero-meta">
-              <span><CheckCircle2 size={15} /> 2BAC uniquement</span>
-              <span><CheckCircle2 size={15} /> 3 parcours</span>
-              <span><CheckCircle2 size={15} /> 300 exercices Helios</span>
-            </div>
-          </div>
-
-          <div className="landing-new__workspace" aria-hidden="true">
-            <div className="workspace-window">
-              <div className="workspace-bar"><span /><span /><span /><b>Mon espace · MentionMax</b></div>
-              <div className="workspace-body">
-                <aside><div className="workspace-logo">M</div><i /><i /><i /><i /><div className="workspace-aside-bottom"><i /><i /></div></aside>
-                <div className="workspace-content">
-                  <div className="workspace-topline"><div><small>AUJOURD’HUI</small><strong>Bonjour, étudiant.</strong><p>Voici ce qui mérite ton attention.</p></div><div className="workspace-profile">2BAC · SPC</div></div>
-                  <div className="workspace-grid">
-                    <div className="workspace-card workspace-card--focus"><small>PROCHAINE SESSION</small><h3>Mission Helios</h3><p>Limites et continuité · Exercice 08</p><div className="workspace-progress"><span /></div><strong>8 / 20</strong><button>Continuer <ArrowRight size={13} /></button></div>
-                    <div className="workspace-card workspace-card--stats"><small>PROGRESSION</small><strong>72%</strong><span>Cette semaine</span><div className="workspace-bars"><i /><i /><i /><i /><i /><i /><i /></div></div>
-                    <div className="workspace-card workspace-card--subjects"><small>TES MATIÈRES</small><div><b>Maths</b><span>→</span></div><div><b>Physique-Chimie</b><span>→</span></div><div><b>SVT</b><span>→</span></div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-new__strip">
-          <span>UNE SEULE BASE DE TRAVAIL</span><strong>Apprendre → pratiquer → corriger → progresser</strong>
-        </section>
-
-        <section className="landing-new__section" id="method">
-          <div className="landing-new__section-head"><div><span className="landing-new__label">La méthode</span><h2>Pas besoin de chercher quoi faire ensuite.</h2></div><p>Chaque partie du produit sert le même objectif : te faire passer du cours à la maîtrise sans perdre ton temps dans les menus.</p></div>
-          <div className="landing-new__method-grid">
-            <article><span>01</span><Target size={21} /><h3>Comprendre</h3><p>Retrouve le chapitre et les notions de ton parcours avec une structure claire.</p></article>
-            <article><span>02</span><BookOpen size={21} /><h3>Pratiquer</h3><p>Travaille avec des exercices progressifs et des séries dédiées comme Mission Helios.</p></article>
-            <article><span>03</span><BarChart3 size={21} /><h3>Mesurer</h3><p>Vois ce que tu as réellement travaillé et ce qui mérite une nouvelle session.</p></article>
-          </div>
-        </section>
-
-        <section className="landing-new__section landing-new__section--tinted" id="parcours">
-          <div className="landing-new__section-head"><div><span className="landing-new__label">Les parcours</span><h2>Le programme s’adapte à ta série.</h2></div><p>Choisis ton parcours pendant l’inscription. MentionMax filtre ensuite les matières et le contenu qui te concernent.</p></div>
-          <div className="landing-new__track-grid">{tracks.map((track, index) => <article className={`landing-new__track landing-new__track--${index + 1}`} key={track.code}><div className="landing-new__track-code">{track.code}</div><div><h3>{track.name}</h3><p>{track.subjects}</p></div><Link to="/connexion">Choisir ce parcours <ArrowRight size={15} /></Link></article>)}</div>
-        </section>
-
-        <section className="landing-new__section" id="matieres">
-          <div className="landing-new__section-head"><div><span className="landing-new__label">Les matières</span><h2>Tout ton programme, au même endroit.</h2></div><p>Les matières affichées dans ton espace dépendent du parcours sélectionné. Pas de SVT parachuté chez les SM B, parce que même les interfaces peuvent respecter le programme.</p></div>
-          <div className="landing-new__subjects">{subjects.map(([number, name, text]) => <div className="landing-new__subject" key={name}><span>{number}</span><div><strong>{name}</strong><small>{text}</small></div><ArrowRight size={17} /></div>)}</div>
-        </section>
-
-        <section className="landing-new__helios">
-          <div className="landing-new__helios-copy"><div className="landing-new__label landing-new__label--light"><FlaskIcon /> Mission Helios</div><h2>300 exercices.<br /><em>15 jours.</em></h2><p>Une campagne mathématique structurée en 15 chapitres, avec 20 exercices par journée et une difficulté qui monte progressivement.</p><Link to="/connexion" className="landing-new__button landing-new__button--light">Explorer Mission Helios <ArrowRight size={16} /></Link></div>
-          <div className="landing-new__helios-map" aria-hidden="true"><div className="helios-ring helios-ring--outer" /><div className="helios-ring helios-ring--middle" /><div className="helios-ring helios-ring--inner" /><div className="helios-core">08</div><div className="helios-caption">JOUR<br /><strong>08 / 15</strong></div></div>
-        </section>
-
-        <section className="landing-new__final">
-          <div><span className="landing-new__label">Ton espace de travail</span><h2>Moins de dispersion.<br />Plus de travail utile.</h2></div>
-          <div className="landing-new__final-right"><p>Commence avec ton parcours et laisse MentionMax organiser le reste.</p><Link to="/connexion" className="landing-new__button landing-new__button--teal">Commencer maintenant <ArrowRight size={16} /></Link></div>
-        </section>
-      </main>
-
-      <footer className="landing-new__footer"><span>© MentionMax</span><span>2BAC · Maroc</span><span>Plateforme non lucrative</span></footer>
-    </div>
-  );
-}
-
-function FlaskIcon() {
-  return <Sparkles size={15} />;
+  return <main style={{ minHeight: "100vh", background: "#F4FAF8", color: "#073B3A", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <nav style={{ height: 72, borderBottom: "1px solid #DDEBE8", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 7vw", background: "rgba(244,250,248,.92)", position: "sticky", top: 0, zIndex: 10 }}>
+      <Link to="/" style={{ display: "flex", alignItems: "center" }}><img src={MentionMaxLogo} alt="MentionMax" style={{ width: 150, height: "auto" }} /></Link>
+      <div style={{ display: "flex", gap: 28, alignItems: "center" }}><a href="#plateforme" style={{ color: "#54736F", textDecoration: "none", fontSize: 13 }}>Plateforme</a><a href="#parcours" style={{ color: "#54736F", textDecoration: "none", fontSize: 13 }}>Parcours</a><a href="#mission" style={{ color: "#54736F", textDecoration: "none", fontSize: 13 }}>Mission Helios</a><Link to="/connexion" style={{ color: "#073B3A", textDecoration: "none", fontWeight: 800, fontSize: 13 }}>Se connecter</Link><Link to="/connexion" style={{ background: "#0FA3A3", color: "white", textDecoration: "none", padding: "11px 16px", borderRadius: 10, fontWeight: 800, fontSize: 13, display: "inline-flex", gap: 7, alignItems: "center" }}>Commencer <ArrowRight size={15} /></Link></div>
+    </nav>
+    <section style={{ maxWidth: 1380, margin: "0 auto", padding: "86px 7vw 80px", display: "grid", gridTemplateColumns: "1.02fr .98fr", gap: 60, alignItems: "center" }}>
+      <div><span style={{ color: "#0FA3A3", fontSize: 11, fontWeight: 900, letterSpacing: ".12em", textTransform: "uppercase", display: "inline-flex", gap: 7, alignItems: "center" }}><Sparkles size={14} /> Préparation 2BAC · Maroc</span><h1 style={{ fontSize: "clamp(48px,6vw,82px)", lineHeight: .98, letterSpacing: "-.055em", margin: "20px 0", maxWidth: 760 }}>Travaille le cours.<br /><span style={{ color: "#0FA3A3" }}>Maîtrise le Bac.</span></h1><p style={{ maxWidth: 650, fontSize: 18, lineHeight: 1.65, color: "#587570", margin: 0 }}>Une plateforme pensée pour le 2BAC : cours, exercices, IA et annales réunis autour d’un seul objectif, progresser réellement.</p><div style={{ display: "flex", gap: 12, marginTop: 30, flexWrap: "wrap" }}><Link to="/connexion" style={{ background: "#0FA3A3", color: "white", textDecoration: "none", padding: "13px 18px", borderRadius: 11, fontWeight: 900, fontSize: 14, display: "inline-flex", gap: 8, alignItems: "center" }}>Commencer gratuitement <ArrowRight size={16} /></Link><a href="#plateforme" style={{ border: "1px solid #CFE2DF", color: "#073B3A", textDecoration: "none", padding: "12px 18px", borderRadius: 11, fontWeight: 800, fontSize: 14 }}>Découvrir la plateforme</a></div><div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 22 }}><span style={{ background: "white", border: "1px solid #DDEBE8", borderRadius: 99, padding: "7px 10px", fontSize: 11, fontWeight: 800 }}>2BAC</span><span style={{ background: "white", border: "1px solid #DDEBE8", borderRadius: 99, padding: "7px 10px", fontSize: 11, fontWeight: 800 }}>3 parcours</span><span style={{ background: "white", border: "1px solid #DDEBE8", borderRadius: 99, padding: "7px 10px", fontSize: 11, fontWeight: 800 }}>5 matières</span><span style={{ background: "white", border: "1px solid #DDEBE8", borderRadius: 99, padding: "7px 10px", fontSize: 11, fontWeight: 800 }}>300 exercices Helios</span></div></div>
+      <div style={{ background: "#E1F4F0", border: "1px solid #D0EAE6", borderRadius: 28, padding: 20, boxShadow: "0 28px 70px rgba(7,59,58,.1)" }}><div style={{ background: "white", border: "1px solid #DDEBE8", borderRadius: 19, padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between", color: "#0FA3A3", fontSize: 10, fontWeight: 900, letterSpacing: ".1em" }}><span>MENTIONMAX</span><span>2BAC · SM A</span></div><div style={{ margin: "26px 0 16px" }}><small style={{ color: "#91A5A1", fontSize: 9, fontWeight: 900, letterSpacing: ".1em" }}>AUJOURD’HUI</small><h2 style={{ margin: "6px 0 0", fontSize: 25 }}>Continue ton travail</h2></div>{[["01","Limites et continuité","Mathématiques · 20 min","Commencer"],["02","Mécanique","Physique-Chimie · Révision","Voir"],["03","Assistant IA","Une question en attente","Ouvrir"]].map(([n,t,s,a],i)=><div key={n} style={{ display: "grid", gridTemplateColumns: "34px 1fr auto", gap: 11, alignItems: "center", padding: "14px 0", borderTop: "1px solid #EDF2F1" }}><span style={{ width: 30, height: 30, borderRadius: 9, display: "grid", placeItems: "center", background: i===0?"#DDF5F1":"#F0F5F4", color: "#0FA3A3", fontSize: 10, fontWeight: 900 }}>{n}</span><div><strong style={{ display: "block", fontSize: 12 }}>{t}</strong><small style={{ color: "#7C9290", fontSize: 10 }}>{s}</small></div><b style={{ fontSize: 9, color: i===0?"#0FA3A3":"#849A96" }}>{a}</b></div>)}<div style={{ marginTop: 22, borderTop: "1px solid #EDF2F1", paddingTop: 16 }}><div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#778D89", fontWeight: 800 }}><span>Progression hebdo</span><strong style={{ color: "#073B3A" }}>68%</strong></div><div style={{ height: 7, background: "#E7EFED", borderRadius: 99, overflow: "hidden", marginTop: 8 }}><div style={{ width: "68%", height: "100%", background: "#0FA3A3", borderRadius: 99 }} /></div></div></div></div>
+    </section>
+    <section id="plateforme" style={{ background: "white", borderTop: "1px solid #DDEBE8", borderBottom: "1px solid #DDEBE8", padding: "90px 7vw" }}><div style={{ maxWidth: 1380, margin: "0 auto" }}><span style={{ color: "#0FA3A3", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>LA LOGIQUE</span><h2 style={{ fontSize: "clamp(34px,4vw,54px)", letterSpacing: "-.04em", margin: "12px 0" }}>Comprendre. Pratiquer. Mesurer.</h2><p style={{ maxWidth: 700, color: "#66807C", lineHeight: 1.65 }}>Chaque partie de MentionMax a une fonction claire dans ton parcours de révision.</p><div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginTop: 38 }}>{[[BookOpen,"Cours","Des leçons structurées autour du programme 2BAC."],[Target,"Pratique","Des exercices pour transformer le cours en réflexes."],[BarChart3,"Progression","Un suivi lisible pour savoir quoi retravailler."]].map(([Icon,title,text])=><article key={title as string} style={{ padding: 25, border: "1px solid #DDEBE8", borderRadius: 18, background: "#FBFDFC" }}><div style={{ width: 40, height: 40, borderRadius: 11, background: "#DDF5F1", color: "#0FA3A3", display: "grid", placeItems: "center" }}><Icon size={18} /></div><h3 style={{ fontSize: 19, margin: "18px 0 7px" }}>{title as string}</h3><p style={{ margin: 0, color: "#6B8581", lineHeight: 1.55, fontSize: 13 }}>{text as string}</p></article>)}</div></div></section>
+    <section id="parcours" style={{ padding: "90px 7vw", maxWidth: 1380, margin: "0 auto" }}><span style={{ color: "#0FA3A3", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>PARCOURS</span><h2 style={{ fontSize: "clamp(34px,4vw,54px)", letterSpacing: "-.04em", margin: "12px 0" }}>Ton contenu suit ta série.</h2><div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginTop: 32 }}>{[["SPC","Sciences Physiques","Maths · PC · SVT · Philo · Anglais"],["SM A","Sciences Mathématiques A","Maths · PC · Philo · Anglais"],["SM B","Sciences Mathématiques B","Maths · PC · Philo · Anglais"]].map(([code,title,subjects])=><article key={code} style={{ background: "white", border: "1px solid #DDEBE8", borderRadius: 18, padding: 24 }}><strong style={{ color: "#0FA3A3", fontSize: 13 }}>{code}</strong><h3 style={{ margin: "20px 0 8px", fontSize: 20 }}>{title}</h3><p style={{ minHeight: 42, margin: 0, color: "#6B8581", lineHeight: 1.5, fontSize: 13 }}>{subjects}</p><Link to="/connexion" style={{ marginTop: 20, color: "#073B3A", textDecoration: "none", fontSize: 12, fontWeight: 900, display: "inline-flex", alignItems: "center", gap: 6 }}>Commencer ce parcours <ArrowRight size={13} /></Link></article>)}</div></section>
+    <section id="mission" style={{ padding: "0 7vw 90px", maxWidth: 1380, margin: "0 auto" }}><div style={{ borderRadius: 25, background: "#073B3A", color: "white", padding: 34, display: "grid", gridTemplateColumns: "1fr .8fr", gap: 30, alignItems: "center" }}><div><span style={{ color: "#76DAD3", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>MISSION HELIOS</span><h2 style={{ fontSize: "clamp(34px,4vw,54px)", letterSpacing: "-.04em", margin: "12px 0" }}>300 exercices.<br />15 jours.</h2><p style={{ color: "#B4D1CE", lineHeight: 1.6, maxWidth: 620 }}>Une progression complète en mathématiques, avec 20 exercices par chapitre et une difficulté qui augmente au fil de la mission.</p><Link to="/connexion" style={{ marginTop: 12, display: "inline-flex", gap: 8, alignItems: "center", background: "white", color: "#073B3A", padding: "12px 16px", borderRadius: 10, textDecoration: "none", fontWeight: 900, fontSize: 12 }}>Entrer dans Helios <ArrowRight size={15} /></Link></div><div style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 18, padding: 20 }}><div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontWeight: 900, letterSpacing: ".1em", color: "#8FB9B4" }}><span>MISSION HELIOS</span><span>JOUR 08 / 15</span></div><h3 style={{ fontSize: 23, margin: "20px 0 5px" }}>Calcul intégral</h3><p style={{ color: "#A9C7C3", fontSize: 11 }}>10 / 20 exercices terminés</p><div style={{ height: 8, background: "rgba(255,255,255,.1)", borderRadius: 99, overflow: "hidden", marginTop: 20 }}><div style={{ width: "50%", height: "100%", background: "#4FCFC8" }} /></div>{["Intégrale simple","Théorème fondamental","Aire entre courbes","Valeur moyenne"].map((x,i)=><div key={x} style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(255,255,255,.08)", padding: "11px 0", marginTop: i===0?18:0, fontSize: 11 }}><span style={{ color: i<2?"#D9EFEC":"#A7C5C1" }}>{i<2?"✓":"○"} {x}</span><b style={{ color: "#88BDB8" }}>{8+i}</b></div>)}</div></div></section>
+    <section style={{ padding: "72px 7vw", borderTop: "1px solid #DDEBE8", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 30, maxWidth: 1380, margin: "0 auto" }}><div><span style={{ color: "#0FA3A3", fontSize: 10, fontWeight: 900, letterSpacing: ".12em" }}>MENTIONMAX</span><h2 style={{ fontSize: 36, letterSpacing: "-.04em", margin: "10px 0 0" }}>Commence par un chapitre.<br />Construis la suite.</h2></div><Link to="/connexion" style={{ display: "inline-flex", gap: 8, alignItems: "center", background: "#0FA3A3", color: "white", padding: "13px 18px", borderRadius: 11, textDecoration: "none", fontWeight: 900, fontSize: 13 }}>Ouvrir MentionMax <ArrowRight size={16} /></Link></section>
+    <footer style={{ borderTop: "1px solid #DDEBE8", padding: "25px 7vw", display: "flex", justifyContent: "space-between", gap: 20, color: "#7A9290", fontSize: 11 }}><img src={MentionMaxLogo} alt="MentionMax" style={{ width: 120 }} /><span>Préparation au Bac marocain · 2BAC</span><span>Comprendre le cours avant de compter les points.</span></footer>
+  </main>;
 }
