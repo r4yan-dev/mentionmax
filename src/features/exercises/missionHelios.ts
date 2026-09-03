@@ -22,30 +22,13 @@ export type MissionHeliosExercise = {
   chapter: MissionHeliosChapter;
 };
 
-const exerciseSelect = `
-  id,
-  chapter_id,
-  exercise_number,
-  title,
-  context,
-  parts,
-  animation,
-  difficulty,
-  is_synthesis,
-  chapter:mission_helios_chapters (
-    id,
-    day,
-    chapter_number,
-    title,
-    mission_context,
-    exercise_count
-  )
-`;
+const chapterFields = "id, day, chapter_number, title, mission_context, exercise_count";
+const exerciseFields = "id, chapter_id, exercise_number, title, context, parts, animation, difficulty, is_synthesis";
 
 export async function getMissionHeliosChapter(day: number) {
   const { data, error } = await supabase
     .from("mission_helios_chapters")
-    .select("id, day, chapter_number, title, mission_context, exercise_count")
+    .select(chapterFields)
     .eq("day", day)
     .single();
 
@@ -54,24 +37,37 @@ export async function getMissionHeliosChapter(day: number) {
 }
 
 export async function getMissionHeliosExercises(day?: number) {
-  let query = supabase
+  const chaptersQuery = supabase
+    .from("mission_helios_chapters")
+    .select(chapterFields)
+    .order("day", { ascending: true });
+
+  const exercisesQuery = supabase
     .from("mission_helios_exercises")
-    .select(exerciseSelect)
+    .select(exerciseFields)
     .order("chapter_id", { ascending: true })
     .order("exercise_number", { ascending: true });
 
-  if (day !== undefined) {
-    const chapter = await getMissionHeliosChapter(day);
-    query = query.eq("chapter_id", chapter.id);
-  }
+  const [{ data: chapters, error: chaptersError }, { data: exercises, error: exercisesError }] =
+    await Promise.all([
+      day === undefined ? chaptersQuery : chaptersQuery.eq("day", day),
+      exercisesQuery,
+    ]);
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return (data ?? []) as MissionHeliosExercise[];
+  if (chaptersError) throw chaptersError;
+  if (exercisesError) throw exercisesError;
+
+  const chapterById = new Map((chapters ?? []).map((chapter) => [chapter.id, chapter as MissionHeliosChapter]));
+  return (exercises ?? [])
+    .filter((exercise) => chapterById.has(exercise.chapter_id))
+    .map((exercise) => ({
+      ...(exercise as Omit<MissionHeliosExercise, "chapter">),
+      chapter: chapterById.get(exercise.chapter_id)!,
+    }));
 }
 
 export async function getMissionHeliosDay(day: number) {
-  const exercises = await getMissionHeliosExercises(day);
   const chapter = await getMissionHeliosChapter(day);
+  const exercises = await getMissionHeliosExercises(day);
   return { chapter, exercises };
 }
