@@ -41,7 +41,7 @@ function HeliosRunner({ exerciseId }: { exerciseId: string }) {
     setAnswers(exercise?.parts.map(() => "") ?? []);
     setSubmitted(false);
     setShowHint(false);
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    window.scrollTo(0, 0);
   }, [exerciseId, exercise]);
 
   if (!exercise) {
