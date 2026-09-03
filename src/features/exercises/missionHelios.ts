@@ -19,7 +19,28 @@ export type MissionHeliosExercise = {
   animation: string;
   difficulty: number;
   is_synthesis: boolean;
+  chapter: MissionHeliosChapter;
 };
+
+const exerciseSelect = `
+  id,
+  chapter_id,
+  exercise_number,
+  title,
+  context,
+  parts,
+  animation,
+  difficulty,
+  is_synthesis,
+  chapter:mission_helios_chapters (
+    id,
+    day,
+    chapter_number,
+    title,
+    mission_context,
+    exercise_count
+  )
+`;
 
 export async function getMissionHeliosChapter(day: number) {
   const { data, error } = await supabase
@@ -32,31 +53,25 @@ export async function getMissionHeliosChapter(day: number) {
   return data as MissionHeliosChapter;
 }
 
-export async function getMissionHeliosExercises(day: number) {
-  const chapter = await getMissionHeliosChapter(day);
-
-  const { data, error } = await supabase
+export async function getMissionHeliosExercises(day?: number) {
+  let query = supabase
     .from("mission_helios_exercises")
-    .select(
-      "id, chapter_id, exercise_number, title, context, parts, animation, difficulty, is_synthesis"
-    )
-    .eq("chapter_id", chapter.id)
+    .select(exerciseSelect)
+    .order("chapter_id", { ascending: true })
     .order("exercise_number", { ascending: true });
 
+  if (day !== undefined) {
+    const chapter = await getMissionHeliosChapter(day);
+    query = query.eq("chapter_id", chapter.id);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as MissionHeliosExercise[];
 }
 
 export async function getMissionHeliosDay(day: number) {
+  const exercises = await getMissionHeliosExercises(day);
   const chapter = await getMissionHeliosChapter(day);
-  const { data, error } = await supabase
-    .from("mission_helios_exercises")
-    .select(
-      "id, chapter_id, exercise_number, title, context, parts, animation, difficulty, is_synthesis"
-    )
-    .eq("chapter_id", chapter.id)
-    .order("exercise_number", { ascending: true });
-
-  if (error) throw error;
-  return { chapter, exercises: (data ?? []) as MissionHeliosExercise[] };
+  return { chapter, exercises };
 }
