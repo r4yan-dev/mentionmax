@@ -3,6 +3,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { useAccount } from "../../context/AccountContext";
 import { saveSchoolProfile } from "../../features/schoolProfile";
 import { pathLabels, resolveUserPath, type UserPath } from "../../data/curriculum/secondBac";
+import "./PathSwitcher.css";
 
 const options: UserPath[] = ["SP", "SMA", "SMB"];
 
