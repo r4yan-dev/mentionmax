@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Clock3, FlaskConical, Lightbulb, Sparkles, Target } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { contentCatalogService } from "../services/content/contentCatalogService";
@@ -33,9 +33,16 @@ function toEngineExercise(exercise: Exercise): ExerciseQuestion {
 function HeliosRunner({ exerciseId }: { exerciseId: string }) {
   const navigate = useNavigate();
   const exercise = useMemo(() => helios300MathExercises.find((item) => item.id === exerciseId), [exerciseId]);
-  const [answers, setAnswers] = useState<string[]>(() => exercise ? exercise.parts.map(() => "") : []);
+  const [answers, setAnswers] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    setAnswers(exercise?.parts.map(() => "") ?? []);
+    setSubmitted(false);
+    setShowHint(false);
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [exerciseId, exercise]);
 
   if (!exercise) {
     return (
