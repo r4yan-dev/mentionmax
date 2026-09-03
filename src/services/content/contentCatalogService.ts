@@ -25,11 +25,13 @@ const allBaseQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
 const allBaseRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
 
 function matchesTarget(trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) {
-  return (item: { target: { trackIds: TrackId[]; subjectId: SubjectId; chapter: string; topic: string } }) =>
-    item.target.trackIds.includes(trackId) &&
-    item.target.subjectId === subjectId &&
-    (!chapter || item.target.chapter === chapter) &&
-    (!topic || item.target.topic === topic);
+  return (item: { target: { trackIds: TrackId[]; subjectId: SubjectId; chapter: string; topic: string }; tags?: string[] }) => {
+    const isHelios = item.tags?.includes("MISSION_HELIOS") ?? false;
+    return (isHelios || item.target.trackIds.includes(trackId)) &&
+      item.target.subjectId === subjectId &&
+      (!chapter || item.target.chapter === chapter) &&
+      (!topic || item.target.topic === topic);
+  };
 }
 
 export const contentCatalogService = {
