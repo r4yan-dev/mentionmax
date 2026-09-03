@@ -1,3 +1,4 @@
+import "./data/mock/missionHeliosPatch";
 import Exams from "./pages/Exams";
 import Tests from "./pages/Tests";
 import NationalExams from "./pages/NationalExams";
@@ -28,7 +29,7 @@ import FocusGroupDetail from "./pages/FocusGroupDetail";
 import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } from "./pages/FocusGroupTabs";
 import "./styles/foundation.css";
 
-function LoadingScreen() { return <div className="auth-page"><div className="auth-loading">Chargement...</div></div>; }
+function LoadingScreen() { return <div className="auth-page"><div className="auth-loading">Chargement...</div>; }
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
