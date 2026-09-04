@@ -3,6 +3,7 @@ import { ArrowRight, Bot, Clock3, FileText, ScanLine, Sparkles, Upload, Wand2 } 
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { exams as nationalExams } from "../features/exams/catalog";
+import PeopleFeature from "../components/ui/PeopleFeature";
 import "./Exams.css";
 import "./ExamsFocusLayout.css";
 
@@ -82,6 +83,8 @@ export default function Exams() {
           </Link>
         </div>
       </header>
+
+      <PeopleFeature variant="books" compact title="Passe du cours à la copie." text="Génère un sujet, fais-le dans les conditions du Bac, puis utilise la correction pour comprendre où tu perds des points." action={<Link to="/tests" className="btn btn-primary"><FileText size={15} /> Voir les tests</Link>} />
 
       <section className="exams-ai-workspace">
         <article className="exams-ai-generator">
