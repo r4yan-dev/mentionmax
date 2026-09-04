@@ -9,7 +9,7 @@ import { resolveUserPath, pathLabels, type UserPath } from "../data/curriculum/s
 import { lessonService } from "../services/lesson/lessonService";
 import { contentCatalogService } from "../services/content/contentCatalogService";
 import PathSwitcher from "../components/curriculum/PathSwitcher";
-import PeopleFeature from "../components/ui/PeopleFeature";
+import PeopleFeature, { type PeopleFeatureVariant } from "../components/ui/PeopleFeature";
 import "../styles/curriculum-path.css";
 
 const subjectTypes: Record<string, SubjectType> = { maths: "math", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
@@ -23,6 +23,14 @@ function resolveSubject(value?: string): "maths" | "physique-chimie" | "svt" | "
   if (value === "anglais" || value === "english") return "anglais";
   if (value === "philo" || value === "philosophie" || value === "philosophy") return "philosophie";
   return null;
+}
+
+function peopleVariantForSubject(subject: "maths" | "physique-chimie" | "svt" | "anglais" | "philosophie"): PeopleFeatureVariant {
+  if (subject === "maths") return "maths";
+  if (subject === "physique-chimie") return "physics";
+  if (subject === "svt") return "svt";
+  if (subject === "anglais") return "english";
+  return "philosophy";
 }
 
 export default function Subjects() {
@@ -40,11 +48,10 @@ export default function Subjects() {
     if (!selected) return <main className="section container"><div className="subject-path-banner"><div className="subject-path-banner__title"><div><strong>{pathLabels[path]}</strong><span>Ce choix détermine les matières disponibles.</span></div></div><PathSwitcher /></div><PageHeader eyebrow="Programme 2BAC" title="Cette matière n'est pas disponible." description={path === "SMB" && requested === "svt" ? "La SVT n'est pas proposée en Sciences Mathématiques B." : "Utilise le sélecteur de parcours pour consulter un autre programme."} /><Link to="/subjects" className="btn btn-secondary">Retour aux matières</Link></main>;
 
     const subject = subjectCatalog[selected];
-    const peopleVariant = selected === "maths" ? "maths" : selected === "physique-chimie" ? "physics" : selected;
     return <main className="section container">
       <div className="subject-path-banner"><div className="subject-path-banner__title"><SubjectIcon type={subjectTypes[selected]} label={subject.name} /><div><strong>{pathLabels[path]}</strong><span>{subject.name} · programme 2BAC</span></div></div><PathSwitcher /></div>
       <PageHeader eyebrow="Cours · exercices · révision" title={<>Prépare la <span className="accent-word">{subject.name}.</span></>} description="Un espace organisé autour des chapitres, des leçons et des exercices du Bac." />
-      <PeopleFeature variant={peopleVariant} compact title={`Maîtrise ${subject.name}, chapitre après chapitre.`} text={`Cours, ${exerciseCount} exercices et notes réunis dans un parcours pensé pour le ${pathLabels[path]}.`} />
+      <PeopleFeature variant={peopleVariantForSubject(selected)} compact title={`Maîtrise ${subject.name}, chapitre après chapitre.`} text={`Cours, ${exerciseCount} exercices et notes réunis dans un parcours pensé pour le ${pathLabels[path]}.`} />
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 28 }}>
         <Link to={`/lecons/${selected}`} className="btn btn-primary"><BookOpen size={15} /> Voir les cours</Link>
         <Link to={`/exercices?subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><PenLine size={15} /> {exerciseCount} exercices</Link>
