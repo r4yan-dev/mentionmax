@@ -9,11 +9,14 @@ import Exercises from "./pages/Exercises";
 import Exams from "./pages/Exams";
 import ExamReader from "./pages/ExamReader";
 import AiStudio from "./pages/AiStudio";
+import AIHelp from "./pages/AIHelp";
 import Subjects from "./pages/Subjects";
 import Lessons from "./pages/Lessons";
+import Handnotes from "./pages/Handnotes";
 import Progression from "./pages/Progression";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
+import Preferences from "./pages/Preferences";
 import AuthenticatedShell from "./components/AuthenticatedShell";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -43,9 +46,12 @@ export default function App() {
             <Route path="/examens" element={<Exams />} />
             <Route path="/examens/:examId" element={<ExamReader />} />
             <Route path="/ai-studio" element={<AiStudio />} />
+            <Route path="/ai-studio/handnotes" element={<Handnotes />} />
+            <Route path="/ai-help" element={<AIHelp />} />
             <Route path="/progression" element={<Progression />} />
             <Route path="/classement" element={<Leaderboard />} />
             <Route path="/profil" element={<Profile />} />
+            <Route path="/preferences" element={<Preferences />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
