@@ -30,41 +30,35 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/connexion" element={<Auth />} />
-          <Route element={<ProtectedRoute><AuthenticatedShell /></ProtectedRoute>}>
-            <Route path="/accueil" element={<Dashboard />} />
-            <Route path="/matieres" element={<Subjects />} />
-            <Route path="/subjects" element={<Subjects />} />
-            <Route path="/subjects/:subjectId" element={<Subjects />} />
-            <Route path="/lecons/:subjectId" element={<Lessons />} />
-            <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
-            <Route path="/exercices" element={<Exercises />} />
-            <Route path="/exercises" element={<Exercises />} />
-            <Route path="/exercices/:exerciseId" element={<Exercises />} />
-            <Route path="/examens" element={<Exams />} />
-            <Route path="/examens/:examId" element={<ExamReader />} />
-            <Route path="/exams" element={<Exams />} />
-            <Route path="/tests" element={<Tests />} />
-            <Route path="/exams/nationaux" element={<NationalExams />} />
-            <Route path="/examens/nationaux" element={<NationalExams />} />
-            <Route path="/exams/:examId" element={<ExamReader />} />
-            <Route path="/ai-studio" element={<AiStudio />} />
-            <Route path="/ai-studio/handnotes" element={<Handnotes />} />
-            <Route path="/ai-help" element={<AIHelp />} />
-            <Route path="/progression" element={<Progression />} />
-            <Route path="/classement" element={<Leaderboard />} />
-            <Route path="/profil" element={<Profile />} />
-            <Route path="/preferences" element={<Preferences />} />
-            <Route path="/preferences/personality" element={<Preferences />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
-  );
+  return <BrowserRouter><AuthProvider><Routes>
+    <Route path="/" element={<Landing />} />
+    <Route path="/connexion" element={<Auth />} />
+    <Route element={<ProtectedRoute><AuthenticatedShell /></ProtectedRoute>}>
+      <Route path="/accueil" element={<Dashboard />} />
+      <Route path="/matieres" element={<Subjects />} />
+      <Route path="/subjects" element={<Subjects />} />
+      <Route path="/subjects/:subjectId" element={<Subjects />} />
+      <Route path="/lecons/:subjectId" element={<Lessons />} />
+      <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
+      <Route path="/exercices" element={<Exercises />} />
+      <Route path="/exercises" element={<Exercises />} />
+      <Route path="/exercices/:exerciseId" element={<Exercises />} />
+      <Route path="/examens" element={<Exams />} />
+      <Route path="/examens/:examId" element={<ExamReader />} />
+      <Route path="/examens/nationaux" element={<NationalExams />} />
+      <Route path="/exams" element={<Exams />} />
+      <Route path="/tests" element={<Tests />} />
+      <Route path="/exams/nationaux" element={<NationalExams />} />
+      <Route path="/exams/:examId" element={<ExamReader />} />
+      <Route path="/ai-studio" element={<AiStudio />} />
+      <Route path="/ai-studio/handnotes" element={<Handnotes />} />
+      <Route path="/ai-help" element={<AIHelp />} />
+      <Route path="/progression" element={<Progression />} />
+      <Route path="/classement" element={<Leaderboard />} />
+      <Route path="/profil" element={<Profile />} />
+      <Route path="/preferences" element={<Preferences />} />
+      <Route path="/preferences/personality" element={<Preferences />} />
+    </Route>
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes></AuthProvider></BrowserRouter>;
 }
