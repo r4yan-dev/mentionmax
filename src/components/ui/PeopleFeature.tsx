@@ -79,12 +79,16 @@ export default function PeopleFeature({
   title,
   text,
   action,
+  compact = false,
+  className = "",
 }: {
   variant?: PeopleFeatureVariant;
   eyebrow?: string;
   title: ReactNode;
   text?: ReactNode;
   action?: ReactNode;
+  compact?: boolean;
+  className?: string;
 }) {
   const style = {
     backgroundImage: `url(${backgrounds[variant]})`,
@@ -92,31 +96,23 @@ export default function PeopleFeature({
 
   return (
     <section
-      className="focus-group-feature"
+      className={`focus-group-feature ${compact ? "focus-group-feature--compact" : ""} ${className}`.trim()}
       style={style}
     >
       <div className="focus-group-feature__content">
         <span className="focus-group-feature__eyebrow">
           {eyebrow ?? labels[variant]}
         </span>
-
         <h2>{title}</h2>
-
         {text && <p>{text}</p>}
-
         {action && (
           <div className="focus-group-feature__actions">
             {action}
           </div>
         )}
       </div>
-
-      <div className="focus-group-feature__person">
-        <img
-          src={people[variant]}
-          alt=""
-          aria-hidden="true"
-        />
+      <div className="focus-group-feature__person" aria-hidden="true">
+        <img src={people[variant]} alt="" />
       </div>
     </section>
   );
