@@ -1,0 +1,156 @@
+.people-feature {
+  --people-bg: #eaf8f5;
+  position: relative;
+  isolation: isolate;
+  min-height: 220px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin: 0 0 24px;
+  padding: 30px 38% 30px 30px;
+  border: 1px solid rgba(7, 59, 58, .10);
+  border-radius: 22px;
+  background: var(--people-bg);
+  box-shadow: 0 14px 40px rgba(7, 59, 58, .07);
+}
+
+.people-feature::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: radial-gradient(circle at 15% 25%, rgba(15, 163, 163, .11) 0 2px, transparent 2.5px), radial-gradient(circle at 72% 78%, rgba(122, 135, 58, .10) 0 1.5px, transparent 2px);
+  background-size: 26px 26px, 34px 34px;
+  opacity: .65;
+}
+
+.people-feature__glow {
+  position: absolute;
+  width: 430px;
+  height: 430px;
+  right: 3%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.82) 0%, rgba(255,255,255,.42) 38%, transparent 72%);
+}
+
+.people-feature__content {
+  position: relative;
+  z-index: 2;
+  max-width: 610px;
+}
+
+.people-feature__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+  color: #0fa3a3;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.people-feature__eyebrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(15,163,163,.10);
+}
+
+.people-feature h2 {
+  margin: 0 0 8px;
+  max-width: 680px;
+  color: #073b3a;
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.people-feature p {
+  max-width: 570px;
+  margin: 0;
+  color: #5f7470;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.people-feature__action {
+  margin-top: 17px;
+}
+
+.people-feature__person {
+  position: absolute;
+  right: -1%;
+  bottom: -18px;
+  width: 43%;
+  max-width: 420px;
+  height: 115%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.people-feature__person img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 20px 20px rgba(7, 59, 58, .10));
+}
+
+.people-feature--compact {
+  min-height: 172px;
+  margin-bottom: 20px;
+  padding: 24px 35% 24px 25px;
+  border-radius: 18px;
+}
+
+.people-feature--compact h2 {
+  font-size: 23px;
+}
+
+.people-feature--compact .people-feature__person {
+  width: 34%;
+  height: 112%;
+  bottom: -10px;
+}
+
+.people-feature--maths { --people-bg: #e9f8f4; }
+.people-feature--physics { --people-bg: #eef7f8; }
+.people-feature--books { --people-bg: #f1f5ea; }
+.people-feature--writing { --people-bg: #f8f1ec; }
+.people-feature--english { --people-bg: #eef2f8; }
+.people-feature--svt { --people-bg: #edf7ee; }
+.people-feature--philosophy { --people-bg: #f5eff4; }
+.people-feature--teacher { --people-bg: #edf5f5; }
+.people-feature--collaboration { --people-bg: #e7f6f1; }
+
+@media (max-width: 760px) {
+  .people-feature,
+  .people-feature--compact {
+    min-height: 275px;
+    padding: 24px 24px 165px;
+  }
+
+  .people-feature__person,
+  .people-feature--compact .people-feature__person {
+    width: 58%;
+    max-width: 270px;
+    height: 62%;
+    right: 3%;
+    bottom: -4px;
+  }
+
+  .people-feature h2,
+  .people-feature--compact h2 {
+    font-size: 25px;
+  }
+}
