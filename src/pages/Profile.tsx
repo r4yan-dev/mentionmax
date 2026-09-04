@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { PenLine } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAccount } from "../context/AccountContext";
 import { getUserProfile, uploadProfileImage } from "../features/focus/supabase";
 import { supabase } from "../lib/supabase";
+import "../styles/profile-name-edit.css";
 
 export default function Profile() {
   const { userId } = useParams();
@@ -278,7 +280,7 @@ export default function Profile() {
         <div>
           <span className="section-eyebrow">Profil</span>
           {isOwnProfile && editingName ? (
-            <div className="profile-name-editor-inline">
+            <h1 className="profile-name-heading">
               <input
                 ref={nameInputRef}
                 value={nameDraft}
@@ -294,14 +296,15 @@ export default function Profile() {
                   }
                 }}
                 maxLength={40}
+                size={Math.max(nameDraft.length, 1)}
                 aria-label="Nom affiché"
-                className="profile-name-input"
+                className="profile-name-input-inline"
                 disabled={savingName}
               />
-            </div>
+            </h1>
           ) : (
             <h1 className="profile-name-heading">
-              {name}
+              <span>{name}</span>
               {isOwnProfile && (
                 <button
                   type="button"
@@ -310,7 +313,7 @@ export default function Profile() {
                   aria-label="Modifier le nom"
                   title="Modifier le nom"
                 >
-                  ✎
+                  <PenLine size={17} strokeWidth={2} aria-hidden="true" />
                 </button>
               )}
             </h1>
