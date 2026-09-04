@@ -73,7 +73,13 @@ export default function Profile() {
 
   useEffect(() => {
     if (!editingName) return;
-    requestAnimationFrame(() => nameInputRef.current?.select());
+    requestAnimationFrame(() => {
+      const input = nameInputRef.current;
+      if (!input) return;
+      input.focus();
+      const end = input.value.length;
+      input.setSelectionRange(end, end);
+    });
   }, [editingName]);
 
   const profileId = currentProfile?.id;
