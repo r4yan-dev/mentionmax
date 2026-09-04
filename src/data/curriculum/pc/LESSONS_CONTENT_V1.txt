@@ -1,799 +1,815 @@
 MENTIONMAX · 2BAC PHYSIQUE-CHIMIE
-LESSONS CONTENT V1
+LESSONS CONTENT V2 · TEACHING-FIRST SOURCE
+================================================================
 
-Purpose
+PURPOSE
 -------
-This file is the canonical teaching-content draft for the next MentionMax PC lesson UI.
-It is intentionally presentation-neutral: the future layout can turn each block into cards,
-callouts, diagrams, formulas, worked examples, quizzes, and interactive media.
+Canonical teaching text for MentionMax PC (2BAC SPC / SM A / SM B).
+The UI is intentionally excluded. This source is designed to be rendered later with modern cards,
+diagrams, formulas, media, interactive checks, worked examples and adaptive exercises.
 
-CONTENT RULES
--------------
-- French, Bac-focused, direct language.
-- Definitions stay short; explanation carries the idea.
-- Every lesson contains an intuition, formulas, a worked example, a method, common traps,
-  a quick check, and media slots.
-- Examples use realistic values close to typical Bac exercises, but are newly constructed.
-- Image slots are descriptive placeholders for the future Menti-style visual system.
+EDITORIAL RULES
+---------------
+- Français simple, précis, niveau Bac marocain.
+- Définitions courtes ; l'explication donne ensuite le sens.
+- Exemples originaux, proches des situations classiques du Bac, avec nombres modifiés.
+- Exercices à variantes : même compétence, nouveau contexte, valeurs ou ordre des informations.
+- Chaque leçon comporte : objectif, idée, définition/cours, exemple, méthode, pièges,
+  quick check, variantes et médias.
+- Les corrections scientifiques priment sur les éventuelles erreurs de notes brutes.
 
-MEDIA SLOT FORMAT
------------------
-[IMAGE: ...]
-[DIAGRAM: ...]
-[ANIMATION: ...]
-[INTERACTIVE: ...]
+MEDIA TOKENS
+------------
+[IMAGE: illustration fixe]
+[DIAGRAM: schéma pédagogique]
+[ANIMATION: mouvement ou évolution à visualiser]
+[INTERACTIVE: composant interactif]
+[VIDEO: emplacement capsule vidéo]
 
-============================================================
-LESSON 01 · SOLUTIONS ACIDES ET BASIQUES
-============================================================
-slug: solutions-acides-basiques
-subject: physique-chimie
+================================================================
+UNITÉ 01 · ACIDES, BASES ET ÉQUILIBRES
+================================================================
+
+LESSON 01 · COMPRENDRE UN ACIDE ET UNE BASE
+slug: comprendre-acides-bases
 
 OBJECTIF
-Comprendre comment un acide ou une base réagit avec l’eau et relier concentration,
-taux d’avancement, pH et constante d’acidité.
+Reconnaître un couple acide/base et écrire la réaction d'une espèce avec l'eau.
 
 ACCROCHE
-Un acide ne se définit pas seulement par un pH faible. Ce qui compte ici est sa capacité
-à céder un proton H+. Une base, elle, capte un proton.
+Le proton H+ passe d'une espèce à une autre. La bonne question est : qui donne le proton,
+et qui le capte ?
 
-DÉFINITION
+DÉFINITIONS
 Acide de Brønsted : espèce capable de céder un proton H+.
 Base de Brønsted : espèce capable de capter un proton H+.
+Couple acide/base : deux espèces qui ne diffèrent que par un proton, notées AH/B.
 
-COUPLES
-Un couple acide/base s’écrit AH/B.
-AH est l’acide conjugué de B ; B est la base conjuguée de AH.
-Exemples : CH3COOH/CH3COO−, NH4+/NH3, H3O+/H2O, H2O/OH−.
+COUPLES À CONNAÎTRE
+H3O+/H2O · H2O/OH− · NH4+/NH3 · CH3COOH/CH3COO−.
 
-RÉACTION D’UN ACIDE AH AVEC L’EAU
+RÉACTION D'UN ACIDE AVEC L'EAU
 AH + H2O ⇌ B + H3O+
 
-À l’état final :
-[B] = [H3O+]
-[AH] = C − [H3O+]
+RÉACTION D'UNE BASE AVEC L'EAU
+B + H2O ⇌ AH + OH−
 
-Taux d’avancement final :
-τ = [H3O+] / C
-
-Constante d’acidité :
-KA = [B][H3O+] / [AH]
-KA = [H3O+]² / (C − [H3O+])
-
-Lien avec le pH :
-[H3O+] = 10^(−pH)
-
-À RETENIR
-Pour une solution d’acide, connaître C et le pH permet de retrouver [H3O+], puis τ et KA.
+IDÉE VISUELLE
+Avec un acide, l'eau joue le rôle de base. Avec une base, l'eau peut jouer le rôle d'acide.
 
 EXEMPLE GUIDÉ
-Une solution d’acide AH a une concentration C = 0,020 mol·L−1 et un pH de 2,70.
-1. [H3O+] = 10^(−2,70) ≈ 2,0×10−3 mol·L−1.
-2. τ = 2,0×10−3 / 0,020 = 0,10, soit 10 %.
-3. [AH] = 0,020 − 0,0020 = 0,018 mol·L−1.
-4. [B] = 0,0020 mol·L−1.
-5. KA ≈ (0,0020)² / 0,018 ≈ 2,2×10−4.
+Pour CH3COOH/CH3COO− :
+CH3COOH + H2O ⇌ CH3COO− + H3O+.
+Le proton va de CH3COOH vers H2O.
 
 MÉTHODE BAC
-1. Écrire le couple AH/B.
-2. Écrire AH + H2O ⇌ B + H3O+.
-3. Traduire le pH en [H3O+].
-4. Utiliser le tableau d’avancement ou les relations de concentrations.
-5. Calculer τ ou KA selon la grandeur demandée.
+1. Identifier l'espèce donnée.
+2. Trouver son partenaire dans le couple.
+3. Repérer le donneur et l'accepteur de H+.
+4. Écrire l'équation et vérifier atomes + charges.
 
-PIÈGE
-Ne pas confondre concentration initiale C et concentration finale de AH.
+PIÈGES
+- Écrire H+ seul comme produit en solution aqueuse.
+- Inverser AH et B dans le couple.
+- Confondre acide fort et solution concentrée.
 
 QUICK CHECK
-Une solution AH de C = 0,010 mol·L−1 a pH = 3,00. Estimer τ.
-Réponse attendue : 10 %.
+NH3 est-il l'acide ou la base de NH4+/NH3 ?
+Réponse : la base.
 
-[DIAGRAM: tableau d’avancement AH + H2O ⇌ B + H3O+]
-[IMAGE: échelle pH simple avec zone acide/base]
-[INTERACTIVE: curseur C et pH donnant automatiquement τ et KA]
+EXERCICES À VARIANTE
+A. Écrire la réaction de NH4+ avec l'eau.
+B. Écrire la réaction de OH− avec l'eau.
+C. Identifier le couple dans HCOOH/HCOO−.
+D. Changer l'espèce initiale et déterminer le sens du transfert de H+.
 
-============================================================
-LESSON 02 · FORCE DES ACIDES ET DES BASES
-============================================================
-slug: force-acides-bases
-subject: physique-chimie
+[DIAGRAM: transfert de H+ entre AH et H2O]
+[ANIMATION: déplacement de H+]
+[IMAGE: cartes des couples acide/base]
+[INTERACTIVE: glisser H+ vers le bon accepteur]
 
-IDÉE CENTRALE
-Un acide est d’autant plus fort qu’il cède facilement H+.
-Une base est d’autant plus forte qu’elle capte facilement H+.
+----------------------------------------------------------------
+LESSON 02 · TABLEAU D'AVANCEMENT D'UN ACIDE AVEC L'EAU
+slug: avancement-acide-eau
 
-ACIDE PLUS FORT
-À concentration initiale identique, l’acide qui possède le plus grand taux d’avancement
-avec l’eau est le plus fort.
+OBJECTIF
+Passer de l'équation au tableau d'avancement puis à τ, [AH] et [B].
 
-KA ET pKA
-KA élevé  → acide plus fort.
-pKA faible → acide plus fort.
+RÉACTION
+AH + H2O ⇌ B + H3O+
 
-BASE PLUS FORTE
-Pour deux bases de même concentration, celle qui réagit le plus avec l’eau est la plus forte.
-KA faible pour le couple AH/B → base B plus forte.
-pKA élevé → base B plus forte.
+SITUATION
+Volume V ; concentration initiale C en AH ; eau en excès.
 
-RAPPEL
-pKA = −log(KA)
-KA = 10^(−pKA)
+TABLEAU D'AVANCEMENT
+AH              H2O       B      H3O+
+Initial         C.V       excès  0      0
+Intermédiaire   C.V−x     excès  x      x
+Final           C.V−xf    excès  xf     xf
+
+À L'ÉTAT FINAL
+[B] = [H3O+] = xf/V.
+[AH] = C − [H3O+].
+
+AVANCEMENT MAXIMAL
+xm = C.V.
+
+TAUX D'AVANCEMENT
+τ = xf/xm = [H3O+]/C.
+
+LECTURE
+Si τ < 1, la transformation est limitée : AH et les produits coexistent à l'équilibre.
 
 EXEMPLE GUIDÉ
-Deux acides A1H et A2H ont chacun C = 0,050 mol·L−1.
-Mesures : τ1 = 0,32 et τ2 = 0,08.
-Conclusion : A1H est plus fort que A2H.
+C = 2,5×10−2 mol·L−1 et pH = 2,80.
+[H3O+] = 10−2,80 ≈ 1,58×10−3 mol·L−1.
+τ ≈ 1,58×10−3/(2,5×10−2) = 0,063 = 6,3 %.
+[AH] ≈ 2,34×10−2 mol·L−1.
 
-MÉTHODE DE COMPARAISON
-Même concentration → comparer τ.
-Même couple → comparer KA ou pKA.
-Acides différents → plus KA est grand, plus l’acide est fort.
-Bases conjuguées → le classement s’inverse.
+MÉTHODE BAC
+pH → [H3O+] → tableau → τ.
+Toujours contrôler 0 ≤ τ ≤ 1.
 
 PIÈGE
-Dire « pKA grand = acide fort » est faux. Pour un acide, pKA faible signifie acide fort.
+[AH] n'est pas égal à C après réaction.
 
 QUICK CHECK
-Quel acide est le plus fort entre pKA = 3,1 et pKA = 4,6 ?
-Réponse : celui de pKA = 3,1.
+C = 1,2×10−2 mol·L−1, pH = 3,20. Estimer τ.
+Réponse ≈ 5,3 %.
 
-[DIAGRAM: axe pKA avec acides forts à gauche et bases conjuguées fortes à droite]
-[INTERACTIVE: classement de couples AH/B]
+EXERCICES À VARIANTE
+A. C = 3,0×10−2 mol·L−1, pH = 2,60.
+B. Même données, V = 50,0 mL, calculer xf.
+C. Utiliser [OH−] pour une base B.
+D. Donner τ et C, puis retrouver le pH.
 
-============================================================
-LESSON 03 · DOMINANCE ACIDE/BASE ET pH = pKA
-============================================================
-slug: dominance-acide-base
-subject: physique-chimie
+[DIAGRAM: tableau d'avancement animé]
+[INTERACTIVE: curseurs C et pH → xf, τ, concentrations]
+
+----------------------------------------------------------------
+LESSON 03 · KA, pKA ET FORCE DES ACIDES / BASES
+slug: ka-pka-force
+
+OBJECTIF
+Relier KA, pKA, τ et la force d'un acide ou d'une base.
+
+CONSTANTE D'ACIDITÉ
+KA = [B][H3O+]/[AH].
+Pour AH + H2O ⇌ B + H3O+ :
+KA = [H3O+]²/(C−[H3O+]).
+
+DÉFINITIONS
+pKA = −log(KA).
+KA = 10^(−pKA).
+
+LECTURE
+KA grand → acide plus fort.
+pKA petit → acide plus fort.
+Pour les bases conjuguées : KA petit et pKA grand → base plus forte.
+
+EXEMPLE
+Deux acides ont C = 4,0×10−2 mol·L−1.
+A1H : pH 2,05 ; A2H : pH 2,65.
+À concentration identique, A1H produit davantage de H3O+ : A1H est le plus fort.
+
+MÉTHODE BAC
+Même C : comparer τ ou [H3O+].
+Avec pKA : le plus petit pKA donne le plus fort acide.
+
+PIÈGE
+Un pH plus faible ne suffit pas à comparer deux acides si leurs concentrations initiales sont différentes.
+
+QUICK CHECK
+pKA 2,9 ou pKA 5,1 : quel acide est le plus fort ?
+Réponse : pKA 2,9.
+
+EXERCICES À VARIANTE
+Classer des couples par KA, puis par pKA, puis calculer KA à partir de C et pH.
+
+[DIAGRAM: axe KA / pKA / force]
+[INTERACTIVE: classement de couples]
+
+----------------------------------------------------------------
+LESSON 04 · DOMINANCE ACIDE/BASE ET DISTRIBUTION
+slug: dominance-ph-pka
 
 RELATION CLÉ
-Pour un couple AH/B :
-[B]/[AH] = 10^(pH − pKA)
+[B]/[AH] = 10^(pH−pKA).
 
-LECTURE IMMÉDIATE
+DONC
 pH < pKA → AH prédomine.
 pH = pKA → [AH] = [B].
 pH > pKA → B prédomine.
 
-REPÈRE PRATIQUE
-À pH inférieur d’environ une unité au pKA, la forme acide est largement majoritaire.
-À pH supérieur d’environ une unité au pKA, la forme basique est largement majoritaire.
+POURCENTAGES
+%AH = 100/(1+10^(pH−pKA)).
+%B = 100/(1+10^(pKA−pH)).
 
 EXEMPLE
-Pour CH3COOH/CH3COO− avec pKA = 4,76 :
-- pH = 3,8 → CH3COOH prédomine.
-- pH = 4,76 → mêmes proportions.
-- pH = 6,0 → CH3COO− prédomine.
-
-POURCENTAGES
-%AH = 1 / (1 + 10^(pH − pKA)) × 100
-%B = 1 / (1 + 10^(pKA − pH)) × 100
+Pour CH3COOH/CH3COO−, pKA ≈ 4,76.
+pH 3,76 → AH majoritaire.
+pH 4,76 → proportions égales.
+pH 5,76 → B majoritaire.
 
 MÉTHODE BAC
-1. Comparer pH et pKA.
-2. Déterminer l’espèce prédominante.
-3. Justifier avec [B]/[AH] si demandé.
-4. Pour un pourcentage, utiliser la formule de distribution.
+Comparer pH et pKA avant tout calcul.
 
 PIÈGE
-pH = pKA ne signifie pas que l’acide a disparu. Cela signifie que les deux formes sont en proportions égales.
+pH = pKA ne signifie pas disparition de l'acide.
 
-[DIAGRAM: diagramme de prédominance AH | pH=pKA | B]
-[INTERACTIVE: pH mobile affichant les pourcentages AH/B]
+EXERCICES À VARIANTE
+Lire une zone de prédominance, retrouver pKA, puis calculer un pourcentage.
 
-============================================================
-LESSON 04 · CONSTANTE D’ÉQUILIBRE ET PRÉVISION D’ÉVOLUTION
-============================================================
-slug: equilibre-chimique-qr-k
-subject: physique-chimie
+[DIAGRAM: AH | pH=pKA | B]
+[ANIMATION: les proportions changent avec le pH]
+[INTERACTIVE: curseur pH → %AH / %B]
 
-RÉACTION GÉNÉRALE
- aA + bB ⇌ cC + dD
+----------------------------------------------------------------
+LESSON 05 · RÉACTION ACIDOBASIQUE ET CONSTANTE D'ÉQUILIBRE
+slug: reaction-acidobasique-k
 
-QUOTIENT DE RÉACTION
-Qr = [C]^c[D]^d / ([A]^a[B]^b)
-Les solides purs et l’eau solvant ne figurent pas dans Qr.
+RÉACTION TYPE
+A1H + B2 ⇌ B1 + A2H.
 
-À L’ÉQUILIBRE
-Qr,eq = K
-K dépend uniquement de la température.
-
-PRÉVISION
-K > Qr → évolution spontanée dans le sens direct.
-K < Qr → évolution spontanée dans le sens inverse.
-K = Qr → état d’équilibre.
-
-EXEMPLE
-Pour une réaction dont K = 12 :
-- Qr = 3 → le système évolue dans le sens direct.
-- Qr = 20 → le système évolue dans le sens inverse.
-- Qr = 12 → équilibre.
-
-MÉTHODE
-1. Écrire l’équation dans le sens choisi.
-2. Écrire Qr.
-3. Calculer ou lire K.
-4. Comparer Qr et K.
-5. Conclure sur le sens spontané.
-
-PIÈGE
-Une grande valeur de K ne signifie pas que la réaction est forcément instantanée. K renseigne sur l’équilibre, pas sur la vitesse.
-
-[DIAGRAM: balance Qr ↔ K avec flèches de sens d’évolution]
-[INTERACTIVE: calcul de Qr à partir des concentrations]
-
-============================================================
-LESSON 05 · DOSAGE ACIDOBASIQUE
-============================================================
-slug: dosage-acidobasique
-subject: physique-chimie
-
-OBJECTIF
-Déterminer une concentration inconnue grâce à une réaction acido-basique totale, rapide et sélective.
-
-EXEMPLE MODÈLE
-Dosage de H3O+ par OH− :
-H3O+ + OH− → 2 H2O
-
-À L’ÉQUIVALENCE
-Les réactifs sont introduits dans les proportions stœchiométriques.
-Pour un dosage 1:1 :
-CA VA = CB VBE
-
-COURBE pH = f(VB)
-On peut lire :
-- le pH initial à VB = 0 ;
-- le volume équivalent VBE ;
-- le pHE ;
-- la nature du dosage ;
-- l’indicateur coloré adapté.
-
-MÉTHODE DES TANGENTES PARALLÈLES
-1. Tracer deux tangentes parallèles de part et d’autre du saut.
-2. Tracer la parallèle médiane équidistante.
-3. Son intersection avec la courbe donne E.
-
-EXEMPLE CHIFFRÉ
-VA = 20,0 mL d’un acide fort.
-CB = 0,050 mol·L−1.
-VBE = 16,0 mL.
-CA = CB VBE / VA = 0,050×16,0/20,0 = 0,040 mol·L−1.
-
-INDICATEUR
-Le pH à l’équivalence doit appartenir à la zone de virage choisie.
-
-PIÈGE
-À l’équivalence, ce n’est pas « même volume » qui compte, mais les proportions stœchiométriques.
-
-[IMAGE: burette + erlenmeyer annotés]
-[DIAGRAM: courbe pH=f(VB) avec point E]
-[INTERACTIVE: cliquer sur la courbe pour estimer VBE]
-
-============================================================
-LESSON 06 · INDICATEURS COLORÉS
-============================================================
-slug: indicateurs-colores
-subject: physique-chimie
-
-DÉFINITION
-Un indicateur coloré est un couple acide/base HIn/In− dont les deux formes ont des teintes différentes.
-
-ÉQUILIBRE
-HIn + H2O ⇌ H3O+ + In−
-
-RELATION
-pH = pKA + log([In−]/[HIn])
+CONSTANTE
+K = KA1/KA2 = 10^(pKA2−pKA1).
 
 LECTURE
-pH < pKA → teinte acide dominante.
-pH = pKA → proportions comparables.
-pH > pKA → teinte basique dominante.
+K >> 1 → sens direct favorisé.
+K << 1 → sens inverse favorisé.
+K ≈ 1 → aucun sens très favorisé par K seul.
 
-EXEMPLE DE CHOIX
-Pour une équivalence proche de pH 9, un indicateur dont la zone de virage se situe autour de 8 à 10 est préférable à un indicateur qui vire autour de pH 4.
-
-MÉTHODE
-1. Déterminer pHE.
-2. Lire la zone de virage des indicateurs disponibles.
-3. Choisir celui dont la zone couvre pHE.
+EXEMPLE
+pKA1 = 3,1 ; pKA2 = 6,0.
+K ≈ 10^2,9 ≈ 8×10^2.
+Le sens A1H + B2 → B1 + A2H est fortement favorisé.
 
 PIÈGE
-Ne pas choisir un indicateur uniquement parce que son pKA est proche sans vérifier sa zone de virage.
+K décrit l'équilibre, pas la rapidité.
 
-[IMAGE: nuancier acide → zone de virage → base]
-[INTERACTIVE: comparer plusieurs indicateurs pour un pHE donné]
+EXERCICES À VARIANTE
+Modifier pKA1 et pKA2 de quelques dixièmes ; demander le sens puis l'ordre de grandeur de K.
 
-============================================================
-LESSON 07 · PILES ÉLECTROCHIMIQUES ET PILE DANIELL
-============================================================
-slug: piles-electrochimiques
-subject: physique-chimie
+[DIAGRAM: échelle K]
+
+================================================================
+UNITÉ 02 · DOSAGES ET INDICATEURS
+================================================================
+
+LESSON 06 · DOSAGE ACIDOBASIQUE
+slug: dosage-acidobasique
+
+OBJECTIF
+Déterminer une concentration inconnue avec une réaction rapide, totale et sélective.
+
+RÉACTION TYPE
+H3O+ + OH− → 2H2O.
+Pour un dosage 1:1 : CA VA = CB VBE.
+
+EXEMPLE GUIDÉ
+VA = 18,0 mL ; CB = 0,060 mol·L−1 ; VBE = 15,0 mL.
+CA = CBVBE/VA = 0,060×15,0/18,0 = 5,0×10−2 mol·L−1.
+
+ACIDE FAIBLE + BASE FORTE
+AH + OH− → B + H2O.
+À l'équivalence, B est majoritaire et le milieu est généralement basique.
+
+BASE FAIBLE + ACIDE FORT
+B + H3O+ → AH + H2O.
+À l'équivalence, AH est majoritaire et le milieu est généralement acide.
+
+PIÈGE
+À l'équivalence, ce sont les quantités de matière qui respectent la stœchiométrie, pas des concentrations nécessairement égales.
+
+EXERCICES À VARIANTE
+Changer VA, CB et VBE ; puis donner une réaction avec des coefficients différents.
+
+[IMAGE: burette + erlenmeyer annotés]
+[DIAGRAM: point d'équivalence]
+[INTERACTIVE: déplacer VB et voir le réactif limitant]
+
+----------------------------------------------------------------
+LESSON 07 · LIRE UNE COURBE pH = f(V)
+slug: courbe-dosage
+
+À REPÉRER
+pH initial · zone tampon éventuelle · saut de pH · VE · pHE · après-équivalence.
+
+MÉTHODE DES TANGENTES
+Deux tangentes parallèles encadrent le saut ; une parallèle médiane équidistante permet de situer E.
+
+MÉTHODE PAR DÉRIVÉE
+dpH/dV atteint un maximum au voisinage de VE.
+
+EXEMPLE
+Le pic de dérivée est à 21,8 mL. On retient VE ≈ 21,8 mL.
+
+EXERCICES À VARIANTE
+Trois courbes proches, puis une quatrième avec une courbe de dérivée : trouver VE et justifier la méthode.
+
+[IMAGE: courbe annotée]
+[INTERACTIVE: placer E sur le graphe]
+
+----------------------------------------------------------------
+LESSON 08 · INDICATEURS COLORÉS
+slug: indicateurs-colores
+
+DÉFINITION
+Un indicateur est un couple HIn/In− dont les deux formes ont des teintes différentes.
+
+ÉQUILIBRE
+HIn + H2O ⇌ H3O+ + In−.
+
+RELATION
+pH = pKA + log([In−]/[HIn]).
+
+LECTURE
+pH < pKA : forme acide dominante.
+pH ≈ pKA : mélange de teintes.
+pH > pKA : forme basique dominante.
+
+CHOIX AU DOSAGE
+Le pHE doit appartenir à la zone de virage de l'indicateur retenu.
+
+EXERCICES À VARIANTE
+Donner pHE, puis proposer plusieurs indicateurs ; choisir celui dont la zone couvre pHE.
+
+[IMAGE: nuancier]
+[INTERACTIVE: pHE → indicateurs compatibles]
+
+================================================================
+UNITÉ 03 · ÉQUILIBRE CHIMIQUE
+================================================================
+
+LESSON 09 · QUOTIENT DE RÉACTION ET PRÉVISION D'ÉVOLUTION
+slug: quotient-reaction-equilibre
+
+RÉACTION
+ aA(aq) + bB(aq) ⇌ cC(aq) + dD(aq).
+
+QUOTIENT
+Qr = [C]^c[D]^d / ([A]^a[B]^b).
+Les solides purs et l'eau solvant ne figurent pas dans Qr.
+
+À L'ÉQUILIBRE
+Qr,eq = K ; K dépend uniquement de la température.
+
+PRÉVISION
+K > Qr → sens direct.
+K < Qr → sens inverse.
+K = Qr → équilibre.
+
+EXEMPLE
+K = 15 ; Qr = 4 → direct ; Qr = 27 → inverse ; Qr = 15 → équilibre.
+
+PRINCIPE
+Une espèce ajoutée tend à être consommée ; une espèce retirée tend à être produite.
+
+PIÈGE
+Équilibre ne signifie pas réaction microscopique arrêtée.
+
+[DIAGRAM: Qr ↔ K]
+[ANIMATION: Qr se rapproche de K]
+[INTERACTIVE: modifier une concentration]
+
+================================================================
+UNITÉ 04 · OXYDORÉDUCTION, PILES, ÉLECTROLYSE
+================================================================
+
+LESSON 10 · OXYDATION ET RÉDUCTION
+slug: redox-bases
+
+DÉFINITIONS
+Oxydation : perte d'électrons.
+Réduction : gain d'électrons.
+Oxydant : capte les électrons.
+Réducteur : cède les électrons.
+
+MÉMO
+OXydation = perte ; REDuction = gain.
+
+EXEMPLE
+Zn → Zn2+ + 2e− : oxydation.
+Cu2+ + 2e− → Cu : réduction.
+
+MÉTHODE BAC
+Couples → demi-équations → équilibrage des électrons → bilan.
+
+[DIAGRAM: couple Ox/Red]
+[INTERACTIVE: classer une demi-équation]
+
+----------------------------------------------------------------
+LESSON 11 · PILE DANIELL
+slug: pile-daniell
 
 IDÉE CENTRALE
-Une pile transforme spontanément une partie de l’énergie chimique en énergie électrique.
+Une pile transforme spontanément de l'énergie chimique en énergie électrique.
 
 VOCABULAIRE
 Anode : oxydation, pôle négatif de la pile.
 Cathode : réduction, pôle positif de la pile.
-Pont salin : ferme le circuit et maintient l’électroneutralité des solutions.
+Pont salin : fermeture du circuit ionique et maintien de l'électroneutralité.
 
-PILE DANIELL
-Couples : Zn2+/Zn et Cu2+/Cu.
-Oxydation : Zn → Zn2+ + 2e−
-Réduction : Cu2+ + 2e− → Cu
-Bilan : Zn + Cu2+ → Zn2+ + Cu
+RÉACTIONS
+Zn → Zn2+ + 2e−.
+Cu2+ + 2e− → Cu.
+Bilan : Zn + Cu2+ → Zn2+ + Cu.
 
 CIRCULATION
-Électrons dans le circuit extérieur : Zn → Cu.
+Électrons : Zn → Cu.
 Courant conventionnel : Cu → Zn.
 
-QUANTITÉ D’ÉLECTRICITÉ
-Q = I Δt = n(e−)F
+QUANTITÉ D'ÉLECTRICITÉ
+Q = IΔt = n(e−)F.
 F ≈ 9,65×10^4 C·mol−1.
 
 EXEMPLE
-Un courant I = 0,20 A circule pendant 12 min.
-Q = 0,20×(12×60) = 144 C.
-n(e−) = 144 / 9,65×10^4 ≈ 1,49×10−3 mol.
+I = 0,18 A ; Δt = 15 min.
+Q = 162 C.
+n(e−) ≈ 1,68×10−3 mol.
+
+EXTENSION
+Pour Cu2+ + Zn → Cu + Zn2+, n(e−) = 2x.
 
 PIÈGE
-Dans une pile, anode = oxydation et cathode = réduction. Le signe des pôles est propre au fonctionnement galvanique.
+Ne pas confondre sens des électrons et sens du courant conventionnel.
 
-[DIAGRAM: pile Daniell avec électrons, courant et ions]
-[IMAGE: deux demi-piles + pont salin]
-[INTERACTIVE: faire glisser les électrons du Zn vers le Cu]
+EXERCICES À VARIANTE
+Changer I et Δt, puis passer à x et à une variation de masse.
 
-============================================================
-LESSON 08 · ÉLECTROLYSE
-============================================================
+[IMAGE: pile Daniell annotée]
+[DIAGRAM: électrons / courant / ions]
+[ANIMATION: dissolution du Zn et dépôt de Cu]
+[INTERACTIVE: cliquer sur chaque flèche]
+
+----------------------------------------------------------------
+LESSON 12 · AVANCEMENT DANS UNE PILE
+slug: avancement-pile
+
+EXEMPLE TYPE
+2Al + 3Cu2+ → 2Al3+ + 3Cu.
+
+AVANCEMENT x
+n(Al) = n0(Al)−2x.
+n(Cu2+) = n0(Cu2+)−3x.
+n(Al3+) = n0(Al3+)+2x.
+n(Cu) = n0(Cu)+3x.
+n(e−) = 6x.
+
+EXEMPLE
+xf = 1,5×10−3 mol → n(e−)=9,0×10−3 mol → Q ≈ 869 C.
+
+EXERCICES À VARIANTE
+Changer les coefficients et demander successivement quantité d'électrons, concentration et masse.
+
+[DIAGRAM: tableau d'avancement redox]
+
+----------------------------------------------------------------
+LESSON 13 · ÉLECTROLYSE
 slug: electrolyse
-subject: physique-chimie
 
 DÉFINITION
-L’électrolyse est une transformation forcée imposée par un générateur électrique.
+Transformation forcée imposée par un générateur.
 
-RÈGLE ABSOLUE
-Cathode : réduction, reliée au pôle − du générateur.
-Anode : oxydation, reliée au pôle + du générateur.
+RÈGLE
+Cathode : réduction, pôle − du générateur.
+Anode : oxydation, pôle + du générateur.
 
-EXEMPLE · NaCl(aq)
-À l’anode : 2Cl− → Cl2 + 2e−
-À la cathode : 2H2O + 2e− → H2 + 2OH−
-Bilan : 2H2O + 2Cl− → H2 + 2OH− + Cl2
+NaCl(aq)
+Anode : 2Cl− → Cl2 + 2e−.
+Cathode : 2H2O + 2e− → H2 + 2OH−.
+
+Bilan : 2H2O + 2Cl− → H2 + 2OH− + Cl2.
 
 MÉTHODE
-1. Lister toutes les espèces présentes.
-2. Identifier les couples redox possibles.
-3. Écrire les oxydations possibles à l’anode.
-4. Écrire les réductions possibles à la cathode.
-5. Retenir les transformations effectivement observées.
-6. Équilibrer le bilan.
-
-QUICK CHECK
-Dans une électrolyse, quelle transformation se produit à la cathode ?
-Réponse : une réduction.
-
-[DIAGRAM: tube en U avec générateur et demi-équations]
-[ANIMATION: électrons quittant la cathode et arrivant à l’anode dans le circuit externe]
-
-============================================================
-LESSON 09 · NOMENCLATURE DES ALCANES ET ALCOOLS
-============================================================
-slug: nomenclature-alcanes-alcools
-subject: physique-chimie
-
-ALCANES
-Formule générale : CnH2n+2.
-Le nom dépend du nombre de carbones de la chaîne principale.
-
-1 → méthane
-2 → éthane
-3 → propane
-4 → butane
-5 → pentane
-6 → hexane
-7 → heptane
-8 → octane
-9 → nonane
-10 → décane
-
-CHAÎNE RAMIFIÉE
-1. Chercher la chaîne principale la plus longue.
-2. Identifier les groupes alkyles.
-3. Numéroter pour donner les plus petits indices aux ramifications.
-4. Classer les substituants par ordre alphabétique.
-
-ALCOOLS
-La chaîne principale doit contenir le carbone portant −OH.
-Numérotation donnant le plus petit indice au groupe −OH.
-Suffixe : −ol.
-Exemple : butan-2-ol.
-
-EXEMPLE GUIDÉ
-CH3−CH(CH3)−CH2−CH3
-Chaîne principale : butane.
-Substituant : méthyle en position 2.
-Nom : 2-méthylbutane.
+Espèces présentes → couples → réactions possibles → observations → bilan.
 
 PIÈGE
-Pour un alcool, on ne choisit pas une chaîne longue qui exclut le carbone portant −OH.
+Cathode = réduction, quel que soit le montage.
 
-[IMAGE: formule semi-développée → chaîne principale surlignée → nom]
-[INTERACTIVE: nommer une molécule en cliquant les étapes]
+EXERCICES À VARIANTE
+Identifier les électrodes à partir d'un schéma, puis calculer une quantité de gaz produite à partir de Q.
 
-============================================================
-LESSON 10 · ACIDES CARBOXYLIQUES ET ESTERS
-============================================================
-slug: acides-carboxyliques-esters
-subject: physique-chimie
+[IMAGE: tube en U]
+[ANIMATION: dégagement des gaz]
+[INTERACTIVE: choisir la réaction correcte]
 
-ACIDE CARBOXYLIQUE
-Le carbone fonctionnel de −COOH reçoit le numéro 1.
-Nom : acide + alcanoïque.
-Exemple : acide propanoïque.
+================================================================
+UNITÉ 05 · CHIMIE ORGANIQUE
+================================================================
 
-ESTER
-Le nom d’un ester comporte deux parties :
-- la partie issue de l’acide → alcanoate ;
-- la partie issue de l’alcool → alkyle.
-
-FORMAT
-alcanoate de alkyle.
-
-EXEMPLE
-CH3COOCH2CH3 → éthanoate d’éthyle.
-
-RETROUVER L’ACIDE ET L’ALCOOL
-Découper autour de la liaison −COO−.
-Côté acyle → reconstruire l’acide en ajoutant OH.
-Côté alkoxy → reconstruire l’alcool en ajoutant H.
-
-[DIAGRAM: ester découpé en « partie acide » et « partie alcool »]
-
-============================================================
-LESSON 11 · ESTÉRIFICATION, HYDROLYSE ET RENDEMENT
-============================================================
-slug: esterification-hydrolyse-rendement
-subject: physique-chimie
-
-ESTÉRIFICATION
-Acide carboxylique + alcool ⇌ ester + eau.
-
-HYDROLYSE
-Ester + eau ⇌ acide carboxylique + alcool.
-
-PROPRIÉTÉS
-Les deux transformations sont lentes et limitées.
-À l’équilibre, les quatre espèces peuvent coexister.
-
-RENDEMENT
-r = n_exp / n_théo
-avec 0 < r ≤ 1.
-
-AMÉLIORER UN RENDEMENT
-- Mettre un réactif en excès.
-- Retirer un produit formé.
-- Utiliser des conditions accélérant la transformation lorsque cela est pertinent.
-
-EXEMPLE CHIFFRÉ
-On obtient expérimentalement 0,072 mol d’ester alors que la quantité théorique est 0,090 mol.
-r = 0,072/0,090 = 0,80 = 80 %.
-
-PIÈGE
-Le rendement et le taux d’avancement final ne sont pas la même grandeur.
-
-[IMAGE: schéma réactionnel alcool + acide → ester + eau]
-[ANIMATION: esterification ⇄ hydrolyse avec flèches de plus en plus équilibrées]
-
-============================================================
-LESSON 12 · SAPONIFICATION ET FABRICATION DU SAVON
-============================================================
-slug: saponification-savon
-subject: physique-chimie
+LESSON 14 · NOMENCLATURE DES ALCANES
+slug: nomenclature-alcanes
 
 DÉFINITION
-La saponification est l’hydrolyse basique d’un ester.
-Elle forme un ion carboxylate et un alcool.
+Alcane acyclique : composé constitué de C et H avec uniquement des liaisons simples ; CnH2n+2.
 
-SCHÉMA
-Ester + OH− → carboxylate + alcool
+MÉTHODE RAMIFIÉE
+1. Choisir la plus longue chaîne.
+2. La numéroter dans le sens donnant les plus petits indices.
+3. Identifier les groupes alkyles.
+4. Classer les substituants par ordre alphabétique.
+5. Construire le nom.
+
+EXEMPLE
+Une chaîne de cinq carbones avec des méthyles en 2 et 3 donne 2,3-diméthylpentane.
+
+EXERCICES À VARIANTE
+Nom → formule semi-développée ; formule → nom ; changer une branche d'une position.
+
+[IMAGE: chaîne surlignée et numérotée]
+[INTERACTIVE: numéroter la chaîne]
+
+----------------------------------------------------------------
+LESSON 15 · ALCOOLS ET ACIDES CARBOXYLIQUES
+slug: alcools-acides-carboxyliques
+
+ALCOOL
+Groupe hydroxyle −OH lié à un carbone saturé. La chaîne principale doit porter −OH ; suffixe -ol.
+
+CLASSES
+Primaire : carbone porteur de OH lié à 1 carbone.
+Secondaire : lié à 2 carbones.
+Tertiaire : lié à 3 carbones.
+
+ACIDE CARBOXYLIQUE
+Groupe −COOH ; le carbone fonctionnel est n°1 ; nom : acide ...oïque.
+
+EXEMPLES
+CH3CH2OH → éthanol.
+CH3CH(OH)CH2CH3 → butan-2-ol.
+CH3CH2COOH → acide propanoïque.
+
+EXERCICES À VARIANTE
+Modifier la position de OH ou ajouter une ramification, puis nommer et classer.
+
+[DIAGRAM: arbre de décision]
+
+----------------------------------------------------------------
+LESSON 16 · ESTERS : NOMMER ET RECONSTITUER LES RÉACTIFS
+slug: nomenclature-esters
+
+STRUCTURE
+R−COO−R'.
+Nom : alcanoate de alkyle.
+
+LECTURE
+Partie issue de l'acide → -oate.
+Partie liée à O → -yle.
+
+EXEMPLE
+CH3COOCH2CH3 → éthanoate d'éthyle.
+
+RETROUVER ACIDE ET ALCOOL
+Le côté carbonyle redevient RCOOH ; le côté O−R' redevient R'OH.
+
+EXERCICES À VARIANTE
+Nommer, construire, puis retrouver les réactifs d'un ester proche mais différent.
+
+[DIAGRAM: découpe de l'ester]
+[INTERACTIVE: cliquer sur une moitié]
+
+----------------------------------------------------------------
+LESSON 17 · ESTÉRIFICATION ET HYDROLYSE
+slug: esterification-hydrolyse
+
+ESTÉRIFICATION
+Acide + alcool ⇌ ester + eau.
+
+HYDROLYSE
+Ester + eau ⇌ acide + alcool.
+
+CARACTÉRISTIQUES
+Lentes · limitées · athermiques.
+Les quatre espèces coexistent à l'équilibre.
+
+EXEMPLE GUIDÉ
+CH3COOH + CH3CH2OH ⇌ CH3COOCH2CH3 + H2O.
+Avec 0,80 mol initial de chacun :
+acide = 0,80−xf ; alcool = 0,80−xf ; ester = xf ; eau = xf.
+
+RENDEMENT
+r = n_exp/n_théo.
+Le rendement n'est pas le taux d'avancement final.
+
+AGIR SUR LE RENDEMENT
+Réactif en excès, élimination d'un produit, choix de conditions adaptées.
+Une hausse de vitesse n'implique pas automatiquement une modification de la limite d'équilibre.
+
+EXERCICES À VARIANTE
+Changer 0,80 mol en 0,75 mol ; changer l'alcool ; distinguer rendement et τ.
+
+[ANIMATION: réaction réversible]
+[DIAGRAM: quatre espèces à l'équilibre]
+[INTERACTIVE: faire varier xf]
+
+----------------------------------------------------------------
+LESSON 18 · SAPONIFICATION ET FABRICATION DU SAVON
+slug: saponification-savon
+
+DÉFINITION
+Hydrolyse basique d'un ester donnant un ion carboxylate et un alcool.
+
+EXEMPLE
+CH3COOCH2CH3 + OH− → CH3COO− + CH3CH2OH.
+
+CARACTÉRISTIQUES
+Lente · totale · exothermique.
 
 SAVON
-Savon dur : carboxylate de sodium.
-Savon mou : carboxylate de potassium.
+Carboxylate de sodium ou de potassium à longue chaîne.
+Tête COO− hydrophile ; queue R hydrophobe.
 
-PARTIE DOUBLE DE L’ION CARBOXYLATE
-Tête −COO− : hydrophile.
-Chaîne R : hydrophobe.
-Cette organisation permet la formation de micelles autour des graisses.
+MONTAGE
+Reflux : accélère sans forte perte de matière volatile.
+Éthanol : favorise le contact des réactifs.
+Pierre ponce : régularise l'ébullition.
+NaCl saturé : favorise le relargage du savon.
 
-CHAUFFAGE À REFLUX
-Accélère la transformation tout en limitant les pertes de matière par condensation des vapeurs.
+EXERCICES À VARIANTE
+Associer chaque étape à son rôle ; identifier tête/queue ; écrire le carboxylate obtenu ; distinguer vitesse et produit.
 
-EAU SALÉE
-Le relargage réduit la solubilité du savon et facilite sa séparation du milieu.
+[IMAGE: micelle autour d'une goutte de graisse]
+[ANIMATION: formation d'une micelle]
+[DIAGRAM: protocole en étapes]
 
-PIERRE PONCE
-Régularise l’ébullition et limite les sursauts de vapeur.
+================================================================
+UNITÉ 06 · CINÉTIQUE CHIMIQUE
+================================================================
 
-EXEMPLE
-Éthanoate d’éthyle + OH− → ion éthanoate + éthanol.
+LESSON 19 · VITESSE D'UNE TRANSFORMATION
+slug: vitesse-reaction
 
-MÉTHODE D’ANALYSE D’UNE EXPÉRIENCE
-1. Identifier les réactifs.
-2. Identifier les produits.
-3. Justifier le reflux.
-4. Justifier l’eau salée.
-5. Expliquer le caractère hydrophile/hydrophobe du savon.
-
-[IMAGE: micelle en coupe, têtes dans l’eau et queues vers la graisse]
-[DIAGRAM: montage de chauffage à reflux annoté]
-[ANIMATION: formation d’une micelle autour d’une goutte de graisse]
-
-============================================================
-LESSON 13 · FACTEURS CINÉTIQUES ET VITESSE DE RÉACTION
-============================================================
-slug: facteurs-cinetiques-vitesse
-subject: physique-chimie
-
-CINÉTIQUE
-La cinétique chimique étudie l’évolution d’une transformation au cours du temps.
+IDÉE
+Deux transformations peuvent avoir la même limite mais des vitesses différentes.
 
 FACTEURS CINÉTIQUES
-Température, concentration initiale des réactifs et catalyseur peuvent modifier la vitesse.
+Température, concentration initiale, surface de contact selon le système, catalyseur.
 
 CATALYSEUR
-Accélère ou modifie le chemin réactionnel sans être consommé globalement et sans modifier
-la constante d’équilibre.
-
-TYPES
-Catalyse homogène : même phase.
-Catalyse hétérogène : phases différentes.
-Catalyse enzymatique : enzyme comme catalyseur.
-Autocatalyse : un produit joue le rôle de catalyseur.
+Accélère la réaction en proposant un autre chemin ; ne modifie pas la constante d'équilibre globale.
 
 VITESSE VOLUMIQUE
-V = (1/VS) dx/dt
-Si VS est constant.
-
-INTERPRÉTATION GRAPHIQUE
-La vitesse instantanée correspond au coefficient directeur de la tangente à x=f(t).
+v = (1/Vs) dx/dt.
 
 EXEMPLE
-VS = 250 mL.
-Entre 10 min et 22 min, l’avancement augmente de 0,60 mmol.
-V ≈ (1/0,250)×(0,60×10−3)/(12×60)
-≈ 3,3×10−6 mol·L−1·s−1.
+Vs = 100 mL ; dx/dt = 2,5×10−4 mol·s−1.
+v = 2,5×10−3 mol·L−1·s−1.
 
-TEMPS DE DEMI-RÉACTION
-t1/2 est la durée nécessaire pour atteindre xf/2.
+LECTURE GRAPHIQUE
+Plus la tangente est pentue, plus la vitesse est grande.
 
-MÉTHODE DE COMPARAISON
-Pour une même durée : plus de produit formé → transformation plus rapide.
-Pour une même quantité formée : moins de temps → transformation plus rapide.
+EXERCICES À VARIANTE
+Changer le volume, comparer deux tangentes, puis identifier le facteur cinétique modifié.
 
-PIÈGE
-Un catalyseur ne déplace pas l’équilibre final ; il modifie surtout la vitesse à laquelle il est atteint.
+[ANIMATION: tangente qui s'aplatit]
+[INTERACTIVE: point mobile sur x(t)]
 
-[DIAGRAM: tangente à x=f(t) et lecture de la pente]
-[INTERACTIVE: changer T, C et catalyseur puis comparer les courbes]
+----------------------------------------------------------------
+LESSON 20 · TEMPS DE DEMI-RÉACTION
+slug: temps-demi-reaction
 
-============================================================
-LESSON 14 · UNITÉS SI, HOMOGÉNÉITÉ ET DIMENSIONS
-============================================================
-slug: systeme-international-dimensions
-subject: physique-chimie
+DÉFINITION
+t1/2 est le temps pour atteindre xf/2.
 
-OBJECTIF
-Vérifier une formule, retrouver une unité dérivée et détecter une erreur de conversion.
-
-GRANDEURS DE BASE
-Longueur → m → L
-Masse → kg → M
-Temps → s → T
-Intensité électrique → A → I
-Température thermodynamique → K → Θ
-Quantité de matière → mol → N
-Intensité lumineuse → cd → J
-
-UNITÉS DÉRIVÉES UTILES
-Vitesse : m·s−1
-Accélération : m·s−2
-Force : N = kg·m·s−2
-Énergie : J = kg·m²·s−2
-Puissance : W = kg·m²·s−3
-Pression : Pa = kg·m−1·s−2
-Charge : C = A·s
-Tension : V = kg·m²·s−3·A−1
-Résistance : Ω = kg·m²·s−3·A−2
-
-EXEMPLE D’HOMOGÉNÉITÉ
-Pour τ = RC :
-[R] = [U]/[I]
-[C] = [Q]/[U] = [I][T]/[U]
-Donc [RC] = [T].
-La relation est homogène à un temps.
-
-PIÈGE
-Une formule homogène n’est pas forcément physiquement correcte, mais une formule non homogène est forcément incorrecte.
-
-[DIAGRAM: arbre dimensions → unités dérivées]
-[INTERACTIVE: détecteur de formules homogènes]
-
-============================================================
-LESSON 15 · ONDES MÉCANIQUES PROGRESSIVES ET PÉRIODIQUES
-============================================================
-slug: ondes-mecaniques
-subject: physique-chimie
-
-DÉFINITIONS COURTES
-Signal : perturbation locale et temporaire qui se propage.
-Onde mécanique : perturbation qui se propage dans un milieu matériel sans transport global de matière.
-Onde progressive : perturbation qui se propage dans l’espace au cours du temps.
-
-CÉLÉRITÉ
-v = d/Δt
-
-DOUBLE PÉRIODICITÉ
-v = λ/T = λf
-
-PHASE
-Même phase : d = kλ.
-Opposition de phase : d = (2k+1)λ/2.
-
-TYPES
-Transversale : déformation perpendiculaire à la propagation.
-Longitudinale : déformation parallèle à la propagation.
+MÉTHODE
+Plateau xf → moitié xf/2 → lecture du temps correspondant.
 
 EXEMPLE
-Une onde parcourt 24 cm en 0,080 s.
-v = 0,24/0,080 = 3,0 m·s−1.
+Si xf = 8,4 mmol, chercher le temps où x = 4,2 mmol.
 
-SI λ = 6,0 cm, alors T = λ/v = 0,060/3,0 = 0,020 s.
-f = 1/T = 50 Hz.
+EXERCICES À VARIANTE
+Changer le plateau puis comparer deux t1/2 pour juger laquelle des transformations est la plus rapide.
 
-PIÈGE
-Ne pas confondre période temporelle T et longueur d’onde λ.
+[DIAGRAM: construction graphique de t1/2]
 
-[IMAGE: onde sur corde avec source S et front F]
-[ANIMATION: onde propagée point par point avec retard τ]
-[INTERACTIVE: mesurer λ sur une onde périodique]
+================================================================
+UNITÉ 07 · CIRCUITS RC, RL, LC, RLC
+================================================================
 
-============================================================
-LESSON 16 · DIFFRACTION, SON ET LUMIÈRE
-============================================================
-slug: diffraction-son-lumiere
-subject: physique-chimie
+LESSON 21 · CONDENSATEUR ET CIRCUIT RC
+slug: rc-condensateur
 
-DIFFRACTION
-Elle devient importante quand l’ouverture a est du même ordre que λ ou plus petite.
-Pour de petits angles : θ ≈ λ/a.
+DÉFINITIONS
+q = CUc.
+i = C dUc/dt.
+Ee = 1/2CUc².
+τ = RC.
 
-CONSÉQUENCE
-Ouverture plus petite → diffraction plus marquée.
+CHARGE
+Uc = E(1−e^(−t/τ)).
+i = (E/R)e^(−t/τ).
 
-SON
-Le son est une onde mécanique progressive et longitudinale.
-Il nécessite un milieu matériel et ne se propage pas dans le vide.
-Dans l’air, sa célérité est proche de 340 m·s−1 dans les conditions usuelles.
+DÉCHARGE
+Uc = E e^(−t/τ).
 
-LUMIÈRE
-La lumière est une onde électromagnétique et peut se propager dans le vide.
-λ0 = c/f.
-
-EXEMPLE DIFFRACTION
-Une fente a = 0,20 mm est éclairée par λ = 600 nm.
-θ ≈ 600×10−9 / 2,0×10−4 = 3,0×10−3 rad.
-
-PIÈGE
-Pour la lumière, la fréquence reste liée à la source ; la longueur d’onde dépend du milieu.
-
-[IMAGE: fente fine avec tache centrale et taches secondaires]
-[DIAGRAM: spectre visible 400–780 nm]
-[ANIMATION: propagation d’une onde sonore par compressions-dilatations]
-
-============================================================
-LESSON 17 · RADIOACTIVITÉ ET DÉCROISSANCE
-============================================================
-slug: radioactivite-decouverte-loi
-subject: physique-chimie
-
-NUCLÉIDE
-Notation : ^A_Z X.
-A = nombre de nucléons.
-Z = nombre de protons.
-N = A − Z.
-
-RADIOACTIVITÉ
-Transformation spontanée et aléatoire d’un noyau instable vers un noyau plus stable.
-
-LOIS DE SODDY
-Conservation de A et de Z.
-
-DÉSINTÉGRATIONS
-α : A diminue de 4, Z diminue de 2.
-β− : A inchangé, Z augmente de 1.
-β+ : A inchangé, Z diminue de 1.
-γ : émission électromagnétique sans modification de A ou Z.
-
-LOI DE DÉCROISSANCE
-N(t) = N0 e^(−λt)
-
-DEMI-VIE
-t1/2 = ln(2)/λ ≈ 0,693/λ
-
-ACTIVITÉ
-A(t) = λN(t)
+REPÈRES
+À t=τ : 63 % en charge, 37 % restant en décharge.
+Vers 5τ : régime transitoire pratiquement terminé.
 
 EXEMPLE
-Un échantillon a N0 = 8,0×10^20 noyaux et λ = 0,025 an−1.
-Après 20 ans :
-N = N0 e^(−0,025×20) ≈ 0,607N0.
-Il reste donc environ 60,7 % des noyaux initiaux.
+R = 22 kΩ ; C = 47 µF.
+τ ≈ 1,03 s.
 
-PIÈGE
-N(t) est le nombre de noyaux encore présents, pas le nombre déjà désintégrés.
+MÉTHODE
+Charge/décharge → τ → expression → condition initiale → calcul.
 
-[DIAGRAM: courbe N(t) et lecture de τ puis t1/2]
-[INTERACTIVE: curseur t pour lire N/N0]
+EXERCICES À VARIANTE
+R = 18 kΩ, C = 56 µF ; retrouver C à partir de τ ; comparer deux courbes.
 
-============================================================
-LESSON 18 · RC, RL, RLC ET OSCILLATIONS
-============================================================
-slug: circuits-rc-rl-rlc
-subject: physique-chimie
+[IMAGE: circuit RC]
+[ANIMATION: charge du condensateur]
+[INTERACTIVE: régler R et C]
 
-RC · CHARGE
-τ = RC
-Uc(t) = E(1 − e^(−t/τ))
-À t = τ : Uc ≈ 0,63E.
+----------------------------------------------------------------
+LESSON 22 · BOBINE ET CIRCUIT RL
+slug: rl-bobine
 
-RC · DÉCHARGE
-Uc(t) = E e^(−t/τ)
-À t = τ : Uc ≈ 0,37E.
+IDÉE
+La bobine s'oppose aux variations rapides du courant.
 
-COURANT À LA CHARGE
-i(t) = E/R · e^(−t/τ)
+RELATIONS
+UL = ri + L di/dt.
+Em = 1/2Li².
+τ = L/(R+r).
+I∞ = E/(R+r).
 
-RL · ÉTABLISSEMENT
-τ = L/(R+r)
-I0 = E/(R+r)
-i(t) = I0(1−e^(−t/τ))
+ÉTABLISSEMENT
+i = I∞(1−e^(−t/τ)).
 
-RL · RUPTURE
-i(t) = I0 e^(−t/τ)
+INTERRUPTION
+i = I0e^(−t/τ).
+
+DIODE
+Elle fournit un chemin au courant à l'ouverture et limite les effets de surtension.
+
+EXEMPLE
+E = 12 V ; R = 10 Ω ; r = 2 Ω ; L = 0,24 H.
+τ = 0,020 s ; I∞ = 1,0 A.
+
+EXERCICES À VARIANTE
+Changer L et R séparément et prédire quelle courbe atteint plus vite son régime.
+
+[DIAGRAM: circuit RL + courbe]
+[ANIMATION: montée du courant]
+
+----------------------------------------------------------------
+LESSON 23 · OSCILLATIONS LC ET RLC
+slug: lc-rlc
 
 LC IDÉAL
-ω0 = 1/√(LC)
-T0 = 2π√(LC)
+Uc + LC d²Uc/dt² = 0.
+ω0 = 1/sqrt(LC).
+T0 = 2πsqrt(LC).
 
-RLC FORCÉ
-u(t) = Um cos(ωt+φ)
-i(t) = Im cos(ωt)
-À la résonance : ω = ω0 et φ = 0.
+ÉNERGIE
+ET = 1/2CUc² + 1/2Li² = constante.
+
+RLC RÉEL
+La résistance dissipe de l'énergie ; oscillations pseudo-périodiques si l'amortissement reste faible.
+
+EXEMPLE
+L = 50 mH ; C = 20 µF.
+T0 ≈ 6,28 ms.
+
+EXERCICES À VARIANTE
+Doubler C ; diminuer L ; identifier la courbe la plus amortie.
+
+[ANIMATION: transfert d'énergie C ↔ L]
+[INTERACTIVE: curseurs L et C]
+
+----------------------------------------------------------------
+LESSON 24 · RÉSONANCE FORCÉE RLC
+slug: resonance-rlc
+
+RÉSONANCE
+ω0 = 1/sqrt(LC).
+Dans le modèle série, à la résonance : courant maximal et déphasage nul entre u et i.
 
 BANDE PASSANTE
-ΔN = (1/2π)·R/L lorsque R représente la résistance équivalente du modèle utilisé.
-
-FACTEUR DE QUALITÉ
+I ≥ Imax/sqrt(2).
 Q = N0/ΔN = ω0/Δω.
+Pour le modèle série avec résistance R : Q = ω0L/R.
 
-PIÈGE
-La constante de temps τ n’est pas la période T0 d’un oscillateur LC.
+EXEMPLE
+N0 = 2,0 kHz ; ΔN = 160 Hz.
+Q = 12,5.
 
-[IMAGE: circuit RC annoté]
-[IMAGE: circuit RL avec bobine]
-[ANIMATION: charge d’un condensateur]
-[INTERACTIVE: changer R ou C et observer τ]
+EXERCICES À VARIANTE
+Changer N0 ou ΔN et comparer la sélectivité.
 
-============================================================
-LESSON 19 · VECTEURS, NEWTON ET MOUVEMENT
-============================================================
-slug: mecanique-vecteurs-newton
-subject: physique-chimie
+[IMAGE: courbe de résonance]
+[INTERACTIVE: augmenter R et regarder le pic s'élargir]
+
+================================================================
+UNITÉ 08 · MÉCANIQUE
+================================================================
+
+LESSON 25 · VECTEURS, VITESSE ET ACCÉLÉRATION
+slug: cinematique-vecteurs
 
 VECTEUR POSITION
-OM = xi + yj + zk.
+OM = x i + y j + z k.
 
 VITESSE
 V = dOM/dt.
@@ -801,176 +817,387 @@ V = dOM/dt.
 ACCÉLÉRATION
 a = dV/dt.
 
-2e LOI DE NEWTON
-ΣF_ext = maG dans un référentiel galiléen.
+FRENET
+a = aT u + aN n ; aT = dV/dt ; aN = V²/ρ.
 
-MÉTHODE DYNAMIQUE
-1. Définir le système.
-2. Faire le bilan des forces.
-3. Choisir le référentiel.
-4. Choisir les axes.
-5. Écrire ΣF = ma.
-6. Projeter.
-7. Résoudre puis vérifier le sens physique.
+EXEMPLE
+V passe de 12 à 15 m·s−1 en 0,60 s.
+aT,moy = 5,0 m·s−2.
+
+EXERCICES À VARIANTE
+Vitesse constante sur trajectoire courbe : aT = 0 mais aN peut être non nulle.
+
+[DIAGRAM: base de Frenet]
+[ANIMATION: point mobile sur une courbe]
+
+----------------------------------------------------------------
+LESSON 26 · MRU ET MRUV
+slug: mru-mruv
 
 MRU
-a = 0 ; V = constante ; x(t)=Vxt+x0.
+a = 0 ; V constante ; x = Vx t + x0.
 
 MRUV
-a = constante ; Vx(t)=axt+V0x ;
-x(t)=1/2 axt²+V0xt+x0.
+a constante ; Vx = ax t + V0x ; x = 1/2ax t² + V0x t + x0.
+
+RELATION UTILE
+V² = V0² + 2a(x−x0).
 
 EXEMPLE
-Un mobile passe de 2,0 m·s−1 à 5,0 m·s−1 en 1,5 s.
-a = (5−2)/1,5 = 2,0 m·s−2.
+Une voiture passe de 8 à 20 m·s−1 sur 36 m.
+a = (20²−8²)/(2×36) ≈ 4,67 m·s−2.
 
-PIÈGE
-Une accélération négative ne signifie pas automatiquement que le mobile ralentit : tout dépend du signe de la vitesse.
+EXERCICES À VARIANTE
+Remplacer 36 m par 40 m puis demander le temps ou la vitesse finale.
 
-[DIAGRAM: forces sur un solide sur plan incliné]
-[INTERACTIVE: projection d’un vecteur sur Ox/Oy]
+[DIAGRAM: x(t), V(t), a(t)]
 
-============================================================
-LESSON 20 · PROJECTILES, MOUVEMENT CIRCULAIRE ET SATELLITES
-============================================================
-slug: projectiles-satellites-rotation
-subject: physique-chimie
+----------------------------------------------------------------
+LESSON 27 · LOIS DE NEWTON ET PLAN INCLINÉ
+slug: newton-plan-incline
 
-PROJECTILE SANS FROTTEMENT
-ax = 0
-ay = −g
+1re LOI
+ΣF = 0 → mouvement rectiligne uniforme dans un référentiel galiléen.
 
-ÉQUATIONS
-x = V0 cos(α)t + x0
-y = −(1/2)gt² + V0 sin(α)t + y0
+2e LOI
+ΣF = maG.
 
-FLÈCHE POUR UN TIR DEPUIS y0
-tH = V0 sin(α)/g
+3e LOI
+Actions réciproques : forces opposées de même intensité.
 
-PORTÉE À MÊME HAUTEUR DE DÉPART ET D’ARRIVÉE
-xP = V0² sin(2α)/g
-La portée est maximale pour α = 45°.
-
-MOUVEMENT CIRCULAIRE UNIFORME
-an = V²/R
-V = Rω
-T = 2πR/V
-
-SATELLITE
-v = √(GM/R)
-T = 2π√(R³/GM)
-
-3e LOI DE KEPLER
-T²/R³ = constante pour des orbites circulaires autour du même astre.
+PLAN INCLINÉ SANS FROTTEMENT
+Ox parallèle au plan ; Oy perpendiculaire.
+Px = mg sinα ; R = mg cosα.
 
 EXEMPLE
-Pour un mouvement circulaire de rayon 0,80 m et vitesse 2,4 m·s−1 :
-an = 2,4²/0,80 = 7,2 m·s−2.
+m = 2,0 kg ; α = 30°.
+a = g sin30° ≈ 4,9 m·s−2.
 
-PIÈGE
-Pour un mouvement circulaire uniforme, la vitesse en norme est constante mais le vecteur vitesse change de direction.
+MÉTHODE BAC
+Système → forces → référentiel → schéma → loi → projections → conclusion.
 
-[ANIMATION: projectile en parabole avec vecteur vitesse]
-[DIAGRAM: satellite + force gravitationnelle + accélération centripète]
+PIÈGES
+Axes mal choisis, réaction mal orientée, valeur de g incohérente.
 
-============================================================
-LESSON 21 · OSCILLATEUR MÉCANIQUE ET PENDULE DE TORSION
-============================================================
-slug: oscillateurs-mecaniques
-subject: physique-chimie
+[DIAGRAM: plan incliné et composantes]
+[INTERACTIVE: changer α]
 
-OSCILLATEUR MÉCANIQUE
-Mobile effectuant un va-et-vient autour d’une position d’équilibre stable.
+----------------------------------------------------------------
+LESSON 28 · CHUTE ET LANCER VERTICAL / OBLIQUE
+slug: projectile
 
-RESSORT HORIZONTAL
-x¨ + (K/m)x = 0
-ω0 = √(K/m)
-T0 = 2π√(m/K)
+LANCER VERTICAL
+vy = V0−gt.
+y = y0 + V0t − 1/2gt².
+tH = V0/g.
+ΔyH = V0²/(2g).
 
-SOLUTION
-x(t)=Xm cos(ω0t+φ)
-
-ÉNERGIE
-Em = 1/2 mV² + 1/2 Kx² = constante sans frottement.
-
-ÉTATS CARACTÉRISTIQUES
-x = ±Xm → V = 0.
-x = 0 → vitesse maximale.
-
-PENDULE DE TORSION
-θ¨ + (C/JΔ)θ = 0
-T0 = 2π√(JΔ/C)
+LANCER OBLIQUE
+V0x = V0cosα ; V0y = V0sinα.
+x = x0 + V0cosα·t.
+y = y0 + V0sinα·t − 1/2gt².
 
 EXEMPLE
-m = 0,40 kg, K = 100 N·m−1.
-ω0 = √(100/0,40) ≈ 15,8 rad·s−1.
-T0 ≈ 0,398 s.
+V0 = 14 m·s−1 ; α = 40°.
+Commencer par calculer V0x et V0y avant d'exploiter les équations horaires.
 
-PIÈGE
-L’amplitude Xm n’est pas la distance totale entre les deux extrémités de l’oscillation : AB = 2Xm.
+EXERCICES À VARIANTE
+Passer à V0 = 15 m·s−1 et α = 35° sans changer la méthode.
 
-[IMAGE: oscillateur masse-ressort avec équilibre et amplitude]
-[ANIMATION: transformation Ec ↔ Ep]
+[ANIMATION: trajectoire avec vecteur vitesse]
+[INTERACTIVE: V0 et α]
+[IMAGE: trajectoire parabolique]
 
-============================================================
-LESSON 22 · ÉNERGIE, TRAVAIL ET LORENTZ
-============================================================
-slug: energie-travail-lorentz
-subject: physique-chimie
+----------------------------------------------------------------
+LESSON 29 · THÉORÈME DE L'ÉNERGIE CINÉTIQUE
+slug: energie-cinetique-travail
 
-ÉNERGIE CINÉTIQUE
-Ec = 1/2 mV².
+Ec = 1/2mV².
+ΔEc = ΣW(F).
+W = F·AB = FABcosθ.
+Pour le poids : W(P)=mg(zA−zB).
 
-TRAVAIL D’UNE FORCE CONSTANTE
-WAB(F) = F·AB·cos(α).
+SIGNES
+W > 0 : moteur.
+W < 0 : résistant.
+W = 0 : pas de variation de Ec due à cette force.
 
-THÉORÈME DE L’ÉNERGIE CINÉTIQUE
-ΔEc = ΣWAB(F_ext).
+EXEMPLE
+F = 12 N sur 4,0 m dans la direction du déplacement → W = 48 J.
 
-POIDS
-WAB(P) = mg(zA−zB).
+EXERCICES À VARIANTE
+Changer θ pour obtenir travail positif, nul puis négatif.
 
-FROTTEMENT
-Le travail d’une force de frottement est généralement résistant et négatif.
+[DIAGRAM: force + déplacement + angle]
+[INTERACTIVE: curseur θ]
 
-LORENTZ
+----------------------------------------------------------------
+LESSON 30 · PARTICULE CHARGÉE DANS UN CHAMP MAGNÉTIQUE
+slug: champ-magnetique-charge
+
+FORCE DE LORENTZ
 F = q V × B.
-La force magnétique est perpendiculaire à V et B.
-Son travail est nul.
-Donc Ec reste constante pour une particule chargée dans un champ magnétique uniforme lorsqu’elle ne subit que la force magnétique.
+La force est perpendiculaire à V et B.
+
+CONSÉQUENCE
+Le champ magnétique ne fournit pas de travail : Ec reste constante dans le modèle considéré.
 
 MOUVEMENT CIRCULAIRE
-r = mV/(|q|B)
-T = 2πm/(|q|B)
+r = mV/(|q|B).
+T = 2πm/(|q|B).
+
+EXERCICES À VARIANTE
+Modifier un seul paramètre à la fois et prévoir l'effet sur r et T.
+
+[DIAGRAM: force perpendiculaire à V]
+[ANIMATION: trajectoire circulaire]
+
+----------------------------------------------------------------
+LESSON 31 · SATELLITES ET KEPLER
+slug: satellites-kepler
+
+ORBITE CIRCULAIRE
+v = sqrt(GM/R).
+T = 2πsqrt(R³/(GM)).
+
+KEPLER
+Pour des orbites autour du même astre : T²/R³ = constante dans le modèle circulaire.
+
+GÉOSTATIONNAIRE
+Orbite équatoriale, même sens de rotation que la Terre, période égale à la rotation terrestre.
 
 EXEMPLE
-m = 2,0×10−27 kg, |q| = 1,6×10−19 C, V = 2,0×10^6 m·s−1, B = 0,40 T.
-r ≈ 0,063 m.
+T2/T1 = (R2/R1)^(3/2).
 
-PIÈGE
-La force de Lorentz peut modifier la direction de la vitesse sans modifier sa norme dans le cas idéal considéré.
+EXERCICES À VARIANTE
+Comparer deux orbites proches puis justifier qualitativement la plus longue période.
 
-[DIAGRAM: force de Lorentz et règle de la main droite]
-[INTERACTIVE: régler q, V et B puis observer r]
+[IMAGE: Terre + orbite]
+[ANIMATION: mouvement orbital]
+[INTERACTIVE: modifier R]
 
-============================================================
-END OF CONTENT V1
-============================================================
+================================================================
+UNITÉ 09 · OSCILLATIONS MÉCANIQUES
+================================================================
 
-FUTURE UI CONTRACT
-------------------
-Each lesson should later render these layers in this order:
-1. Header: title + short objective.
-2. Hook/intuition card.
-3. Definition cards.
-4. Main concept explanation.
-5. Formula block with LaTeX.
-6. Visual/diagram block.
-7. Worked example with step reveal.
-8. Bac method card.
-9. Common mistake / warning.
-10. Quick-check question.
-11. Exercise CTA.
-12. Progress / completion state.
+LESSON 32 · OSCILLATEUR MASSE-RESSORT
+slug: ressort-oscillateur
 
-The content should remain editable independently from CSS and React layout.
+LOI
+F = −Kx.
+
+ÉQUATION
+x¨ + (K/m)x = 0.
+
+PÉRIODE
+ω0 = sqrt(K/m).
+T0 = 2πsqrt(m/K).
+
+ÉNERGIE
+Ec = 1/2mV².
+Epe = 1/2Kx².
+Em = 1/2KXm² si absence de dissipation.
+
+EXEMPLE
+m = 0,20 kg ; K = 50 N·m−1 → T0 ≈ 0,397 s.
+
+EXERCICES À VARIANTE
+Changer m ou K et prévoir d'abord le sens de variation de T0.
+
+[ANIMATION: ressort oscillant]
+[INTERACTIVE: m et K]
+
+----------------------------------------------------------------
+LESSON 33 · PENDULE DE TORSION ET PENDULE PESANT
+slug: torsion-pendule
+
+TORSION
+M = −Cθ.
+ω0 = sqrt(C/J).
+T0 = 2πsqrt(J/C).
+
+PENDULE PESANT
+Pour petites oscillations : ω0 = sqrt(mgd/J) ; T0 = 2πsqrt(J/(mgd)).
+
+POINT CLÉ
+sinθ ≈ θ seulement pour de petites oscillations exprimées en radians.
+
+EXERCICES À VARIANTE
+Faire varier J ou d puis prévoir l'effet sur T0.
+
+[DIAGRAM: angle et moment de rappel]
+
+================================================================
+UNITÉ 10 · PHOTONS ET NIVEAUX D'ÉNERGIE
+================================================================
+
+LESSON 34 · PHOTON ET SPECTRES
+slug: photons-spectres
+
+PHOTON
+E = hν = hc/λ.
+h ≈ 6,63×10−34 J·s.
+c ≈ 3,00×10^8 m·s−1.
+
+ABSORPTION
+Un photon peut être absorbé si son énergie correspond à un écart entre deux niveaux autorisés.
+
+ÉMISSION
+Une transition vers un niveau plus bas peut s'accompagner de l'émission d'un photon.
+
+HYDROGÈNE
+En = −13,6/n² eV.
+
+CONVERSION
+1 eV ≈ 1,60×10−19 J.
+
+EXERCICES À VARIANTE
+Changer les niveaux n puis demander ΔE, λ ou ν.
+
+[IMAGE: niveaux d'énergie]
+[ANIMATION: transition + photon]
+[INTERACTIVE: choisir deux niveaux]
+
+================================================================
+UNITÉ 11 · RADIOACTIVITÉ ET ÉNERGIE NUCLÉAIRE
+================================================================
+
+LESSON 35 · DÉSINTÉGRATION RADIOACTIVE
+slug: radioactivite-loi
+
+DÉFINITION
+Transformation spontanée, aléatoire et inéluctable d'un noyau instable.
+
+LOI
+N(t)=N0e^(−λt).
+
+a = λN.
+t1/2 = ln2/λ.
+
+RAYONNEMENTS
+α : A−4, Z−2.
+β− : A inchangé, Z+1.
+β+ : A inchangé, Z−1.
+γ : désexcitation, A et Z inchangés.
+
+EXEMPLE
+λ = 1,5×10−3 an−1 → t1/2 ≈ 462 ans.
+
+EXERCICES À VARIANTE
+Retrouver λ, calculer une activité relative, identifier le type de désintégration.
+
+[ANIMATION: décroissance exponentielle]
+[INTERACTIVE: curseur t]
+
+----------------------------------------------------------------
+LESSON 36 · DÉFAUT DE MASSE ET ÉNERGIE DE LIAISON
+slug: energie-nucleaire
+
+E = mc².
+
+DÉFAUT DE MASSE
+Δm = masse des nucléons séparés − masse du noyau.
+
+ÉNERGIE DE LIAISON
+El = Δmc².
+ε = El/A.
+
+RÉACTION NUCLÉAIRE
+Δm = masse finale − masse initiale.
+E0 = Δmc².
+
+EXERCICES À VARIANTE
+Modifier légèrement une masse et recalculer l'énergie en J ou MeV.
+
+[DIAGRAM: défaut de masse → énergie]
+
+================================================================
+UNITÉ 12 · MÉTHODES MENTIONMAX ET GÉNÉRATION D'EXERCICES
+================================================================
+
+LESSON 37 · MÉTHODE POUR UN EXERCICE DE CHIMIE
+slug: methode-exercice-chimie
+
+CHECKLIST
+1. Lire précisément la question finale.
+2. Écrire l'équation correcte.
+3. Lister les données avec unités.
+4. Tableau d'avancement si nécessaire.
+5. Exploiter pH, équivalence, équilibre ou redox selon le chapitre.
+6. Calculer.
+7. Vérifier unité et ordre de grandeur.
+8. Conclure par une phrase.
+
+ADAPTATION D'EXERCICES
+VARIANTE A : même compétence, valeurs modifiées de 5 à 15 %.
+VARIANTE B : contexte modifié mais méthode identique.
+VARIANTE C : une étape d'interprétation supplémentaire.
+
+EXEMPLE
+Calcul de CA à partir de VA, CB, VBE.
+A : valeurs différentes.
+B : lire VBE sur une courbe.
+C : choisir un indicateur après le calcul.
+
+----------------------------------------------------------------
+LESSON 38 · MÉTHODE POUR UN EXERCICE DE PHYSIQUE
+slug: methode-exercice-physique
+
+CHECKLIST
+Système → référentiel → schéma → loi → projections → calcul → contrôle des unités → conclusion.
+
+EXEMPLE D'ADAPTATION
+Un exercice RC peut changer R ou C, puis demander d'abord une lecture graphique de τ avant le calcul.
+Un exercice de projectile peut changer V0 et α tout en gardant exactement la même structure mathématique.
+
+RÈGLE
+On ne change pas seulement les nombres : on modifie parfois l'ordre des données ou la question finale,
+sans changer la compétence ciblée.
+
+----------------------------------------------------------------
+LESSON 39 · RÉPÉTITION ACTIVE ET FEEDBACK
+slug: repetition-active-pc
+
+MINI-CHECKS
+- calcul mental ;
+- choisir une relation ;
+- classer ;
+- lire un graphe ;
+- détecter une erreur ;
+- remettre une méthode dans l'ordre.
+
+EXEMPLES
+« pH = pKA : relation entre [AH] et [B] ? »
+« Dans une pile Daniell, quelle électrode s'oxyde ? »
+« À t=τ en charge RC, quelle fraction de la tension finale atteint-on environ ? »
+« Une force opposée au déplacement fournit-elle un travail positif ou négatif ? »
+
+ADAPTATION
+Deux réussites rapides du même type → variante appliquée.
+Erreur → indice conceptuel d'abord, correction complète ensuite.
+
+FORMAT MÉDIA
+Une mini-leçon doit pouvoir alterner texte, formule, schéma, animation, question et application,
+au lieu de présenter un mur de paragraphes. Le rendu visuel sera construit séparément.
+
+[INTERACTIVE: quiz flash avec feedback]
+[IMAGE: carte « À retenir »]
+
+================================================================
+CONTENT QUALITY NOTES
+================================================================
+
+- Les exemples ci-dessus sont volontairement proches des exercices scolaires habituels mais ne doivent
+  pas être traités comme des énoncés à recopier mot pour mot.
+- Les nombres doivent pouvoir être légèrement randomisés par le moteur d'exercices en conservant
+  des résultats pédagogiquement propres.
+- Les graphiques et schémas doivent être générés en vectoriel ou avec les assets MentionMax ; éviter
+  les captures génériques de manuels.
+- Chaque formule affichée par le futur renderer doit conserver sa notation scientifique exacte.
+- SM B : ne pas exposer les leçons SVT ; cette source concerne uniquement PC.
+- Les exercices doivent référencer le slug de la leçon et une compétence, afin que le moteur puisse
+  générer des variantes sans perdre la méthode de résolution.
+
+================================================================
+END OF CONTENT V2
+================================================================
