@@ -9,6 +9,7 @@ import { resolveUserPath, pathLabels, type UserPath } from "../data/curriculum/s
 import { lessonService } from "../services/lesson/lessonService";
 import { contentCatalogService } from "../services/content/contentCatalogService";
 import PathSwitcher from "../components/curriculum/PathSwitcher";
+import PeopleFeature from "../components/ui/PeopleFeature";
 import "../styles/curriculum-path.css";
 
 const subjectTypes: Record<string, SubjectType> = { maths: "math", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
@@ -39,9 +40,11 @@ export default function Subjects() {
     if (!selected) return <main className="section container"><div className="subject-path-banner"><div className="subject-path-banner__title"><div><strong>{pathLabels[path]}</strong><span>Ce choix détermine les matières disponibles.</span></div></div><PathSwitcher /></div><PageHeader eyebrow="Programme 2BAC" title="Cette matière n'est pas disponible." description={path === "SMB" && requested === "svt" ? "La SVT n'est pas proposée en Sciences Mathématiques B." : "Utilise le sélecteur de parcours pour consulter un autre programme."} /><Link to="/subjects" className="btn btn-secondary">Retour aux matières</Link></main>;
 
     const subject = subjectCatalog[selected];
+    const peopleVariant = selected === "maths" ? "maths" : selected === "physique-chimie" ? "physics" : selected;
     return <main className="section container">
       <div className="subject-path-banner"><div className="subject-path-banner__title"><SubjectIcon type={subjectTypes[selected]} label={subject.name} /><div><strong>{pathLabels[path]}</strong><span>{subject.name} · programme 2BAC</span></div></div><PathSwitcher /></div>
       <PageHeader eyebrow="Cours · exercices · révision" title={<>Prépare la <span className="accent-word">{subject.name}.</span></>} description="Un espace organisé autour des chapitres, des leçons et des exercices du Bac." />
+      <PeopleFeature variant={peopleVariant} compact title={`Maîtrise ${subject.name}, chapitre après chapitre.`} text={`Cours, ${exerciseCount} exercices et notes réunis dans un parcours pensé pour le ${pathLabels[path]}.`} />
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 28 }}>
         <Link to={`/lecons/${selected}`} className="btn btn-primary"><BookOpen size={15} /> Voir les cours</Link>
         <Link to={`/exercices?subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><PenLine size={15} /> {exerciseCount} exercices</Link>
@@ -62,6 +65,7 @@ export default function Subjects() {
   return <main className="section container">
     <div className="subject-path-banner"><div className="subject-path-banner__title"><div><strong>{pathLabels[path]}</strong><span>Ton parcours contrôle maintenant la liste ci-dessous.</span></div></div><PathSwitcher /></div>
     <PageHeader eyebrow="Programme 2BAC" title={<>Choisis ta <span className="accent-word">matière.</span></>} description="Mathématiques, Physique-Chimie, SVT, Anglais et Philosophie selon ton parcours." />
+    <PeopleFeature variant="hero" compact title="Une matière à la fois. Un programme qui avance." text="Chaque matière garde ses chapitres, ses exercices et ses ressources dans le même espace." />
     <div className="subject-page-grid">{trackSubjects.map((subject) => <Link key={subject.id} to={`/subjects/${subjectSlug[subject.id]}`} className="card subject-large-card" style={{ textDecoration: "none" }}><SubjectIcon type={subjectTypes[subject.id]} label={subject.name}/><h2>{subject.name}</h2><p>{subject.shortName} · programme 2BAC · {contentCatalogService.getBaseExercises(path, subject.id).length} exercices</p><div className="chapter-pills"><span>{lessonService.list(subject.id, path).length} leçons</span><span>Exercices</span><span>Notes</span></div><span className="text-brand">Ouvrir <ArrowRight size={14} /></span></Link>)}</div>
   </main>;
 }
