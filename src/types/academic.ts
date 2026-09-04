@@ -100,7 +100,9 @@ export interface LessonBlock {
     | "exercise"
     | "recap"
     | "annotation"
-    | "highlight";
+    | "highlight"
+    | "animation"
+    | "interactive";
   text?: string;
   latex?: string;
   title?: string;
