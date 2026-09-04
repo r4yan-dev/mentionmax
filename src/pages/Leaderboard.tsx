@@ -48,12 +48,9 @@ export default function Leaderboard() {
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
 
   const loadLeaderboard = async () => {
-    setLoading(true);
     setError(null);
 
-    const { data, error: queryError } = await mentiSupabase
-      .from("leaderboard_public")
-      .select("user_id, source_app_user_id, display_name, avatar_url, total_xp, weekly_xp, current_streak, total_exercises, total_tests, total_focus_minutes, weekly_exercises, weekly_tests, weekly_focus_minutes, updated_at");
+    const { data, error: queryError } = await mentiSupabase.rpc("get_leaderboard_public");
 
     if (queryError) {
       console.error("Failed to load live leaderboard:", queryError);
@@ -72,15 +69,12 @@ export default function Leaderboard() {
   }, []);
 
   useEffect(() => {
+    const refresh = () => void loadLeaderboard();
     const channel = mentiSupabase
       .channel("live-classment-leaderboard")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "leaderboard_public" },
-        () => {
-          void loadLeaderboard();
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_progress" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_progress" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, refresh)
       .subscribe();
 
     return () => {
@@ -125,9 +119,10 @@ export default function Leaderboard() {
       </div>
 
       {error && <div className="leaderboard-empty">{error}</div>}
+      {!error && loading && <div className="leaderboard-empty">Synchronisation du classement…</div>}
       {!error && !loading && rows.length === 0 && <div className="leaderboard-empty">Aucun élève n'a encore de données de classement.</div>}
 
-      {!error && rows.length > 0 && <>
+      {!error && !loading && rows.length > 0 && <>
         <div className="leaderboard-podium">
           {rows.slice(0, 3).map((row) => <div className={`leader-podium-card rank-${row.rank}`} key={row.user_id}>
             <div className="leader-podium-medal">{row.rank === 1 ? <Crown size={18}/> : row.rank === 2 ? <Medal size={18}/> : <Trophy size={18}/>}</div>
