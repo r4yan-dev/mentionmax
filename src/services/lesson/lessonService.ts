@@ -1,9 +1,11 @@
 import type { LessonDocument, SubjectId, TrackId } from "../../types/academic";
 import { secondBacLessons } from "../../data/curriculum/secondBac";
+import { secondBacPcLessonsDetailed } from "./pcLessonsDetailed";
 import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
 
 const lessons: LessonDocument[] = [
-  ...secondBacLessons,
+  ...secondBacLessons.filter((lesson) => lesson.subjectId !== "physique-chimie"),
+  ...secondBacPcLessonsDetailed.slice(0, 14),
   ...secondBacSvtLessons,
   ...secondBacEnglishLessons,
   ...secondBacPhilosophyLessons,
