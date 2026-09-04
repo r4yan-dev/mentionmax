@@ -30,7 +30,7 @@ const splitIntoFourPages = (lesson: LessonDocument): LessonDocument => {
 
   const integratedPractice: LessonBlock[] = exercises.length
     ? exercises
-    : [{ type: "exercise", title: "Application intégrée · Niveau Bac", text: `Construire un exercice du même type que la leçon « ${lesson.title} » avec des valeurs nouvelles mais une situation proche.`, data: { integrated: true, revealMode: "stepwise" } };
+    : [{ type: "exercise", title: "Application intégrée · Niveau Bac", text: `Construire un exercice du même type que la leçon « ${lesson.title} » avec des valeurs nouvelles mais une situation proche.`, data: { integrated: true, revealMode: "stepwise" } }];
 
   return {
     ...lesson,
