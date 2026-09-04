@@ -23,6 +23,7 @@ export default function Profile() {
   } | null>(null);
   const [loading, setLoading] = useState(!!userId);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -32,8 +33,10 @@ export default function Profile() {
   const [stats, setStats] = useState({ completedExercises: 0, streak: 0, focusMinutes: 0 });
 
   useEffect(() => {
-    setNameDraft(currentProfile?.display_name ?? "");
-  }, [currentProfile?.display_name]);
+    if (!editingName) {
+      setNameDraft(currentProfile?.display_name ?? "");
+    }
+  }, [currentProfile?.display_name, editingName]);
 
   useEffect(() => {
     if (!userId || userId === user?.id) {
@@ -65,6 +68,11 @@ export default function Profile() {
       void refreshProfile();
     }
   }, [isOwnProfile, currentProfile, refreshProfile]);
+
+  useEffect(() => {
+    if (!editingName) return;
+    requestAnimationFrame(() => nameInputRef.current?.select());
+  }, [editingName]);
 
   const profileId = currentProfile?.id;
 
@@ -143,6 +151,7 @@ export default function Profile() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
   const track = isOwnProfile ? schoolPreferences?.track : undefined;
   const section = isOwnProfile ? schoolPreferences?.section : undefined;
 
@@ -159,9 +168,27 @@ export default function Profile() {
     }
   }
 
+  function beginNameEdit() {
+    setError("");
+    setSaved(false);
+    setNameDraft(currentProfile?.display_name ?? name);
+    setEditingName(true);
+  }
+
+  function cancelNameEdit() {
+    setEditingName(false);
+    setNameDraft(currentProfile?.display_name ?? name);
+  }
+
   async function saveName() {
     const nextName = nameDraft.trim();
-    if (!nextName || nextName === (currentProfile?.display_name ?? "")) return;
+    const currentName = (currentProfile?.display_name ?? name).trim();
+
+    if (!nextName || nextName === currentName) {
+      cancelNameEdit();
+      return;
+    }
+
     try {
       setSavingName(true);
       setError("");
@@ -230,7 +257,44 @@ export default function Profile() {
 
         <div>
           <span className="section-eyebrow">Profil</span>
-          <h1>{name}</h1>
+          {isOwnProfile && editingName ? (
+            <div className="profile-name-editor-inline">
+              <input
+                ref={nameInputRef}
+                value={nameDraft}
+                onChange={(event) => setNameDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (!savingName) void saveName();
+                  }
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    cancelNameEdit();
+                  }
+                }}
+                maxLength={40}
+                aria-label="Nom affiché"
+                className="profile-name-input"
+                disabled={savingName}
+              />
+            </div>
+          ) : (
+            <h1 className="profile-name-heading">
+              {name}
+              {isOwnProfile && (
+                <button
+                  type="button"
+                  className="profile-name-edit-button"
+                  onClick={beginNameEdit}
+                  aria-label="Modifier le nom"
+                  title="Modifier le nom"
+                >
+                  ✎
+                </button>
+              )}
+            </h1>
+          )}
           {isOwnProfile && (
             <>
               <p>{user?.email}</p>
@@ -247,32 +311,6 @@ export default function Profile() {
 
         {isOwnProfile && (
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {!editingName ? (
-              <button type="button" className="btn btn-ghost" onClick={() => setEditingName(true)}>
-                Modifier le nom
-              </button>
-            ) : (
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <input
-                  autoFocus
-                  value={nameDraft}
-                  onChange={(event) => setNameDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") void saveName();
-                    if (event.key === "Escape") {
-                      setEditingName(false);
-                      setNameDraft(currentProfile?.display_name ?? "");
-                    }
-                  }}
-                  maxLength={40}
-                  aria-label="Nom affiché"
-                  style={{ minWidth: 170 }}
-                />
-                <button type="button" className="btn btn-primary" disabled={savingName || !nameDraft.trim()} onClick={() => void saveName()}>
-                  {savingName ? "..." : "Enregistrer"}
-                </button>
-              </div>
-            )}
             <Link to="/preferences" className="btn btn-ghost">Modifier mes choix</Link>
           </div>
         )}
