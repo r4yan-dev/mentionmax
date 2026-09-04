@@ -27,39 +27,20 @@ export interface SchoolPreferences {
 
 interface AccountContextValue {
   profile: Profile | null;
-  schoolPreferences:
-    | SchoolPreferences
-    | null;
+  schoolPreferences: SchoolPreferences | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   refreshSchoolPreferences: () => Promise<void>;
+  updateProfileName: (displayName: string) => Promise<void>;
 }
 
-const AccountContext =
-  createContext<
-    AccountContextValue | undefined
-  >(undefined);
+const AccountContext = createContext<AccountContextValue | undefined>(undefined);
 
-export function AccountProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AccountProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-
-  const [profile, setProfile] =
-    useState<Profile | null>(null);
-
-  const [
-    schoolPreferences,
-    setSchoolPreferences,
-  ] =
-    useState<SchoolPreferences | null>(
-      null
-    );
-
-  const [loading, setLoading] =
-    useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [schoolPreferences, setSchoolPreferences] = useState<SchoolPreferences | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function refreshProfile() {
     if (!user) {
@@ -67,25 +48,18 @@ export function AccountProvider({
       return;
     }
 
-    const { data, error } =
-      await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
 
     if (error) {
-      console.error(
-        "Failed to load profile:",
-        error
-      );
+      console.error("Failed to load profile:", error);
       return;
     }
 
-    setProfile(
-      (data as Profile | null) ??
-        null
-    );
+    setProfile((data as Profile | null) ?? null);
   }
 
   async function refreshSchoolPreferences() {
@@ -94,30 +68,42 @@ export function AccountProvider({
       return;
     }
 
-    const { data, error } =
-      await supabase
-        .from("school_preferences")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+    const { data, error } = await supabase
+      .from("school_preferences")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (error) {
-      console.error(
-        "Failed to load school preferences:",
-        error
-      );
+      console.error("Failed to load school preferences:", error);
       return;
     }
 
-    setSchoolPreferences(
-      (data as SchoolPreferences | null) ??
-        null
-    );
+    setSchoolPreferences((data as SchoolPreferences | null) ?? null);
+  }
+
+  async function updateProfileName(displayName: string) {
+    if (!user) throw new Error("Utilisateur non connecté.");
+    const cleanName = displayName.trim();
+    if (!cleanName) throw new Error("Le nom ne peut pas être vide.");
+    if (cleanName.length > 40) throw new Error("Le nom doit contenir au maximum 40 caractères.");
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ display_name: cleanName, updated_at: new Date().toISOString() })
+      .eq("id", user.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      throw new Error(`Nom: ${error.message}`);
+    }
+
+    setProfile(data as Profile);
   }
 
   useEffect(() => {
     let mounted = true;
-
     async function loadAccount() {
       if (!user) {
         setProfile(null);
@@ -125,124 +111,73 @@ export function AccountProvider({
         setLoading(false);
         return;
       }
-
       setLoading(true);
-
-      await Promise.all([
-        refreshProfile(),
-        refreshSchoolPreferences(),
-      ]);
-
-      if (mounted) {
-        setLoading(false);
-      }
+      await Promise.all([refreshProfile(), refreshSchoolPreferences()]);
+      if (mounted) setLoading(false);
     }
-
-    loadAccount();
-
+    void loadAccount();
     return () => {
       mounted = false;
     };
   }, [user?.id]);
 
   useEffect(() => {
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
-    const profileChannel =
-      supabase
-        .channel(
-          `profile:${user.id}`
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "profiles",
-            filter: `id=eq.${user.id}`,
-          },
-          (payload) => {
-            if (
-              payload.eventType ===
-              "DELETE"
-            ) {
-              setProfile(null);
-              return;
-            }
+    const profileChannel = supabase
+      .channel(`profile:${user.id}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "profiles",
+        filter: `id=eq.${user.id}`,
+      }, (payload) => {
+        if (payload.eventType === "DELETE") {
+          setProfile(null);
+          return;
+        }
+        setProfile(payload.new as Profile);
+      })
+      .subscribe();
 
-            setProfile(
-              payload.new as Profile
-            );
-          }
-        )
-        .subscribe();
-
-    const preferencesChannel =
-      supabase
-        .channel(
-          `school-preferences:${user.id}`
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "school_preferences",
-            filter: `user_id=eq.${user.id}`,
-          },
-          (payload) => {
-            if (
-              payload.eventType ===
-              "DELETE"
-            ) {
-              setSchoolPreferences(null);
-              return;
-            }
-
-            setSchoolPreferences(
-              payload.new as SchoolPreferences
-            );
-          }
-        )
-        .subscribe();
+    const preferencesChannel = supabase
+      .channel(`school-preferences:${user.id}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "school_preferences",
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        if (payload.eventType === "DELETE") {
+          setSchoolPreferences(null);
+          return;
+        }
+        setSchoolPreferences(payload.new as SchoolPreferences);
+      })
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(
-        profileChannel
-      );
-
-      supabase.removeChannel(
-        preferencesChannel
-      );
+      supabase.removeChannel(profileChannel);
+      supabase.removeChannel(preferencesChannel);
     };
   }, [user?.id]);
 
   return (
-    <AccountContext.Provider
-      value={{
-        profile,
-        schoolPreferences,
-        loading,
-        refreshProfile,
-        refreshSchoolPreferences,
-      }}
-    >
+    <AccountContext.Provider value={{
+      profile,
+      schoolPreferences,
+      loading,
+      refreshProfile,
+      refreshSchoolPreferences,
+      updateProfileName,
+    }}>
       {children}
     </AccountContext.Provider>
   );
 }
 
 export function useAccount() {
-  const context =
-    useContext(AccountContext);
-
-  if (!context) {
-    throw new Error(
-      "useAccount must be used inside AccountProvider"
-    );
-  }
-
+  const context = useContext(AccountContext);
+  if (!context) throw new Error("useAccount must be used inside AccountProvider");
   return context;
 }
