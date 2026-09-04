@@ -43,8 +43,7 @@ export interface Exercise {
   mode: ContentMode;
   source: "OFFICIAL" | "APPROVED" | "AI_GENERATED" | "USER_CREATED";
   target: ContentTarget;
-  /** Optional for legacy content imported before exercise types were introduced. */
-  type?: ExerciseType;
+  type: ExerciseType;
   difficulty: ContentDifficulty;
   title: string;
   statement: string;
