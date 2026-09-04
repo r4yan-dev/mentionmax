@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Bold, CheckSquare, ChevronDown, ChevronLeft, Folder, Italic, List, ListOrdered, Pin, PinOff, Plus, Search, Trash2, Underline, X } from "lucide-react";
+import { Bold, CheckSquare, ChevronDown, ChevronLeft, Folder, Italic, List, ListOrdered, Pin, PinOff, Plus, Search, Trash2, Underline } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import "./Handnotes.css";
 
