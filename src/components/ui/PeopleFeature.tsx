@@ -9,6 +9,17 @@ import studentSvt from "../../assets/people/student-svt.webp";
 import studentPhilosophy from "../../assets/people/student-philosophy.webp";
 import teacherExplaining from "../../assets/people/teacher-explaining.webp";
 import studentsCollaborating from "../../assets/people/students-collaborating.webp";
+
+import studentHeroBg from "../../assets/people-bg/student-hero-bg.webp";
+import studentMathsBg from "../../assets/people-bg/student-maths-bg.webp";
+import studentPhysicsBg from "../../assets/people-bg/student-physics-bg.webp";
+import studentBooksBg from "../../assets/people-bg/student-books-bg.webp";
+import studentWritingBg from "../../assets/people-bg/student-writing-bg.webp";
+import studentEnglishBg from "../../assets/people-bg/student-english-bg.webp";
+import studentSvtBg from "../../assets/people-bg/student-svt-bg.webp";
+import studentPhilosophyBg from "../../assets/people-bg/student-philosophy-bg.webp";
+import teacherExplainingBg from "../../assets/people-bg/teacher-explaining-bg.webp";
+import studentsCollaboratingBg from "../../assets/people-bg/students-collaborating-bg.webp";
 import "./PeopleFeature.css";
 
 export type PeopleFeatureVariant =
@@ -34,6 +45,19 @@ const people: Record<PeopleFeatureVariant, string> = {
   philosophy: studentPhilosophy,
   teacher: teacherExplaining,
   collaboration: studentsCollaborating,
+};
+
+const backgrounds: Record<PeopleFeatureVariant, string> = {
+  hero: studentHeroBg,
+  maths: studentMathsBg,
+  physics: studentPhysicsBg,
+  books: studentBooksBg,
+  writing: studentWritingBg,
+  english: studentEnglishBg,
+  svt: studentSvtBg,
+  philosophy: studentPhilosophyBg,
+  teacher: teacherExplainingBg,
+  collaboration: studentsCollaboratingBg,
 };
 
 const labels: Record<PeopleFeatureVariant, string> = {
@@ -68,6 +92,7 @@ export default function PeopleFeature({
 }) {
   const style = {
     "--people-image": `url(${people[variant]})`,
+    "--people-background": `url(${backgrounds[variant]})`,
   } as CSSProperties;
 
   return (
@@ -75,6 +100,7 @@ export default function PeopleFeature({
       className={`people-feature ${compact ? "people-feature--compact" : ""} people-feature--${variant} ${className}`.trim()}
       style={style}
     >
+      <div className="people-feature__backdrop" aria-hidden="true" />
       <div className="people-feature__glow" aria-hidden="true" />
       <div className="people-feature__content">
         <span className="people-feature__eyebrow">{eyebrow ?? labels[variant]}</span>
