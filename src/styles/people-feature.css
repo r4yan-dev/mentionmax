@@ -1,4 +1,4 @@
-/* People artwork: deliberate pop-out layer, with soft masking at the lower edge. */
+/* People artwork: deliberate pop-out layer, fully visible at the top and cleanly seated at the card base. */
 .focus-group-feature {
   position: relative !important;
   overflow: visible !important;
@@ -17,13 +17,14 @@
   display: block !important;
   z-index: 2 !important;
   pointer-events: none !important;
+  overflow: visible !important;
 }
 
 .focus-group-feature__person img {
   position: absolute !important;
-  top: -3rem !important;
+  top: auto !important;
   right: 2rem !important;
-  bottom: auto !important;
+  bottom: 0 !important;
   left: auto !important;
   display: block !important;
   width: auto !important;
@@ -34,17 +35,10 @@
   object-position: bottom right !important;
   pointer-events: none !important;
   filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15)) !important;
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%) !important;
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%) !important;
-  -webkit-mask-repeat: no-repeat !important;
-  mask-repeat: no-repeat !important;
-  -webkit-mask-size: 100% 100% !important;
-  mask-size: 100% 100% !important;
 }
 
 @media (max-width: 900px) {
   .focus-group-feature__person img {
-    top: -2.25rem !important;
     right: 1.25rem !important;
     height: 122% !important;
   }
@@ -52,7 +46,6 @@
 
 @media (max-width: 700px) {
   .focus-group-feature__person img {
-    top: -1.5rem !important;
     right: 0.75rem !important;
     height: 118% !important;
   }
