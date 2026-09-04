@@ -35,8 +35,8 @@
   pointer-events: none !important;
   flex: 0 0 auto !important;
   filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15)) !important;
-  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%) !important;
-  mask-image: linear-gradient(to bottom, black 82%, transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%) !important;
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%) !important;
   -webkit-mask-repeat: no-repeat !important;
   mask-repeat: no-repeat !important;
   -webkit-mask-size: 100% 100% !important;
@@ -45,22 +45,26 @@
 
 @media (max-width: 900px) {
   .focus-group-feature__person {
-    right: 1.25rem !important;
-    width: 48% !important;
-    top: -2.25rem !important;
-    bottom: -1rem !important;
+    right: 1rem !important;
+    width: 46% !important;
+    top: -2rem !important;
+    bottom: -0.75rem !important;
+  }
+
+  .focus-group-feature__person img {
+    height: 120% !important;
   }
 }
 
 @media (max-width: 700px) {
   .focus-group-feature__person {
     right: 0.75rem !important;
-    width: 50% !important;
-    top: -1.5rem !important;
-    bottom: -0.75rem !important;
+    width: 48% !important;
+    top: -1.25rem !important;
+    bottom: -0.5rem !important;
   }
 
   .focus-group-feature__person img {
-    height: 118% !important;
+    height: 115% !important;
   }
 }
