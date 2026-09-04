@@ -66,8 +66,10 @@ export default function Profile() {
     }
   }, [isOwnProfile, currentProfile, refreshProfile]);
 
+  const profileId = currentProfile?.id;
+
   useEffect(() => {
-    if (!isOwnProfile || !currentProfile?.id) return;
+    if (!isOwnProfile || !profileId) return;
     let mounted = true;
 
     async function loadStats() {
@@ -75,11 +77,11 @@ export default function Profile() {
         supabase
           .from("mission_helios_progress")
           .select("completed, completed_at")
-          .eq("user_id", currentProfile.id),
+          .eq("user_id", profileId),
         supabase
           .from("focus_sessions")
           .select("actual_seconds, started_at, status")
-          .eq("user_id", currentProfile.id)
+          .eq("user_id", profileId)
           .eq("status", "completed"),
       ]);
 
@@ -128,7 +130,7 @@ export default function Profile() {
     return () => {
       mounted = false;
     };
-  }, [isOwnProfile, currentProfile?.id]);
+  }, [isOwnProfile, profileId]);
 
   const profile = isOwnProfile ? currentProfile : otherUserProfile;
   const name =
