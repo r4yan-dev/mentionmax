@@ -31,7 +31,7 @@ export default function PathSwitcher() {
   return (
     <div className="path-switcher" aria-label="Choisir ton parcours">
       <span className="path-switcher__label">Parcours</span>
-      <div className="path-switcher__buttons">
+      <div className="path-switcher__buttons" role="group" aria-label="Changer de parcours sans quitter la page">
         {options.map((path) => (
           <button
             key={path}
@@ -40,7 +40,7 @@ export default function PathSwitcher() {
             aria-pressed={current === path}
             onClick={() => void choose(path)}
             disabled={saving}
-            title={pathLabels[path]}
+            title={`Basculer vers ${pathLabels[path]}`}
           >
             <span>{path === "SP" ? "SP" : path === "SMA" ? "SM A" : "SM B"}</span>
             {current === path ? <Check size={13} /> : null}
