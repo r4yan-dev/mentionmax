@@ -1,0 +1,411 @@
+MENTIONMAX · 2BAC SCIENCES PHYSIQUES · PC
+LONGFORM LESSON CONTENT v2
+
+Editorial rule
+-------------
+Chaque leçon est conçue pour AU MOINS 4 pages d'apprentissage verticales.
+Une page = un moment pédagogique, pas un simple saut visuel.
+Les définitions sont courtes et précises. Les exemples gardent des situations
+proches du type Bac mais changent les nombres ou le contexte. Les exercices
+sont intégrés avant la fin de la leçon. Les corrections sont révélées par
+étapes dans l'interface. Les médias Menti sont décrits comme des objets de
+contenu, pas comme de la décoration.
+
+PAGE SYSTEM
+-----------
+01 · DÉCLIC       comprendre + visualiser + mini-manipulation
+02 · CONSTRUIRE   cours + formule + 2 exemples + lecture graphique
+03 · MÉTHODE      méthode Bac + pièges + animation + coach de raisonnement
+04 · ENTRAÎNER    exercice acquisition + exercice Bac + défi + rappel actif
+
+======================================================================
+01 · ONDES MÉCANIQUES PROGRESSIVES
+======================================================================
+Déclic
+Une onde mécanique progressive est la propagation d'une perturbation dans
+un milieu matériel, sans transport global de matière.
+Image Menti : une impulsion avance sur une corde. Les points de la corde
+oscillent localement mais ne suivent pas la bosse.
+Interaction : déplacer la distance entre A et B et le retard entre leurs
+signaux ; afficher v en direct.
+
+Construire
+Relation : v = d / Δt
+Exemple : une impulsion parcourt 2,8 m en 0,70 s. v = 4,0 m·s⁻¹.
+Exemple Bac remix : deux capteurs séparés de 1,70 m détectent le même signal
+avec 5,0 ms de retard. v = 340 m·s⁻¹.
+Lecture graphique : repérer les deux instants de détection avant de prendre
+leur différence.
+
+Méthode
+1. Identifier les deux points.
+2. Relever d.
+3. Déterminer Δt.
+4. Convertir le temps en secondes.
+5. Calculer puis conclure avec l'unité.
+Piège : confondre célérité, fréquence et période.
+Animation : propagation d'une impulsion avec repères A/B.
+
+Entraîner
+Niveau 1 : 2,4 m en 7,0 ms → v ≈ 343 m·s⁻¹.
+Niveau Bac : 3,0 m en 8,8 ms → v ≈ 341 m·s⁻¹.
+Défi : diagnostiquer l'erreur d'un résultat 0,34 m·s⁻¹ obtenu avec 1,7 m et 5,0 ms.
+Rappel : expliquer à voix haute pourquoi l'onde transporte une perturbation,
+pas la matière.
+
+======================================================================
+02 · ONDES MÉCANIQUES PROGRESSIVES PÉRIODIQUES
+======================================================================
+Déclic
+Une onde périodique répète le même motif dans le temps et dans l'espace.
+T est la période, f la fréquence, λ la longueur d'onde.
+Image Menti : même onde représentée dans le temps puis dans l'espace, avec
+les crêtes repérées.
+Interaction : curseurs T et v, affichage automatique de f et λ.
+
+Construire
+Relations : f = 1/T ; v = λf = λ/T.
+Exemple : T = 40 ms → f = 25 Hz.
+Exemple Bac remix : v = 12 m·s⁻¹ et f = 30 Hz → λ = 0,40 m.
+Phase : des points séparés d'un nombre entier de λ sont en phase.
+
+Méthode
+Lire d'abord l'échelle du graphe. Convertir ms en s. Choisir la relation
+la plus directe. Garder λ en m si v est en m·s⁻¹.
+Piège : écrire λ = vT avec T encore en millisecondes.
+Animation : déplacement d'un motif sur une corde ou à la surface de l'eau.
+
+Entraîner
+Niveau 1 : T = 25 ms → f = 40 Hz.
+Niveau Bac : v = 6,0 m·s⁻¹, f = 20 Hz → λ = 0,30 m.
+Défi : 1,20 m entre deux points en phase → λ possible = 0,40 m.
+Rappel : donner l'unité de T, f, λ et v sans regarder le cours.
+
+======================================================================
+03 · LUMIÈRE : DIFFRACTION, RÉFRACTION ET DISPERSION
+======================================================================
+Déclic
+La lumière est une onde électromagnétique. Elle peut se propager dans le
+vide et dans les milieux transparents.
+Image Menti : interface air/verre, normale, rayon incident et rayon réfracté,
+puis une fente de plus en plus étroite produisant une diffraction plus visible.
+Interaction : modifier n et i1 ; voir i2 se déplacer.
+
+Construire
+Relations : n = c/v ; n1 sin(i1) = n2 sin(i2).
+Exemple : n = 1,50 → v = 2,00×10⁸ m·s⁻¹.
+Exemple Bac remix : air → verre n = 1,50 avec i1 = 30° → i2 ≈ 19,5°.
+Diffraction : plus l'ouverture est petite devant la longueur d'onde,
+plus l'étalement observé est important. Dispersion : l'indice dépend de
+la longueur d'onde dans un milieu dispersif.
+
+Méthode
+Dessiner la normale. Mesurer les angles par rapport à la normale. Écrire
+Snell-Descartes. Pour un indice, utiliser n = c/v.
+Piège : mesurer l'angle par rapport à la surface.
+Animation : rayon qui change de direction à une interface.
+
+Entraîner
+Niveau 1 : n = 1,60 → v = 1,875×10⁸ m·s⁻¹.
+Niveau Bac : air → liquide n = 1,33 avec i1 = 45° → i2 ≈ 32,1°.
+Défi : ouverture divisée par 2 → diffraction plus marquée.
+Rappel : expliquer pourquoi la direction et la longueur d'onde peuvent
+changer lors d'un changement de milieu alors que la fréquence reste liée
+à la source.
+
+======================================================================
+04 · DÉCROISSANCE RADIOACTIVE
+======================================================================
+Déclic
+Une désintégration est aléatoire pour un noyau isolé. Pour un grand ensemble,
+l'évolution suit une loi exponentielle.
+Image Menti : frise 0, T1/2, 2T1/2, 3T1/2 avec 100 %, 50 %, 25 %, 12,5 %.
+Interaction : curseur t, courbe N/N0 et A/A0.
+
+Construire
+Relations : N(t)=N0 e^(-λt) ; A=λN ; T1/2=ln2/λ.
+Exemple : λ = 2,0×10⁻³ s⁻¹ → T1/2 ≈ 347 s.
+Exemple Bac remix : après 3 demi-vies, il reste 1/8, soit 12,5 %.
+
+Méthode
+Vérifier l'unité de t et λ. Utiliser le nombre de demi-vies lorsque la durée
+est un multiple simple de T1/2. Pour l'activité, elle décroît comme N.
+Piège : croire qu'une demi-vie laisse 0 %.
+Animation : diminution progressive d'un nuage de noyaux.
+
+Entraîner
+Niveau 1 : T1/2 = 6,0 h, après 18 h → 1/8.
+Niveau Bac : T1/2 = 5,0 jours → λ ≈ 0,139 jour⁻¹.
+Défi : A0 = 1200 Bq, après 3 demi-vies → 150 Bq.
+Rappel : donner la définition de demi-vie sans formuler « temps pour tout
+faire disparaître ».
+
+======================================================================
+05 · NOYAUX, DÉFAUT DE MASSE ET ÉNERGIE
+======================================================================
+Déclic
+Une faible variation de masse peut correspondre à une énergie importante.
+Image Menti : nucléons séparés → noyau lié, avec Δm et énergie de liaison.
+Interaction : modifier Δm et comparer l'énergie en MeV entre deux noyaux.
+
+Construire
+Relations : E=mc² ; El=Δm c² ; ε=El/A.
+Conversion pratique : 1 u ≈ 931,5 MeV/c².
+Exemple : Δm = 0,0020 u → E ≈ 1,86 MeV.
+Exemple Bac remix : A = 40, El = 320 MeV → ε = 8,0 MeV/nucléon.
+Fusion : assemblage de noyaux légers. Fission : séparation d'un noyau lourd.
+
+Méthode
+Identifier la masse manquante. Choisir l'unité pratique. Calculer. Interpréter
+le signe et l'origine de l'énergie.
+Piège : mélanger u, kg, J et MeV sans conversion.
+Animation : bilan de masse avant/après une réaction nucléaire.
+
+Entraîner
+Niveau 1 : 0,0030 u → 2,79 MeV.
+Niveau Bac : 400 MeV pour A = 50 → 8,0 MeV/nucléon.
+Défi : expliquer le rôle du facteur c².
+Rappel : distinguer défaut de masse d'une variation de masse d'une réaction.
+
+======================================================================
+06 · DIPÔLE RC
+======================================================================
+Déclic
+Le condensateur stocke de l'énergie. Sa tension n'évolue pas instantanément.
+Image Menti : circuit RC + courbe montant vers une valeur finale + repère 63 %.
+Interaction : sliders R et C, courbe de charge en direct.
+
+Construire
+Relations : τ=RC ; uC(t)=E(1-e^(-t/τ)).
+À t=τ, uC atteint environ 63 % de la valeur finale.
+Exemple : R=2,0 kΩ et C=470 μF → τ=0,94 s.
+Exemple Bac remix : E=6,0 V à t=τ → uC≈3,79 V.
+
+Méthode
+Convertir R et C en unités cohérentes, calculer τ, situer le temps étudié,
+puis utiliser la bonne expression de charge ou de décharge.
+Piège : utiliser τ=R/C.
+Animation : charge puis décharge avec barre de progression.
+
+Entraîner
+Niveau 1 : 4,0 kΩ et 250 μF → τ=1,0 s.
+Niveau Bac : E=8,0 V et τ=0,40 s → uC≈5,06 V à t=τ.
+Défi : une courbe atteint 63 % à 0,75 s → τ≈0,75 s.
+
+======================================================================
+07 · DIPÔLE RL
+======================================================================
+Déclic
+Une bobine s'oppose aux variations rapides du courant.
+Image Menti : circuit RL + courbe d'établissement du courant.
+Interaction : modifier L et R, voir τ et I∞ changer.
+
+Construire
+Relations : uL=L di/dt ; τ=L/R ; i(t)=I∞(1-e^(-t/τ)).
+Exemple : L=120 mH et R=30 Ω → τ=4,0 ms.
+Exemple Bac remix : E=12 V et R=24 Ω → I∞=0,50 A.
+
+Méthode
+Identifier le régime transitoire puis le régime permanent. Calculer τ puis
+la valeur finale avant d'utiliser l'évolution temporelle.
+Piège : utiliser la formule RC pour la constante de temps.
+Animation : courant qui s'établit progressivement.
+
+Entraîner
+Niveau 1 : L=150 mH, R=50 Ω → τ=3,0 ms.
+Niveau Bac : E=12 V, R=24 Ω → I∞=0,50 A.
+Défi : doubler L à R constant → τ est doublée.
+
+======================================================================
+08 · OSCILLATIONS LC ET RLC
+======================================================================
+Déclic
+Le condensateur et la bobine échangent de l'énergie. Une résistance amortit
+les oscillations.
+Image Menti : énergie électrique et magnétique qui se passent le relais.
+Interaction : modifier R et observer l'amortissement de uC(t).
+
+Construire
+Relation : T0=2π√(LC).
+Quand uC est maximale, le courant est momentanément nul dans le modèle idéal.
+Exemple : L=10 mH, C=100 nF → T0≈199 μs.
+Exemple Bac remix : la résistance dissipe une partie de l'énergie, donc
+l'amplitude diminue.
+
+Méthode
+Mesurer une pseudo-période sur le graphe entre deux maxima similaires.
+Identifier séparément le rôle de L, C et R.
+Piège : traiter un RLC réel comme parfaitement conservatif.
+Animation : échange EC ↔ EL au fil du temps.
+
+Entraîner
+Niveau 1 : L=20 mH, C=50 nF → T0≈199 μs.
+Niveau Bac : quand EC est-elle maximale ? Quand |uC| est maximal.
+Défi : expliquer l'amortissement par dissipation thermique.
+
+======================================================================
+09 · RÉSONANCE ÉLECTRIQUE FORCÉE
+======================================================================
+Déclic
+Un générateur impose une fréquence d'excitation. La réponse du circuit
+peut devenir très grande autour d'une fréquence caractéristique.
+Image Menti : courbe amplitude/fréquence avec un sommet et f0 indiqué.
+Interaction : balayer la fréquence et voir amplitude + déphasage.
+
+Construire
+Relations : ω0=1/√(LC) ; f0=1/(2π√(LC)).
+Exemple : L=20 mH et C=50 nF → f0≈5,03 kHz.
+Lecture : le maximum de la courbe repère la zone de résonance.
+
+Méthode
+Lire l'axe des fréquences, identifier le maximum, comparer la largeur et
+la hauteur du pic lorsque R varie.
+Piège : confondre fréquence propre et période propre.
+Animation : balayage automatique de fréquence.
+
+Entraîner
+Niveau 1 : calculer f0 pour 20 mH et 50 nF.
+Niveau Bac : maximum à 1,8 kHz → excitation proche de la fréquence caractéristique.
+Défi : augmenter R → pic plus aplati et plus amorti.
+
+======================================================================
+10 · MOUVEMENT, NEWTON ET PROJECTILES
+======================================================================
+Déclic
+La mécanique commence par le système, le référentiel, le repère et le bilan
+des forces. Les équations viennent ensuite.
+Image Menti : projectile avec repère x/y, vecteur vitesse et accélération.
+Interaction : sliders hauteur et vitesse initiale, trajectoire en direct.
+
+Construire
+Relations : ΣF⃗=m a⃗ ; v=v0+at ; x=x0+v0t+1/2 at².
+Sans frottement, pour un projectile et y vers le haut : ay=-g.
+Exemple : lancement horizontal depuis 1,25 m à 8,0 m·s⁻¹ → temps≈0,505 s,
+portée≈4,04 m.
+Exemple Bac remix : masse 5,0 kg, résultante 15 N → a=3,0 m·s⁻².
+
+Méthode
+1. Système. 2. Référentiel. 3. Repère. 4. Forces. 5. Projection des vecteurs.
+Piège : choisir une formule avant le bilan des forces.
+Animation : décomposition du mouvement horizontal/vertical.
+
+Entraîner
+Niveau 1 : 4,0 → 10 m·s⁻¹ en 3,0 s → a=2,0 m·s⁻².
+Niveau Bac : projectile depuis 1,80 m à 6,0 m·s⁻¹ → t≈0,606 s, portée≈3,64 m.
+Défi : résultante 9,0 N sur 2,0 kg → a=4,5 m·s⁻².
+
+======================================================================
+11 · TRAVAIL ET ÉNERGIE CINÉTIQUE
+======================================================================
+Déclic
+Une approche énergétique relie directement les actions des forces aux
+variations de vitesse.
+Image Menti : barre d'énergie cinétique avant/après, force et angle θ.
+Interaction : modifier m, v et θ et voir Ec et W évoluer.
+
+Construire
+Relations : Ec=1/2 mv² ; W=F·AB·cosθ ; ΔEc=ΣW.
+Exemple : m=0,50 kg, 3,0 → 7,0 m·s⁻¹ → ΔEc=10 J.
+Exemple Bac remix : F=20 N sur 3,0 m dans le même sens → W=60 J.
+
+Méthode
+Choisir le système, lister les forces, calculer seulement les travaux utiles,
+puis appliquer le théorème de l'énergie cinétique.
+Piège : oublier le signe du travail.
+Animation : énergie avant → transfert → énergie après.
+
+Entraîner
+Niveau 1 : m=0,80 kg, v=5,0 m·s⁻¹ → Ec=10 J.
+Niveau Bac : force 20 N et 3,0 m dans le même sens → W=60 J.
+Défi : somme des travaux négative → ΔEc négative.
+
+======================================================================
+12 · PARTICULE CHARGÉE DANS UN CHAMP MAGNÉTIQUE
+======================================================================
+Déclic
+La force magnétique dévie une charge en mouvement. Dans le cas v⊥B,
+la trajectoire peut devenir circulaire uniforme.
+Image Menti : particule, v, B et F avec trois vecteurs orthogonaux.
+Interaction : changer signe de q, v et B et observer sens + rayon.
+
+Construire
+Relations : F⃗=q v⃗×B⃗ ; |F|=|q|vB si v⊥B ; r=mv/(|q|B).
+Exemple : q=2,0 μC, v=3,0×10⁵ m·s⁻¹, B=0,40 T → F=0,24 N.
+Exemple Bac remix : doubler v → rayon doublé.
+
+Méthode
+Identifier l'angle entre v et B. Calculer la norme avec le sinus si nécessaire,
+puis déterminer le sens avec le signe de q.
+Piège : utiliser q sans valeur absolue dans la norme.
+Animation : particule qui tourne, avec affichage du rayon.
+
+Entraîner
+Niveau 1 : calculer F pour les valeurs ci-dessus.
+Niveau Bac : comparer r lorsque v est doublée.
+Défi : charge négative → sens de déviation opposé.
+
+======================================================================
+13 · SATELLITES ET MOUVEMENT ORBITAL
+======================================================================
+Déclic
+Un satellite est en chute libre autour d'un astre. La gravitation fournit
+l'accélération centripète.
+Image Menti : planète centrale, orbite et force dirigée vers le centre.
+Interaction : déplacer le satellite sur différentes orbites et afficher v,
+T et T²/r³.
+
+Construire
+Relations : F=GMm/r² ; v=√(GM/r) ; T=2π√(r³/GM).
+Exemple : doubler r → v multipliée par 1/√2.
+Exemple Bac remix : multiplier r par 4 → T multipliée par 8.
+
+Méthode
+Identifier l'orbite, écrire la gravitation puis relier cette force à
+l'accélération centripète pour obtenir v ou T.
+Piège : croire que la période est proportionnelle à r.
+Animation : trois orbites avec vitesses différentes.
+
+Entraîner
+Niveau 1 : r×2 → F÷4.
+Niveau Bac : r augmente → vitesse diminue.
+Défi : r×4 → T×8.
+
+======================================================================
+14 · ROTATION, MOMENTS ET ÉQUILIBRE
+======================================================================
+Déclic
+Une force peut provoquer une rotation. Le bras de levier détermine son effet.
+Image Menti : poutre, pivot, forces et bras de levier perpendiculaire.
+Interaction : déplacer le point d'application d'une force et observer le moment.
+
+Construire
+Relations : |M_O|=F d ; ΣF⃗=0 ; ΣM_O=0 à l'équilibre plan.
+Exemple : F=25 N, d=0,40 m → |M|=10 N·m.
+Exemple Bac remix : 40 N à 0,30 m équilibrée par 60 N à 0,20 m.
+
+Méthode
+Choisir intelligemment le pivot. Écrire la somme des moments avant de
+remplacer les valeurs.
+Piège : utiliser une distance quelconque au lieu du bras de levier perpendiculaire.
+Animation : sens de rotation des moments opposés.
+
+Entraîner
+Niveau 1 : F=30 N, d=0,25 m → 7,5 N·m.
+Niveau Bac : équilibrage 40 N×0,30 m → force opposée de 60 N à 0,20 m.
+Défi : expliquer pourquoi placer le pivot sur une force inconnue simplifie
+l'équation.
+
+======================================================================
+CONTENT / UI CONTRACT
+======================================================================
+Chaque leçon exposée au renderer doit conserver les quatre marqueurs de page
+et les types de blocs suivants lorsqu'ils sont disponibles :
+page, definition, concept, formula, example, worked-solution, method,
+common-mistake, warning, exam-tip, diagram, graph, animation, interactive,
+exercise, highlight et recap.
+
+Les exercices intégrés doivent pouvoir révéler leur correction par étapes.
+Les blocs animation/interactive doivent être considérés comme composants
+pédagogiques actifs. Les diagrammes doivent être illustrés dans un style
+Menti : clair, éditorial, coloré avec retenue, annotations courtes et forte
+hiérarchie visuelle.
