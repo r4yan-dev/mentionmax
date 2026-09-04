@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BookOpen, CheckCircle2, Clock3, Flame, Target, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAccount } from "../context/AccountContext";
@@ -6,34 +7,192 @@ import { resolveUserPath } from "../data/curriculum/secondBac";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
 import PeopleFeature from "../components/ui/PeopleFeature";
+import { supabase } from "../lib/supabase";
 import "./Dashboard.css";
 
-const subjectTypes: Record<string, SubjectType> = { maths: "math", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
-const mastery: Record<string, number> = { maths: 91, "physique-chimie": 84, svt: 78, anglais: 75, philosophie: 72 };
-const week = [55, 74, 82, 48, 91, 66, 38];
-const weekLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const subjectTypes: Record<string, SubjectType> = {
+  maths: "math",
+  "physique-chimie": "physics",
+  svt: "svt",
+  anglais: "english",
+  philosophie: "philosophy",
+};
+
+interface DashboardActivity {
+  completedExercises: number;
+  totalExercises: number;
+  totalFocusSeconds: number;
+  weekFocusSeconds: number;
+  streakDays: number;
+  weekFocusByDay: number[];
+}
+
+const emptyActivity: DashboardActivity = {
+  completedExercises: 0,
+  totalExercises: 0,
+  totalFocusSeconds: 0,
+  weekFocusSeconds: 0,
+  streakDays: 0,
+  weekFocusByDay: [0, 0, 0, 0, 0, 0, 0],
+};
+
+function startOfLocalDay(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function formatStudyTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return `${hours}h${minutes.toString().padStart(2, "0")}`;
+  return `${minutes} min`;
+}
+
+function calculateStreak(activityDates: string[]) {
+  const days = new Set(
+    activityDates.map((value) => startOfLocalDay(new Date(value)).getTime()),
+  );
+  let streak = 0;
+  const cursor = startOfLocalDay();
+
+  while (days.has(cursor.getTime())) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  if (streak === 0) {
+    const yesterday = startOfLocalDay();
+    yesterday.setDate(yesterday.getDate() - 1);
+    while (days.has(yesterday.getTime())) {
+      streak += 1;
+      yesterday.setDate(yesterday.getDate() - 1);
+    }
+  }
+
+  return streak;
+}
 
 export default function Dashboard() {
   const { profile, schoolPreferences } = useAccount();
   const path = resolveUserPath(schoolPreferences?.track ?? null, schoolPreferences?.section ?? null);
   const trackSubjects = getTrackSubjects(path);
   const displayName = profile?.display_name?.split(" ")[0] || "élève";
-  const pathLabel = schoolPreferences?.track === "SM" ? `Sciences Mathématiques ${schoolPreferences.section ?? ""}` : "Sciences Physiques";
+  const pathLabel = schoolPreferences?.track === "SM"
+    ? `Sciences Mathématiques ${schoolPreferences.section ?? ""}`
+    : "Sciences Physiques";
+
+  const [activity, setActivity] = useState<DashboardActivity>(emptyActivity);
+  const [activityLoading, setActivityLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadActivity() {
+      if (!profile?.id) {
+        setActivityLoading(false);
+        return;
+      }
+
+      setActivityLoading(true);
+      try {
+        const [progressResult, totalResult, focusResult] = await Promise.all([
+          supabase
+            .from("mission_helios_progress")
+            .select("completed, completed_at")
+            .eq("user_id", profile.id),
+          supabase
+            .from("mission_helios_exercises")
+            .select("id", { count: "exact", head: true }),
+          supabase
+            .from("focus_sessions")
+            .select("actual_seconds, started_at, status")
+            .eq("user_id", profile.id)
+            .eq("status", "completed"),
+        ]);
+
+        if (!mounted) return;
+
+        const progressRows = progressResult.data ?? [];
+        const focusRows = focusResult.data ?? [];
+        const completedExercises = progressRows.filter((row) => row.completed).length;
+        const focusSeconds = focusRows.reduce(
+          (sum, row) => sum + Number(row.actual_seconds ?? 0),
+          0,
+        );
+
+        const weekStart = startOfLocalDay();
+        weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+        weekStart.setHours(0, 0, 0, 0);
+
+        const weekFocusByDay = [0, 0, 0, 0, 0, 0, 0];
+        for (const row of focusRows) {
+          const startedAt = new Date(row.started_at);
+          if (startedAt < weekStart) continue;
+          const dayIndex = (startedAt.getDay() + 6) % 7;
+          weekFocusByDay[dayIndex] += Number(row.actual_seconds ?? 0);
+        }
+
+        const activityDates = [
+          ...focusRows.map((row) => row.started_at),
+          ...progressRows
+            .filter((row) => row.completed && row.completed_at)
+            .map((row) => row.completed_at as string),
+        ];
+
+        setActivity({
+          completedExercises,
+          totalExercises: totalResult.count ?? 0,
+          totalFocusSeconds: focusSeconds,
+          weekFocusSeconds: weekFocusByDay.reduce((sum, value) => sum + value, 0),
+          streakDays: calculateStreak(activityDates),
+          weekFocusByDay,
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard activity:", error);
+        if (mounted) setActivity(emptyActivity);
+      } finally {
+        if (mounted) setActivityLoading(false);
+      }
+    }
+
+    void loadActivity();
+
+    return () => {
+      mounted = false;
+    };
+  }, [profile?.id]);
+
+  const exerciseProgress = activity.totalExercises > 0
+    ? Math.round((activity.completedExercises / activity.totalExercises) * 100)
+    : 0;
+
+  const maxDaySeconds = Math.max(...activity.weekFocusByDay, 1);
+  const weekLabels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+  const focusTodayMinutes = Math.round(activity.weekFocusByDay[(new Date().getDay() + 6) % 7] / 60);
+
+  const realMastery = useMemo(() => {
+    if (activity.totalExercises === 0) return 0;
+    return exerciseProgress;
+  }, [activity.totalExercises, exerciseProgress]);
 
   return <main className="section container dashboard-page">
     <header className="dashboard-hero"><div><span className="section-eyebrow">TABLEAU DE BORD · 2BAC</span><h1>Continue ta <span className="accent-word">préparation.</span></h1><p>Bonjour {displayName}. Voici ce qui mérite ton attention aujourd’hui.</p></div><div className="dashboard-path"><span>PARCOURS ACTIF</span><strong>{pathLabel}</strong><Link to="/preferences">Modifier</Link></div></header>
 
     <PeopleFeature variant="hero" compact title="Ton prochain chapitre commence ici." text="Cours, exercices et correction guidée dans un seul parcours. Travaille régulièrement pour construire une préparation solide au Bac." action={<Link className="btn btn-primary" to="/exercices">Commencer une session <ArrowRight size={15} /></Link>} />
 
-    <section className="stats-grid dashboard-stats"><div className="card"><div className="dashboard-stat-icon"><TrendingUp size={17}/></div><span>Réussite moyenne</span><strong>86%</strong><small>+4 pts ce mois</small></div><div className="card"><div className="dashboard-stat-icon"><Target size={17}/></div><span>Exercices</span><strong>186</strong><small>12 cette semaine</small></div><div className="card"><div className="dashboard-stat-icon"><Flame size={17}/></div><span>Série</span><strong>5 jours</strong><small>record : 12 jours</small></div><div className="card"><div className="dashboard-stat-icon"><Clock3 size={17}/></div><span>Temps de travail</span><strong>12h40</strong><small>objectif : 15h</small></div></section>
+    <section className="stats-grid dashboard-stats">
+      <div className="card"><div className="dashboard-stat-icon"><TrendingUp size={17}/></div><span>Progression exercices</span><strong>{activityLoading ? "…" : `${realMastery}%`}</strong><small>{activity.completedExercises} terminés sur {activity.totalExercises || "—"}</small></div>
+      <div className="card"><div className="dashboard-stat-icon"><Target size={17}/></div><span>Exercices terminés</span><strong>{activityLoading ? "…" : activity.completedExercises}</strong><small>Données réelles de ton compte</small></div>
+      <div className="card"><div className="dashboard-stat-icon"><Flame size={17}/></div><span>Série</span><strong>{activityLoading ? "…" : `${activity.streakDays} ${activity.streakDays > 1 ? "jours" : "jour"}`}</strong><small>Basée sur tes activités réelles</small></div>
+      <div className="card"><div className="dashboard-stat-icon"><Clock3 size={17}/></div><span>Temps de travail</span><strong>{activityLoading ? "…" : formatStudyTime(activity.totalFocusSeconds)}</strong><small>{focusTodayMinutes} min aujourd’hui</small></div>
+    </section>
 
     <div className="dashboard-grid">
       <section className="card dashboard-priority"><div className="section-row"><div><span className="section-eyebrow">PRIORITÉ DU JOUR</span><h2>Physique-Chimie · Électricité</h2></div><span className="dashboard-priority-time">25 min</span></div><div className="dashboard-priority-body"><div className="dashboard-priority-icon"><SubjectIcon type="physics" label="Physique-Chimie" /></div><div><strong>Réponse d’un circuit RC</strong><p>Consolide les équations différentielles avant de passer aux exercices plus difficiles.</p><div className="dashboard-tags"><span>Difficile</span><span>+40 XP</span><span>2 tentatives</span></div></div><Link className="btn btn-primary" to="/exercices?subject=physique-chimie">Commencer <ArrowRight size={15}/></Link></div></section>
-      <section className="card"><div className="section-row"><div><span className="section-eyebrow">TON PROGRAMME</span><h2>Matières</h2></div><Link to="/matieres" className="text-brand">Explorer <ArrowRight size={14}/></Link></div><div className="dashboard-subjects">{trackSubjects.map((subject) => { const value = mastery[subject.id] ?? 70; return <Link to={`/subjects/${subject.id}`} className="dashboard-subject" key={subject.id}><SubjectIcon type={subjectTypes[subject.id]} label={subject.name}/><div><strong>{subjectCatalog[subject.id].shortName}</strong><span>{subject.name}</span></div><b>{value}%</b><ProgressBar value={value}/></Link>; })}</div></section>
+      <section className="card"><div className="section-row"><div><span className="section-eyebrow">TON PROGRAMME</span><h2>Matières</h2></div><Link to="/matieres" className="text-brand">Explorer <ArrowRight size={14}/></Link></div><div className="dashboard-subjects">{trackSubjects.map((subject) => { const value = subject.id === "maths" ? realMastery : null; return <Link to={`/subjects/${subject.id}`} className="dashboard-subject" key={subject.id}><SubjectIcon type={subjectTypes[subject.id]} label={subject.name}/><div><strong>{subjectCatalog[subject.id].shortName}</strong><span>{subject.name}</span></div><b>{value === null ? "—" : `${value}%`}</b><ProgressBar value={value ?? 0}/></Link>; })}</div></section>
     </div>
 
     <div className="dashboard-lower-grid">
-      <section className="card dashboard-week"><div className="section-row"><div><span className="section-eyebrow">ACTIVITÉ</span><h2>Ta semaine</h2></div><Link to="/progression" className="text-brand">Détails <ArrowRight size={14}/></Link></div><div className="dashboard-chart">{week.map((value,index)=><div className="dashboard-bar-wrap" key={weekLabels[index]}><span className="dashboard-bar-value">{value}%</span><div className={`dashboard-bar ${index === 4 ? "active" : ""}`} style={{height:`${value}%`}}/><small>{weekLabels[index]}</small></div>)}</div></section>
+      <section className="card dashboard-week"><div className="section-row"><div><span className="section-eyebrow">ACTIVITÉ RÉELLE</span><h2>Ta semaine</h2></div><Link to="/progression" className="text-brand">Détails <ArrowRight size={14}/></Link></div><div className="dashboard-chart">{activity.weekFocusByDay.map((seconds,index)=><div className="dashboard-bar-wrap" key={weekLabels[index]}><span className="dashboard-bar-value">{Math.round(seconds / 60)} min</span><div className={`dashboard-bar ${index === (new Date().getDay() + 6) % 7 ? "active" : ""}`} style={{height:`${Math.max(5,(seconds / maxDaySeconds) * 100)}%`}}/><small>{weekLabels[index]}</small></div>)}</div><small style={{display:"block",marginTop:10,color:"#718582"}}>{formatStudyTime(activity.weekFocusSeconds)} de Focus cette semaine</small></section>
       <section className="card dashboard-checklist"><div><span className="section-eyebrow">SESSION DU JOUR</span><h2>3 choses à faire</h2></div><div className="dashboard-check"><span className="dashboard-check-dot done"><CheckCircle2 size={15}/></span><div><strong>Revoir un cours</strong><small>Mathématiques · 12 min</small></div><b>✓</b></div><div className="dashboard-check"><span className="dashboard-check-dot"><Target size={15}/></span><div><strong>Faire 3 exercices</strong><small>Physique-Chimie · 25 min</small></div><Link to="/exercices" aria-label="Faire les exercices"><ArrowRight size={15}/></Link></div><div className="dashboard-check"><span className="dashboard-check-dot"><BookOpen size={15}/></span><div><strong>Lire une fiche</strong><small>Philosophie · 10 min</small></div><Link to="/ai-studio/handnotes" aria-label="Ouvrir les notes"><ArrowRight size={15}/></Link></div></section>
     </div>
 
