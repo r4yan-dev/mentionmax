@@ -55,9 +55,18 @@ function toLatex(text: string): string {
     .replace(/([A-Za-zΔΩμ]+)·m/g, "\\($1\,\\mathrm{m}\\)");
 }
 
-export function LatexText({ children, className }: { children: string; className?: string }) {
+export function LatexText({
+  children,
+  className,
+  display = false,
+}: {
+  children: string;
+  className?: string;
+  display?: boolean;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
-  const latex = useMemo(() => toLatex(children), [children]);
+  const source = display ? children.trim() : children;
+  const latex = useMemo(() => (display ? `\\[${source}\\]` : toLatex(source)), [display, source]);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,5 +90,5 @@ export function LatexText({ children, className }: { children: string; className
     };
   }, [latex]);
 
-  return <span ref={ref} className={className}>{latex}</span>;
+  return <span ref={ref} className={className} data-latex-display={display || undefined}>{latex}</span>;
 }
