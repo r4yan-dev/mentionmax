@@ -157,6 +157,10 @@ export default function Profile() {
 
   async function upload(file: File) {
     try {
+      if (!user) {
+        throw new Error("Utilisateur non connecté.");
+      }
+
       setUploading(true);
       setError("");
       const avatarUrl = await uploadProfileImage(file);
@@ -165,7 +169,7 @@ export default function Profile() {
         .from("profiles")
         .upsert(
           {
-            id: user?.id,
+            id: user.id,
             avatar_url: avatarUrl,
             updated_at: new Date().toISOString(),
           },
