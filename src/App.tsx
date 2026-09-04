@@ -10,6 +10,7 @@ import Exams from "./pages/Exams";
 import ExamReader from "./pages/ExamReader";
 import AiStudio from "./pages/AiStudio";
 import Subjects from "./pages/Subjects";
+import Lessons from "./pages/Lessons";
 import Progression from "./pages/Progression";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
@@ -32,7 +33,12 @@ export default function App() {
           <Route element={<ProtectedRoute><AuthenticatedShell /></ProtectedRoute>}>
             <Route path="/accueil" element={<Dashboard />} />
             <Route path="/matieres" element={<Subjects />} />
+            <Route path="/subjects" element={<Subjects />} />
+            <Route path="/subjects/:subjectId" element={<Subjects />} />
+            <Route path="/lecons/:subjectId" element={<Lessons />} />
+            <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
             <Route path="/exercices" element={<Exercises />} />
+            <Route path="/exercises" element={<Exercises />} />
             <Route path="/exercices/:exerciseId" element={<Exercises />} />
             <Route path="/examens" element={<Exams />} />
             <Route path="/examens/:examId" element={<ExamReader />} />
