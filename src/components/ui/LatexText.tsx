@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 declare global {
   interface Window {
@@ -56,21 +56,30 @@ function toLatex(text: string): string {
 }
 
 export function LatexText({ children, className }: { children: string; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
   const latex = useMemo(() => toLatex(children), [children]);
 
   useEffect(() => {
     let cancelled = false;
+    const element = ref.current;
+    if (!element) return;
+
+    if (!latex.includes("\\(") && !latex.includes("\\[") && !latex.includes("$$") && !latex.includes("$")) {
+      element.textContent = latex;
+      return;
+    }
+
     void loadMathJax()
       .then(async () => {
-        if (!cancelled && window.MathJax?.typesetPromise) {
-          await window.MathJax.typesetPromise();
-        }
+        if (cancelled || !window.MathJax?.typesetPromise || !ref.current) return;
+        await window.MathJax.typesetPromise([ref.current]);
       })
       .catch(() => undefined);
+
     return () => {
       cancelled = true;
     };
   }, [latex]);
 
-  return <span className={className}>{latex}</span>;
+  return <span ref={ref} className={className}>{latex}</span>;
 }
