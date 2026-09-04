@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+
 import studentHero from "../../assets/people/student-hero.webp";
 import studentMaths from "../../assets/people/student-maths.webp";
 import studentPhysics from "../../assets/people/student-physics.webp";
@@ -20,7 +21,6 @@ import studentSvtBg from "../../assets/people-bg/student-svt-bg.webp";
 import studentPhilosophyBg from "../../assets/people-bg/student-philosophy-bg.webp";
 import teacherExplainingBg from "../../assets/people-bg/teacher-explaining-bg.webp";
 import studentsCollaboratingBg from "../../assets/people-bg/students-collaborating-bg.webp";
-import "./PeopleFeature.css";
 
 export type PeopleFeatureVariant =
   | "hero"
@@ -79,37 +79,44 @@ export default function PeopleFeature({
   title,
   text,
   action,
-  compact = false,
-  className = "",
 }: {
   variant?: PeopleFeatureVariant;
   eyebrow?: string;
   title: ReactNode;
   text?: ReactNode;
   action?: ReactNode;
-  compact?: boolean;
-  className?: string;
 }) {
   const style = {
-    "--people-image": `url(${people[variant]})`,
-    "--people-background": `url(${backgrounds[variant]})`,
+    backgroundImage: `url(${backgrounds[variant]})`,
   } as CSSProperties;
 
   return (
     <section
-      className={`people-feature ${compact ? "people-feature--compact" : ""} people-feature--${variant} ${className}`.trim()}
+      className="focus-group-feature"
       style={style}
     >
-      <div className="people-feature__backdrop" aria-hidden="true" />
-      <div className="people-feature__glow" aria-hidden="true" />
-      <div className="people-feature__content">
-        <span className="people-feature__eyebrow">{eyebrow ?? labels[variant]}</span>
+      <div className="focus-group-feature__content">
+        <span className="focus-group-feature__eyebrow">
+          {eyebrow ?? labels[variant]}
+        </span>
+
         <h2>{title}</h2>
+
         {text && <p>{text}</p>}
-        {action && <div className="people-feature__action">{action}</div>}
+
+        {action && (
+          <div className="focus-group-feature__actions">
+            {action}
+          </div>
+        )}
       </div>
-      <div className="people-feature__person" aria-hidden="true">
-        <img src={people[variant]} alt="" />
+
+      <div className="focus-group-feature__person">
+        <img
+          src={people[variant]}
+          alt=""
+          aria-hidden="true"
+        />
       </div>
     </section>
   );
