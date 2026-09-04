@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import "../../styles/people-feature.css";
+
 import studentHero from "../../assets/people/student-hero.webp";
 import studentMaths from "../../assets/people/student-maths.webp";
 import studentPhysics from "../../assets/people/student-physics.webp";
