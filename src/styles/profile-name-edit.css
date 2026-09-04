@@ -1,0 +1,81 @@
+/* Minimal inline profile-name editing. The editor inherits the exact heading typography instead of introducing a second UI box. */
+.profile-name-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  margin: 0 !important;
+}
+
+.profile-name-heading .profile-name-input-inline {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: auto !important;
+  min-width: 1ch !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+}
+
+.profile-name-heading .profile-name-input-inline:focus,
+.profile-name-heading .profile-name-input-inline:hover,
+.profile-name-heading .profile-name-input-inline:active {
+  outline: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.profile-name-heading .profile-name-input-inline::selection {
+  background: rgba(15, 163, 163, 0.2);
+}
+
+.profile-name-edit-button {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 0 0 2px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: currentColor !important;
+  opacity: 0.58 !important;
+  cursor: pointer !important;
+  transition: opacity 140ms ease, transform 140ms ease, color 140ms ease !important;
+}
+
+.profile-name-edit-button:hover {
+  opacity: 1 !important;
+  color: var(--mm-teal, #0FA3A3) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: translateY(-1px) !important;
+}
+
+.profile-name-edit-button:focus-visible {
+  opacity: 1 !important;
+  color: var(--mm-teal, #0FA3A3) !important;
+  outline: 2px solid rgba(15, 163, 163, 0.28) !important;
+  outline-offset: 3px !important;
+  border-radius: 4px !important;
+}
