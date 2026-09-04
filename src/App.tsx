@@ -10,14 +10,15 @@ import Exams from "./pages/Exams";
 import ExamReader from "./pages/ExamReader";
 import AiStudio from "./pages/AiStudio";
 import AIHelp from "./pages/AIHelp";
+import Handnotes from "./pages/Handnotes";
 import Subjects from "./pages/Subjects";
 import Lessons from "./pages/Lessons";
-import Handnotes from "./pages/Handnotes";
 import Progression from "./pages/Progression";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Preferences from "./pages/Preferences";
 import AuthenticatedShell from "./components/AuthenticatedShell";
+import "./index.css";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -45,6 +46,9 @@ export default function App() {
             <Route path="/exercices/:exerciseId" element={<Exercises />} />
             <Route path="/examens" element={<Exams />} />
             <Route path="/examens/:examId" element={<ExamReader />} />
+            <Route path="/exams" element={<Exams />} />
+            <Route path="/exams/:examId" element={<ExamReader />} />
+            <Route path="/exams/nationaux" element={<Exams />} />
             <Route path="/ai-studio" element={<AiStudio />} />
             <Route path="/ai-studio/handnotes" element={<Handnotes />} />
             <Route path="/ai-help" element={<AIHelp />} />
@@ -52,6 +56,7 @@ export default function App() {
             <Route path="/classement" element={<Leaderboard />} />
             <Route path="/profil" element={<Profile />} />
             <Route path="/preferences" element={<Preferences />} />
+            <Route path="/preferences/personality" element={<Preferences />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
