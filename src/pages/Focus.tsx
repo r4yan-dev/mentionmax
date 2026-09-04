@@ -21,6 +21,7 @@ import {
 } from "../context/FocusContext";
 
 import mentionmaxMark from "../assets/brand/mentionmax-mark.svg";
+import "../styles/focus-people.css";
 
 function getInitials(
   name: string
