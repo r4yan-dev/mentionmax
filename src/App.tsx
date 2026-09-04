@@ -15,6 +15,11 @@ import AIHelp from "./pages/AIHelp";
 import Handnotes from "./pages/Handnotes";
 import Subjects from "./pages/Subjects";
 import Lessons from "./pages/Lessons";
+import Focus from "./pages/Focus";
+import FocusGroupDetail from "./pages/FocusGroupDetail";
+import FocusGroupNew from "./pages/FocusGroupNew";
+import FocusGroupJoin from "./pages/FocusGroupJoin";
+import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } from "./pages/FocusGroupTabs";
 import Progression from "./pages/Progression";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
@@ -43,6 +48,16 @@ export default function App() {
       <Route path="/exercices" element={<Exercises />} />
       <Route path="/exercises" element={<Exercises />} />
       <Route path="/exercices/:exerciseId" element={<Exercises />} />
+      <Route path="/focus" element={<Focus />} />
+      <Route path="/focus/groups/new" element={<FocusGroupNew />} />
+      <Route path="/focus/groups/join" element={<FocusGroupJoin />} />
+      <Route path="/focus/groups/:groupId" element={<FocusGroupDetail />}>
+        <Route index element={<GroupLeaderboard />} />
+        <Route path="chat" element={<GroupChat />} />
+        <Route path="stats" element={<GroupStats />} />
+        <Route path="members" element={<GroupMembers />} />
+        <Route path="settings" element={<GroupSettings />} />
+      </Route>
       <Route path="/examens" element={<Exams />} />
       <Route path="/examens/:examId" element={<ExamReader />} />
       <Route path="/examens/nationaux" element={<NationalExams />} />
