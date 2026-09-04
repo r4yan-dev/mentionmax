@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, Download, FileText, Search } from "lucide-react";
+import { Download, FileText, Search } from "lucide-react";
 import {
   exams,
   displayFileName,
