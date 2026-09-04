@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { Icon } from "../navigation/Icon";
 import { useAuth } from "../../context/AuthContext";
+import { useAccount } from "../../context/AccountContext";
 import { CommandPalette } from "../command/CommandPalette";
 import MentionMaxMark from "../../assets/brand/mentionmax-mark.svg";
 import PathSwitcher from "../curriculum/PathSwitcher";
@@ -20,6 +21,7 @@ const primaryNav = [
 
 export function AppShell() {
   const { user, signOut } = useAuth();
+  const { profile } = useAccount();
   const location = useLocation();
   const [profileOpen, setProfileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -28,6 +30,8 @@ export function AppShell() {
   const exercisesArea = location.pathname.startsWith("/exercices") || location.pathname.startsWith("/pratique");
   const aiArea = location.pathname.startsWith("/ai-help") || location.pathname.startsWith("/ai-studio");
   const focusArea = location.pathname.startsWith("/focus");
+  const displayName = profile?.display_name || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Compte";
+  const initials = displayName.split(/\s+/).map((part) => part.charAt(0)).join("").slice(0, 2).toUpperCase();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -53,6 +57,14 @@ export function AppShell() {
     return isActive;
   }
 
+  function Avatar({ size = "small" }: { size?: "small" | "tiny" }) {
+    return profile?.avatar_url ? (
+      <img src={profile.avatar_url} alt="" className={`app-profile-avatar app-profile-avatar--${size}`} />
+    ) : (
+      <span className={`app-profile-avatar app-profile-avatar--${size}`}>{initials}</span>
+    );
+  }
+
   return (
     <div className="dashboard-shell">
       <nav className="sidebar">
@@ -73,7 +85,7 @@ export function AppShell() {
         <div className="sidebar-footer">
           <div className="sidebar-section-label sidebar-section-label--footer">Compte</div>
           <button type="button" className="sidebar-search" onClick={() => setCommandOpen(true)}><Icon name="search" size={18} /><span>Recherche</span><kbd>⌘K</kbd></button>
-          <Link to="/profil" className="sidebar-secondary-item"><Icon name="profile" size={18} /><span>Profil</span></Link>
+          <Link to="/profil" className="sidebar-secondary-item sidebar-profile-item"><Avatar size="small" /><span>{displayName}</span></Link>
           <Link to="/preferences" className="sidebar-secondary-item"><Icon name="settings" size={18} /><span>Préférences</span></Link>
         </div>
       </nav>
@@ -93,8 +105,8 @@ export function AppShell() {
             <div className="streak-chip"><Icon name="flame" size={16} /><span>5 jours</span></div>
             <div className="profile-dropdown">
               <button type="button" className="profile-chip" onClick={() => setProfileOpen((value) => !value)} aria-expanded={profileOpen} aria-haspopup="menu">
-                <span className="profile-chip__avatar">{(user?.user_metadata?.display_name || user?.email || "U").slice(0, 2).toUpperCase()}</span>
-                <span className="profile-chip__name">{user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Compte"}</span>
+                <Avatar size="tiny" />
+                <span className="profile-chip__name">{displayName}</span>
                 <Icon name="chevron" size={15} />
               </button>
               {profileOpen && <div className="profile-dropdown-menu" role="menu"><Link to="/profil" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>Profil</Link><Link to="/preferences" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>Paramètres</Link><button type="button" className="profile-dropdown-item danger" onClick={async () => { setProfileOpen(false); await signOut(); }}>Déconnexion</button></div>}
