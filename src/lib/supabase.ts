@@ -1,8 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Netlify currently has no VITE_* variables configured, so keep the public
-// Supabase connection available in production while still allowing env vars
-// to override it for local/dev deployments.
+// The main app still uses mentimax-app for its existing auth/data.
 const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ||
   "https://ideyxjuptbizfubyokim.supabase.co";
@@ -15,5 +13,22 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+  },
+});
+
+// Classment reads from the richer Menti project. The Menti table exposed to
+// the client contains only leaderboard-safe, non-sensitive fields.
+const mentiSupabaseUrl =
+  import.meta.env.VITE_MENTI_SUPABASE_URL ||
+  "https://otydkqjsqozxtjbqgcuw.supabase.co";
+const mentiSupabaseKey =
+  import.meta.env.VITE_MENTI_SUPABASE_PUBLISHABLE_KEY ||
+  "sb_publishable_yXNJgv84AAGlZ44K88IZyQ_4bb0iNtW";
+
+export const mentiSupabase = createClient(mentiSupabaseUrl, mentiSupabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
   },
 });
