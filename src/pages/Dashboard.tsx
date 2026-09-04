@@ -5,6 +5,7 @@ import { getTrackSubjects, subjects as subjectCatalog } from "../data/curriculum
 import { resolveUserPath } from "../data/curriculum/secondBac";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
+import PeopleFeature from "../components/ui/PeopleFeature";
 import "./Dashboard.css";
 
 const subjectTypes: Record<string, SubjectType> = { maths: "math", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
@@ -21,6 +22,8 @@ export default function Dashboard() {
 
   return <main className="section container dashboard-page">
     <header className="dashboard-hero"><div><span className="section-eyebrow">TABLEAU DE BORD · 2BAC</span><h1>Continue ta <span className="accent-word">préparation.</span></h1><p>Bonjour {displayName}. Voici ce qui mérite ton attention aujourd’hui.</p></div><div className="dashboard-path"><span>PARCOURS ACTIF</span><strong>{pathLabel}</strong><Link to="/preferences">Modifier</Link></div></header>
+
+    <PeopleFeature variant="hero" compact title="Ton prochain chapitre commence ici." text="Cours, exercices et correction guidée dans un seul parcours. Travaille régulièrement plutôt que de découvrir le programme la veille du Bac, ce fascinant sport national." action={<Link className="btn btn-primary" to="/exercices">Commencer une session <ArrowRight size={15} /></Link>} />
 
     <section className="stats-grid dashboard-stats"><div className="card"><div className="dashboard-stat-icon"><TrendingUp size={17}/></div><span>Réussite moyenne</span><strong>86%</strong><small>+4 pts ce mois</small></div><div className="card"><div className="dashboard-stat-icon"><Target size={17}/></div><span>Exercices</span><strong>186</strong><small>12 cette semaine</small></div><div className="card"><div className="dashboard-stat-icon"><Flame size={17}/></div><span>Série</span><strong>5 jours</strong><small>record : 12 jours</small></div><div className="card"><div className="dashboard-stat-icon"><Clock3 size={17}/></div><span>Temps de travail</span><strong>12h40</strong><small>objectif : 15h</small></div></section>
 
