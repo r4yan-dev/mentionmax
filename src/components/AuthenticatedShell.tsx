@@ -12,6 +12,7 @@ const navItems = [
   { to: "/accueil", label: "Accueil", icon: Home },
   { to: "/matieres", label: "Matières", icon: BookOpen },
   { to: "/exercices", label: "Pratique", icon: BrainCircuit },
+  { to: "/focus", label: "Focus", icon: Sparkles },
   { to: "/ai-studio", label: "AI Studio", icon: Sparkles },
   { to: "/examens", label: "Examens", icon: FileText },
   { to: "/progression", label: "Progression", icon: BarChart3 },
@@ -22,6 +23,7 @@ type SearchTarget = [string, string, string, LucideIcon];
 const searchTargets: SearchTarget[] = [
   ["Cours", "Explorer les matières et les leçons", "/matieres", BookOpen],
   ["Pratique", "Ouvrir la banque d’exercices", "/exercices", BrainCircuit],
+  ["Focus", "Travailler seul ou avec ton groupe", "/focus", Sparkles],
   ["AI Studio", "Créer une fiche, un résumé ou des flashcards", "/ai-studio", Sparkles],
   ["Tuteur IA", "Poser une question à MentionMax AI", "/ai-help", Sparkles],
   ["Examens", "Sujets IA, corrections et tests", "/examens", FileText],
@@ -29,7 +31,7 @@ const searchTargets: SearchTarget[] = [
   ["Progression", "Voir tes statistiques et ta maîtrise", "/progression", BarChart3],
   ["Classement", "Voir ton rang et ton XP", "/classement", Trophy],
 ];
-const pageNames: Record<string, string> = { "/accueil": "Accueil", "/matieres": "Matières", "/subjects": "Matières", "/exercices": "Pratique", "/exercises": "Pratique", "/examens": "Examens", "/exams": "Examens", "/ai-studio": "AI Studio", "/ai-help": "Tuteur IA", "/progression": "Progression", "/classement": "Classement", "/profil": "Profil", "/preferences": "Préférences" };
+const pageNames: Record<string, string> = { "/accueil": "Accueil", "/matieres": "Matières", "/subjects": "Matières", "/exercices": "Pratique", "/exercises": "Pratique", "/focus": "Focus", "/examens": "Examens", "/exams": "Examens", "/ai-studio": "AI Studio", "/ai-help": "Tuteur IA", "/progression": "Progression", "/classement": "Classement", "/profil": "Profil", "/preferences": "Préférences" };
 
 export default function AuthenticatedShell() {
   const { signOut } = useAuth();
@@ -43,7 +45,7 @@ export default function AuthenticatedShell() {
   const path = resolveUserPath(schoolPreferences?.track ?? null, schoolPreferences?.section ?? null);
   const trackLabel = tracks[path].shortLabel;
   const initials = (profile?.display_name ?? "M").trim().slice(0, 1).toUpperCase();
-  const pageTitle = pageNames[location.pathname] ?? (location.pathname.startsWith("/exercices/") ? "Pratique" : location.pathname.startsWith("/subjects/") ? "Matières" : location.pathname.startsWith("/exams/") ? "Examens" : "MentionMax");
+  const pageTitle = pageNames[location.pathname] ?? (location.pathname.startsWith("/exercices/") ? "Pratique" : location.pathname.startsWith("/subjects/") ? "Matières" : location.pathname.startsWith("/exams/") ? "Examens" : location.pathname.startsWith("/focus") ? "Focus" : "MentionMax");
   const searchResults = useMemo<SearchTarget[]>(() => { const needle = query.trim().toLowerCase(); return !needle ? searchTargets : searchTargets.filter(([title, description]) => `${title} ${description}`.toLowerCase().includes(needle)); }, [query]);
 
   useEffect(() => { function onKeyDown(event: KeyboardEvent) { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true); window.setTimeout(() => searchRef.current?.focus(), 0); } if (event.key === "Escape") { setSearchOpen(false); setQuery(""); } } window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown); }, []);
@@ -58,7 +60,7 @@ export default function AuthenticatedShell() {
       <div className="shell-brand-row"><NavLink to="/accueil" className="shell-brand" onClick={() => setMobileOpen(false)}><span className="shell-mark">M</span><span><strong>MentionMax</strong><small>2BAC · Maroc</small></span></NavLink><button className="shell-close" onClick={() => setMobileOpen(false)} aria-label="Fermer"><X size={18}/></button></div>
       <button className="shell-mini-search" type="button" onClick={openSearch}><Search size={15}/><span>Rechercher</span><kbd>⌘K</kbd></button>
       <div className="shell-track"><span>Parcours</span><strong>{trackLabel}</strong><span className="shell-track-dot" /></div>
-      <nav className="shell-nav" aria-label="Navigation principale">{navItems.map(({to,label,icon:Icon})=><NavLink key={to} to={to} onClick={()=>setMobileOpen(false)} className={({isActive})=>`shell-nav-link ${isActive || (to === "/exercices" && location.pathname.startsWith("/exercices")) || (to === "/examens" && (location.pathname.startsWith("/examens") || location.pathname.startsWith("/exams"))) ? "active" : ""}`}><Icon size={18} strokeWidth={2}/><span>{label}</span></NavLink>)}</nav>
+      <nav className="shell-nav" aria-label="Navigation principale">{navItems.map(({to,label,icon:Icon})=><NavLink key={to} to={to} onClick={()=>setMobileOpen(false)} className={({isActive})=>`shell-nav-link ${isActive || (to === "/exercices" && location.pathname.startsWith("/exercices")) || (to === "/focus" && location.pathname.startsWith("/focus")) || (to === "/examens" && (location.pathname.startsWith("/examens") || location.pathname.startsWith("/exams"))) ? "active" : ""}`}><Icon size={18} strokeWidth={2}/><span>{label}</span></NavLink>)}</nav>
       <div className="shell-sidebar-bottom"><NavLink to="/ai-help" className="shell-tutor-card" onClick={()=>setMobileOpen(false)}><span className="shell-tutor-icon"><Sparkles size={15}/></span><span><strong>Besoin d’aide ?</strong><small>Ouvrir le tuteur IA</small></span><ChevronDown size={15}/></NavLink><button className="shell-streak" onClick={()=>go("/progression")}><span>🔥</span><div><strong>5 jours</strong><small>Série actuelle</small></div></button><button className="shell-profile" onClick={()=>go("/profil")}><span className="shell-avatar">{initials}</span><span><strong>{profile?.display_name || "Mon profil"}</strong><small>Compte étudiant · {pageTitle}</small></span><ChevronDown size={15}/></button><button className="shell-logout" onClick={handleSignOut}><LogOut size={16}/> Déconnexion</button></div>
     </aside>
     <div className="shell-main"><header className="shell-topbar"><button className="shell-menu" onClick={()=>setMobileOpen(true)} aria-label="Ouvrir le menu"><Menu size={21}/></button><button className="shell-search" type="button" onClick={openSearch}><Search size={17}/><span>Rechercher un chapitre, exercice...</span><kbd>⌘K</kbd></button><div className="shell-topbar-right"><div className="shell-page-title">{pageTitle}</div><div className="shell-path-chip">{trackLabel}</div><NavLink to="/profil" className="shell-top-profile"><span className="shell-avatar">{initials}</span><span>{profile?.display_name || "Mon profil"}</span></NavLink></div></header><div className="shell-content"><Outlet/></div></div>
