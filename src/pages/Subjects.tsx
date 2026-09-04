@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ArrowRight, BookOpen, FileText, PenLine } from "lucide-react";
+import { ArrowRight, BookOpen, FileText, PenLine, Sparkles } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
@@ -14,6 +14,7 @@ import "../styles/curriculum-path.css";
 
 const subjectTypes: Record<string, SubjectType> = { maths: "math", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
 const subjectSlug: Record<string, string> = { maths: "maths", "physique-chimie": "physique-chimie", svt: "svt", anglais: "anglais", philosophie: "philosophie" };
+const subjectThemes: Record<string, string> = { maths: "maths", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
 
 function resolveSubject(value?: string): "maths" | "physique-chimie" | "svt" | "anglais" | "philosophie" | null {
   if (!value) return "maths";
@@ -43,9 +44,6 @@ export default function Subjects() {
 
   const lessons = useMemo(() => selected ? lessonService.list(selected, path) : [], [selected, path]);
   const exerciseCount = useMemo(() => selected ? contentCatalogService.getBaseExercises(path, selected).length : 0, [selected, path]);
-  const subjectListDescription = path === "SMB"
-    ? "Mathématiques, Physique-Chimie, Anglais et Philosophie pour ton parcours Sciences Mathématiques B."
-    : "Mathématiques, Physique-Chimie, SVT, Anglais et Philosophie selon ton parcours."
 
   if (subjectId) {
     if (!selected) return <main className="section container"><div className="subject-path-banner"><div className="subject-path-banner__title"><div><strong>{pathLabels[path]}</strong><span>Ce choix détermine les matières disponibles.</span></div></div><PathSwitcher /></div><PageHeader eyebrow="Programme 2BAC" title="Cette matière n'est pas disponible." description={path === "SMB" && requested === "svt" ? "La SVT n'est pas proposée en Sciences Mathématiques B." : "Utilise le sélecteur de parcours pour consulter un autre programme."} /><Link to="/subjects" className="btn btn-secondary">Retour aux matières</Link></main>;
@@ -63,33 +61,40 @@ export default function Subjects() {
       <section className="card subjects-program-card">
         <div className="subjects-program-head">
           <div><span className="section-eyebrow">Programme 2BAC</span><h2 className="subjects-program-title">{lessons.length} leçons accessibles</h2></div>
-          <Link to={`/lecons/${selected}`} className="text-brand">Tout voir <ArrowRight size={14} /></Link>
+          <Link to={`/lecons/${selected}`} className="text-brand subjects-inline-link">Tout voir <ArrowRight size={14} /></Link>
         </div>
-        <div className="subjects-lesson-grid">
-          {lessons.map((item, index) => <Link key={item.id} to={`/lecons/${selected}/${item.id}`} className="card subject-large-card subjects-lesson-card">
-            <div className="subjects-lesson-card__meta"><span className="subjects-lesson-card__number">{String(index + 1).padStart(2, "0")}</span><span className="section-eyebrow">LEÇON</span></div>
+        {lessons.length ? <div className="subjects-lesson-grid">
+          {lessons.map((item, index) => <Link key={item.id} to={`/lecons/${selected}/${item.id}`} className="card subjects-lesson-card">
+            <div className="subjects-lesson-card__meta"><span className="subjects-lesson-card__number">{String(index + 1).padStart(2, "0")}</span><span className="section-eyebrow">LEÇON</span><span className="subjects-lesson-card__dot" /></div>
             <h3 className="subjects-lesson-card__title">{item.title}</h3>
-            <p className="subjects-lesson-card__description">{item.blocks.find((block) => block.type === "intro")?.text}</p>
-            <span className="text-brand subjects-lesson-card__link">Étudier →</span>
+            <p className="subjects-lesson-card__description">{item.blocks.find((block) => block.type === "intro")?.text ?? "Explore ce chapitre et consolide les notions essentielles du programme."}</p>
+            <span className="text-brand subjects-lesson-card__link">Étudier <ArrowRight size={13} /></span>
           </Link>)}
-        </div>
-        {lessons.length === 0 && <div className="subject-empty">Aucune leçon n'est encore publiée pour cette matière et ce parcours.</div>}
+        </div> : <div className="subject-empty"><Sparkles size={18} /><span>Aucune leçon n'est encore publiée pour ce parcours.</span></div>}
       </section>
     </main>;
   }
 
   return <main className="section container">
-    <div className="subject-path-banner"><div className="subject-path-banner__title"><div><strong>{pathLabels[path]}</strong><span>Ton parcours contrôle maintenant la liste ci-dessous.</span></div></div><PathSwitcher /></div>
-    <PageHeader eyebrow="Programme 2BAC" title={<>Choisis ta <span className="accent-word">matière.</span></>} description={subjectListDescription} />
+    <div className="subject-path-banner"><div className="subject-path-banner__title"><Sparkles size={17} /><div><strong>{pathLabels[path]}</strong><span>Ton parcours contrôle maintenant la liste ci-dessous.</span></div></div><PathSwitcher /></div>
+    <PageHeader eyebrow="Programme 2BAC" title={<>Choisis ta <span className="accent-word">matière.</span></>} description="Des espaces dédiés pour travailler les chapitres, pratiquer et suivre tes ressources." />
     <PeopleFeature variant="hero" compact title="Une matière à la fois. Un programme qui avance." text="Chaque matière garde ses chapitres, ses exercices et ses ressources dans le même espace." />
-    <div className="subject-page-grid">
-      {trackSubjects.map((subject) => <Link key={subject.id} to={`/subjects/${subjectSlug[subject.id]}`} className="card subject-large-card">
-        <SubjectIcon type={subjectTypes[subject.id]} label={subject.name}/>
-        <h2>{subject.name}</h2>
-        <p>{subject.shortName} · programme 2BAC · {contentCatalogService.getBaseExercises(path, subject.id).length} exercices</p>
-        <div className="chapter-pills"><span>{lessonService.list(subject.id, path).length} leçons</span><span>Exercices</span><span>Notes</span></div>
-        <span className="text-brand">Ouvrir <ArrowRight size={14} /></span>
-      </Link>)}
-    </div>
+    <div className="subjects-grid-intro"><div><span className="section-eyebrow">TON PROGRAMME</span><h2>Tout ton Bac, au même endroit.</h2></div><span>{trackSubjects.length} matières dans ce parcours</span></div>
+    <div className="subject-page-grid">{trackSubjects.map((subject, index) => {
+      const lessonsCount = lessonService.list(subject.id, path).length;
+      const exercisesCount = contentCatalogService.getBaseExercises(path, subject.id).length;
+      return <Link key={subject.id} to={`/subjects/${subjectSlug[subject.id]}`} className={`card subject-large-card subject-card--${subjectThemes[subject.id]}`}>
+        <div className="subject-large-card__glow" />
+        <div className="subject-large-card__top"><span className="subject-large-card__index">0{index + 1}</span><span className="subject-large-card__open">Ouvrir <ArrowUpRight /></span></div>
+        <div className="subject-large-card__icon"><SubjectIcon type={subjectTypes[subject.id]} label={subject.name}/></div>
+        <div className="subject-large-card__copy"><h2>{subject.name}</h2><p>{subject.shortName} · programme 2BAC</p></div>
+        <div className="subject-large-card__stats"><div><strong>{lessonsCount}</strong><span>leçons</span></div><div><strong>{exercisesCount}</strong><span>exercices</span></div><div><strong>∞</strong><span>notes</span></div></div>
+        <div className="subject-large-card__footer"><span>Entrer dans la matière</span><span className="subject-large-card__arrow"><ArrowRight size={15} /></span></div>
+      </Link>;
+    })}</div>
   </main>;
+}
+
+function ArrowUpRight() {
+  return <ArrowRight size={13} />;
 }
