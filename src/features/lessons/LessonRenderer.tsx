@@ -1,5 +1,5 @@
-import type { LessonBlock, LessonDocument } from "../../types/academic";
 import { LatexText } from "../../components/ui/LatexText";
+import type { LessonBlock, LessonDocument } from "../../types/academic";
 import "./lesson-renderer.css";
 
 function renderBlock(block: LessonBlock, index: number) {
@@ -7,7 +7,19 @@ function renderBlock(block: LessonBlock, index: number) {
 
   if (block.type === "title") return <h1 key={key}>{block.title || block.text}</h1>;
   if (block.type === "page") return <header key={key} className="lesson-page-break"><span>{block.title}</span><p>{block.text}</p></header>;
-  if (block.type === "formula") return <div key={key} className="lesson-block lesson-formula"><LatexText>{block.latex || ""}</LatexText></div>;
+
+  // Formula blocks contain raw LaTeX and are always rendered as display math.
+  // The explicit delimiters make strings such as `\\frac{a}{b}` render correctly
+  // even when the content source does not include $$...$$ itself.
+  if (block.type === "formula") {
+    const latex = block.latex?.trim() || block.text?.trim() || "";
+    return (
+      <div key={key} className="lesson-block lesson-formula" role="math" aria-label="Formule">
+        <LatexText display>{latex}</LatexText>
+      </div>
+    );
+  }
+
   if (block.type === "recap") return <section key={key} className="lesson-block lesson-recap"><h2>{block.title || "À retenir"}</h2>{block.items?.map((item) => <p key={item}>• <LatexText>{item}</LatexText></p>)}</section>;
   if (block.type === "warning" || block.type === "common-mistake") return <aside key={key} className="lesson-block lesson-callout lesson-callout--warning"><strong>{block.title || "Attention"}</strong><p>{block.text ? <LatexText>{block.text}</LatexText> : null}</p></aside>;
   if (block.type === "exam-tip") return <aside key={key} className="lesson-block lesson-callout lesson-callout--tip"><strong>{block.title || "Réflexe Bac"}</strong><p>{block.text ? <LatexText>{block.text}</LatexText> : null}</p></aside>;
