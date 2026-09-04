@@ -38,6 +38,12 @@
 .sidebar-search:hover { background:#fff !important; border-color:var(--mm-border) !important; color:var(--mm-ink-900) !important; }
 .sidebar-secondary-item { min-height:37px !important; border-radius:11px !important; font-size:10px !important; }
 .sidebar-secondary-item.active { background:var(--mm-teal-50) !important; color:var(--mm-teal-700) !important; }
+.sidebar-profile-item { gap:9px; }
+.app-profile-avatar { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; overflow:hidden; border-radius:999px; background:var(--mm-teal-50); color:var(--mm-teal-800); font-weight:850; line-height:1; text-transform:uppercase; }
+.app-profile-avatar img, .app-profile-avatar { box-sizing:border-box; }
+.app-profile-avatar--small { width:27px; height:27px; font-size:9px; }
+.app-profile-avatar--tiny { width:31px; height:31px; font-size:10px; }
+img.app-profile-avatar { object-fit:cover; }
 
 .topbar-context { display:flex; align-items:baseline; gap:8px; min-width:0; }
 .topbar-context__eyebrow { color:var(--mm-ink-400); font-size:8px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
