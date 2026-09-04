@@ -39,11 +39,18 @@
 .sidebar-secondary-item { min-height:37px !important; border-radius:11px !important; font-size:10px !important; }
 .sidebar-secondary-item.active { background:var(--mm-teal-50) !important; color:var(--mm-teal-700) !important; }
 .sidebar-profile-item { gap:9px; }
-.app-profile-avatar { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; overflow:hidden; border-radius:999px; background:var(--mm-teal-50); color:var(--mm-teal-800); font-weight:850; line-height:1; text-transform:uppercase; }
-.app-profile-avatar img, .app-profile-avatar { box-sizing:border-box; }
+.app-profile-avatar { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; overflow:hidden; width:27px; height:27px; border-radius:999px; background:var(--mm-teal-50); color:var(--mm-teal-800); font-weight:850; line-height:1; text-transform:uppercase; object-fit:cover; }
 .app-profile-avatar--small { width:27px; height:27px; font-size:9px; }
 .app-profile-avatar--tiny { width:31px; height:31px; font-size:10px; }
-img.app-profile-avatar { object-fit:cover; }
+img.app-profile-avatar { display:block; object-position:center; }
+
+.profile-name-heading { display:flex; align-items:center; gap:8px; margin:0; }
+.profile-name-edit-button { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:transparent; color:var(--mm-ink-400); font-size:17px; font-weight:700; line-height:1; cursor:pointer; transition:background .15s ease,color .15s ease,transform .15s ease; }
+.profile-name-edit-button:hover { background:var(--mm-teal-50); color:var(--mm-teal-700); transform:translateY(-1px); }
+.profile-name-input { width:min(420px,100%); min-height:48px; margin:2px 0 0; padding:8px 12px; border:1px solid var(--mm-border); border-radius:12px; background:#fff; color:var(--mm-ink-900); font:inherit; font-size:clamp(28px,3vw,42px); font-weight:850; letter-spacing:-.04em; line-height:1.08; outline:none; box-shadow:0 0 0 3px rgba(15,163,163,.08); }
+.profile-name-input:focus { border-color:rgba(15,163,163,.42); box-shadow:0 0 0 3px rgba(15,163,163,.1); }
+.profile-name-input:disabled { opacity:.65; }
+.profile-name-editor-inline { display:block; max-width:100%; }
 
 .topbar-context { display:flex; align-items:baseline; gap:8px; min-width:0; }
 .topbar-context__eyebrow { color:var(--mm-ink-400); font-size:8px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
