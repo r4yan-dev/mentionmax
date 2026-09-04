@@ -9,6 +9,7 @@ import studentSvt from "../../assets/people/student-svt.webp";
 import studentPhilosophy from "../../assets/people/student-philosophy.webp";
 import teacherExplaining from "../../assets/people/teacher-explaining.webp";
 import studentsCollaborating from "../../assets/people/students-collaborating.webp";
+import "./PeopleFeature.css";
 
 export type PeopleFeatureVariant =
   | "hero"
