@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Landing from "./pages/Landing";
 import Exercises from "./pages/Exercises";
 import Exams from "./pages/Exams";
+import Tests from "./pages/Tests";
+import NationalExams from "./pages/NationalExams";
 import ExamReader from "./pages/ExamReader";
 import AiStudio from "./pages/AiStudio";
 import AIHelp from "./pages/AIHelp";
@@ -47,8 +49,10 @@ export default function App() {
             <Route path="/examens" element={<Exams />} />
             <Route path="/examens/:examId" element={<ExamReader />} />
             <Route path="/exams" element={<Exams />} />
+            <Route path="/tests" element={<Tests />} />
+            <Route path="/exams/nationaux" element={<NationalExams />} />
+            <Route path="/examens/nationaux" element={<NationalExams />} />
             <Route path="/exams/:examId" element={<ExamReader />} />
-            <Route path="/exams/nationaux" element={<Exams />} />
             <Route path="/ai-studio" element={<AiStudio />} />
             <Route path="/ai-studio/handnotes" element={<Handnotes />} />
             <Route path="/ai-help" element={<AIHelp />} />
