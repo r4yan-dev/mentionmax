@@ -99,9 +99,9 @@ export default function Progression() {
   const weeklySuccessRate = weeklyExercises > 0 ? Math.round((weeklyCorrect / weeklyExercises) * 100) : 0;
 
   const subjects = useMemo(() => {
-    const allowed = path === "2BAC_SM_B"
+    const allowed = path === "SMB"
       ? ["mathematiques", "physique-chimie", "francais", "philosophie", "anglais"]
-      : path === "2BAC_SM_A"
+      : path === "SMA"
         ? ["mathematiques", "physique-chimie", "francais", "philosophie", "anglais", "svt"]
         : null;
     const rows = data?.subjects ?? [];
