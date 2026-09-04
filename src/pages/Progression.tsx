@@ -4,6 +4,7 @@ import { useAccount } from "../context/AccountContext";
 import { getTrackSubjects, subjects as subjectCatalog } from "../data/curriculum/tracks";
 import { resolveUserPath } from "../data/curriculum/secondBac";
 import { ProgressBar } from "../components/ui/ProgressBar";
+import PeopleFeature from "../components/ui/PeopleFeature";
 
 const weekly = [62, 78, 54, 91, 68, 84, 72];
 
@@ -14,6 +15,7 @@ export default function Progression() {
 
   return <main className="section container">
     <header style={{ marginBottom: 26 }}><span className="section-eyebrow">PROGRESSION</span><h1 style={{ margin: "5px 0 8px" }}>Construis une avance réelle.</h1><p style={{ maxWidth: 650, color: "#718582", lineHeight: 1.65 }}>Pas seulement un compteur de tâches terminées. Ici, tu vois où tu progresses et où ton parcours a encore besoin de travail.</p></header>
+    <PeopleFeature variant="writing" compact title="Chaque session compte." text="Une progression utile se construit dans la répétition : comprendre, pratiquer, corriger, recommencer." />
     <section className="stats-grid" style={{ marginBottom: 20 }}>
       <div className="card"><span className="section-eyebrow">XP TOTAL</span><strong style={{ display:"block",fontSize:28,marginTop:7 }}>1 120</strong><small style={{color:"#718582"}}>+180 cette semaine</small></div>
       <div className="card"><span className="section-eyebrow">TAUX DE RÉUSSITE</span><strong style={{ display:"block",fontSize:28,marginTop:7 }}>86%</strong><small style={{color:"#718582"}}>+4 pts ce mois</small></div>
