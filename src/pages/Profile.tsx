@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAccount } from "../context/AccountContext";
 import { getUserProfile, uploadProfileImage } from "../features/focus/supabase";
-import { supabase } from "../lib/supabase";
 
 export default function Profile() {
   const { userId } = useParams();
