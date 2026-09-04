@@ -36,6 +36,13 @@ interface AccountContextValue {
 
 const AccountContext = createContext<AccountContextValue | undefined>(undefined);
 
+function fallbackDisplayName(user: { email?: string | null; user_metadata?: Record<string, unknown> }) {
+  const metadataName = typeof user.user_metadata?.display_name === "string"
+    ? user.user_metadata.display_name.trim()
+    : "";
+  return metadataName || user.email?.split("@")[0] || "Élève";
+}
+
 export function AccountProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -59,7 +66,36 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setProfile((data as Profile | null) ?? null);
+    if (data) {
+      setProfile(data as Profile);
+      return;
+    }
+
+    // Some existing accounts predate the profiles row. Create it lazily so
+    // profile editing and avatar persistence work without a special migration.
+    const now = new Date().toISOString();
+    const defaultProfile = {
+      id: user.id,
+      display_name: fallbackDisplayName(user),
+      avatar_url: typeof user.user_metadata?.avatar_url === "string"
+        ? user.user_metadata.avatar_url
+        : null,
+      created_at: now,
+      updated_at: now,
+    };
+
+    const { data: created, error: createError } = await supabase
+      .from("profiles")
+      .upsert(defaultProfile, { onConflict: "id" })
+      .select("*")
+      .single();
+
+    if (createError) {
+      console.error("Failed to create profile:", createError);
+      return;
+    }
+
+    setProfile(created as Profile);
   }
 
   async function refreshSchoolPreferences() {
@@ -90,8 +126,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
     const { data, error } = await supabase
       .from("profiles")
-      .update({ display_name: cleanName, updated_at: new Date().toISOString() })
-      .eq("id", user.id)
+      .upsert({
+        id: user.id,
+        display_name: cleanName,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "id" })
       .select("*")
       .single();
 
