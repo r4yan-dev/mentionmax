@@ -159,7 +159,23 @@ export default function Profile() {
     try {
       setUploading(true);
       setError("");
-      await uploadProfileImage(file);
+      const avatarUrl = await uploadProfileImage(file);
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user?.id,
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" },
+        );
+
+      if (profileError) {
+        throw new Error(`Profil: ${profileError.message}`);
+      }
+
       await refreshProfile();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Impossible d'importer la photo.");
