@@ -32,6 +32,7 @@ const make = (
 ): HeliosDay01Exercise => ({
   id: `helios-j01-e${String(number).padStart(2, "0")}`,
   ...base,
+  type: "multi-step",
   title,
   statement: parts.join("\\n"),
   difficulty,
