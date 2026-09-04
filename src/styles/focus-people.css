@@ -1,0 +1,47 @@
+.focus-group-feature {
+  position: relative;
+  overflow: hidden;
+}
+
+.focus-group-feature__content {
+  position: relative;
+  z-index: 2;
+}
+
+.focus-group-feature__person {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 46%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.focus-group-feature__person img {
+  position: absolute;
+  right: 4%;
+  bottom: 0;
+  width: auto;
+  height: 85%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  pointer-events: none;
+  user-select: none;
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .focus-group-feature__person {
+    width: 44%;
+  }
+
+  .focus-group-feature__person img {
+    height: 72%;
+    right: -2%;
+  }
+}
