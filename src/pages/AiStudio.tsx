@@ -1,6 +1,7 @@
 import { ArrowRight, FileText, FileUp, Layers3, ListChecks, PlaySquare, Sparkles, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import PeopleFeature from "../components/ui/PeopleFeature";
 import "./AiStudio.css";
 
 const tools = [
@@ -29,6 +30,8 @@ export default function AiStudio() {
         </div>
         <div className="studio-credits"><span>CRÉATIONS</span><strong>12</strong></div>
       </header>
+
+      <PeopleFeature variant="teacher" compact title="L’IA devient ton atelier de révision." text="Transforme tes cours en fiches, résumés, cartes et quiz sans perdre la structure du programme." action={<Link to="/ai-studio/handnotes" className="btn btn-primary"><Wand2 size={15} /> Ouvrir l’atelier</Link>} />
 
       <div className="studio-grid">
         <section className="studio-card">
