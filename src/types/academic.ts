@@ -83,6 +83,7 @@ export interface StudentProfile {
 export interface LessonBlock {
   type:
     | "title"
+    | "page"
     | "intro"
     | "concept"
     | "definition"
