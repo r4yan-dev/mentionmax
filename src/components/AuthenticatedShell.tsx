@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BarChart3, BookOpen, BrainCircuit, ChevronDown, FileText, Home, LogOut, Menu, Search, Sparkles, Trophy, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useAccount } from "../context/AccountContext";
 import { resolveUserPath } from "../data/curriculum/secondBac";
@@ -17,7 +18,9 @@ const navItems = [
   { to: "/classement", label: "Classement", icon: Trophy },
 ];
 
-const searchTargets = [
+type SearchTarget = [string, string, string, LucideIcon];
+
+const searchTargets: SearchTarget[] = [
   ["Cours", "Explorer les matières et les leçons", "/matieres", BookOpen],
   ["Pratique", "Ouvrir la banque d’exercices", "/exercices", BrainCircuit],
   ["AI Studio", "Créer une fiche, un résumé ou des flashcards", "/ai-studio", Sparkles],
@@ -58,7 +61,7 @@ export default function AuthenticatedShell() {
   const initials = (profile?.display_name ?? "M").trim().slice(0, 1).toUpperCase();
   const pageTitle = pageNames[location.pathname] ?? (location.pathname.startsWith("/exercices/") ? "Pratique" : location.pathname.startsWith("/subjects/") ? "Matières" : "MentionMax");
 
-  const searchResults = useMemo(() => {
+  const searchResults = useMemo<SearchTarget[]>(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return searchTargets;
     return searchTargets.filter(([title, description]) => `${title} ${description}`.toLowerCase().includes(needle));
