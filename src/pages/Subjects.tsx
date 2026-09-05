@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ArrowRight, BookOpen, FileText, PenLine, Sparkles, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Atom, BookOpen, BookOpenText, Brain, Calculator, Dna, FileText, Languages, PenLine, Sparkles } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
@@ -35,95 +35,66 @@ function peopleVariantForSubject(subject: "maths" | "physique-chimie" | "svt" | 
 }
 
 function SubjectWidgetArt({ subject }: { subject: string }) {
-  if (subject === "maths") {
-    return <svg viewBox="0 0 320 170" aria-hidden="true" focusable="false">
-      <rect x="12" y="12" width="296" height="146" rx="16" className="widget-paper" />
-      <path d="M43 127V45M32 116h118" className="art-teal" strokeWidth="1.5" />
-      <path d="M39 49l4-7 4 7M145 112l7 4-7 4" className="art-teal" strokeWidth="1.5" />
-      <path d="M47 111C66 96 70 61 97 51c20-7 27 20 42 27 10 5 18-2 28-19" className="art-ink" strokeWidth="2.2" />
-      <path d="M79 52l8 2m-7 9 9 2" className="art-olive" strokeWidth="1.4" />
-      <circle cx="221" cy="104" r="30" className="art-olive-dash" strokeWidth="1.4" />
-      <path d="M221 74v60M191 104h60M199 82l44 44M199 126l44-44" className="art-olive-light" strokeWidth=".8" />
-      <rect x="180" y="30" width="102" height="28" rx="9" className="highlight-teal" transform="rotate(-3 180 30)" />
-      <text x="188" y="49" className="art-hand teal" transform="rotate(-3 188 49)">f'(x) &gt; 0</text>
-      <text x="48" y="27" className="art-hand ink" transform="rotate(-4 48 27)">variations</text>
-      <path d="M46 141h30l-18-18z" className="art-ink" strokeWidth="1.2" />
-      <circle cx="280" cy="127" r="5" className="sticker-olive" />
-    </svg>;
-  }
+  const visualStyle: React.CSSProperties = { width: "100%", height: "100%", padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 };
+  const tileStyle: React.CSSProperties = { background: "rgba(255,255,255,.82)", border: "1px solid rgba(7,59,58,.10)", borderRadius: 14, padding: "10px 12px", boxShadow: "0 8px 20px rgba(7,59,58,.06)" };
+  const noteStyle: React.CSSProperties = { fontSize: 11, fontWeight: 800, color: "#073B3A", letterSpacing: ".02em" };
 
-  if (subject === "physique-chimie") {
-    return <svg viewBox="0 0 320 170" aria-hidden="true" focusable="false">
-      <rect x="12" y="12" width="296" height="146" rx="16" className="widget-paper" />
-      <path d="M27 53c19-29 38 29 57 0s38 29 57 0 38 29 57 0" className="art-ink" strokeWidth="2" />
-      <path d="M32 111h24v-17h22l7 8 7-8h22v17h22" className="art-teal" strokeWidth="1.7" />
-      <rect x="24" y="107" width="125" height="17" rx="4" className="art-teal-outline" />
-      <circle cx="219" cy="48" r="8" className="node-olive" />
-      <circle cx="246" cy="34" r="6" className="node-teal" />
-      <circle cx="246" cy="63" r="6" className="node-teal" />
-      <path d="M226 45l14-8m-14 14 14 8" className="art-ink" strokeWidth="1.5" />
-      <path d="M178 111l60-20" className="art-ink" strokeWidth="1.6" />
-      <path d="M228 88l10 3-7 7" className="art-ink" strokeWidth="1.5" />
-      <rect x="190" y="121" width="84" height="23" rx="8" className="highlight-olive" transform="rotate(-2 190 121)" />
-      <text x="199" y="138" className="art-hand teal" transform="rotate(-2 199 138)">U = R × I</text>
-      <text x="34" y="29" className="art-hand teal" transform="rotate(-4 34 29)">λ = vT</text>
-      <path d="M270 90h14m-7-7v14" className="art-olive" strokeWidth="1.3" />
-    </svg>;
-  }
+  if (subject === "maths") return <div style={visualStyle} aria-hidden="true">
+    <div style={{ ...tileStyle, flex: 1, minHeight: 104, position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 18, right: 18, top: 50, borderTop: "1px solid #0FA3A3" }} />
+      <div style={{ position: "absolute", left: 34, top: 18, bottom: 18, borderLeft: "1px solid #0FA3A3" }} />
+      <div style={{ position: "absolute", left: 36, top: 28, width: 110, height: 62, borderTop: "3px solid #073B3A", borderRadius: "55% 55% 0 0", transform: "rotate(-16deg)" }} />
+      <Calculator size={22} color="#7A873A" style={{ position: "absolute", right: 12, top: 12 }} />
+      <span style={{ ...noteStyle, position: "absolute", right: 14, bottom: 12, fontFamily: "Caveat, cursive", fontSize: 18, color: "#0FA3A3" }}>f'(x)</span>
+    </div>
+    <div style={{ ...tileStyle, width: 92, transform: "rotate(3deg)" }}>
+      <span style={noteStyle}>∫  f(x)dx</span>
+      <div style={{ marginTop: 8, height: 4, width: "72%", borderRadius: 8, background: "#DDF5F1" }} />
+      <div style={{ marginTop: 6, height: 4, width: "52%", borderRadius: 8, background: "#DDF5F1" }} />
+    </div>
+  </div>;
 
-  if (subject === "svt") {
-    return <svg viewBox="0 0 320 170" aria-hidden="true" focusable="false">
-      <rect x="12" y="12" width="296" height="146" rx="16" className="widget-paper" />
-      <path d="M42 30c24 19-18 38 6 57s-18 38 6 57m14-114c-24 19 18 38-6 57s18 38-6 57" className="art-olive" strokeWidth="2" />
-      <path d="M48 42h22m-28 20h34m-28 20h22m-28 20h34m-28 20h22" className="art-ink-light" strokeWidth="1" />
-      <circle cx="153" cy="73" r="33" className="art-ink-outline" strokeWidth="1.5" />
-      <ellipse cx="162" cy="66" rx="12" ry="9" className="art-olive-outline" strokeWidth="1.3" />
-      <circle cx="162" cy="66" r="3" className="node-olive" />
-      <ellipse cx="137" cy="87" rx="7" ry="4" className="art-teal-outline" />
-      <path d="M185 43c8-4 13 2 8 7" className="art-teal" strokeWidth="1" />
-      <rect x="126" y="47" width="34" height="13" rx="5" className="highlight-olive" transform="rotate(-4 126 47)" />
-      <path d="M226 102h57m-57 10h57m-57 10h57m-57 10h57" className="art-ink-light" strokeWidth="1.2" />
-      <path d="M228 103h54v8h-54zm0 18h54v8h-54z" className="strata-fill" />
-      <circle cx="240" cy="48" r="5" className="art-teal-outline" />
-      <path d="M240 43l-7-9m7 9 8-10m-4 17 14 5m-18-3-11 7" className="art-ink-light" strokeWidth="1" />
-      <text x="93" y="30" className="art-hand olive" transform="rotate(-4 93 30)">ADN</text>
-      <text x="221" y="91" className="art-hand teal" transform="rotate(3 221 91)">strates</text>
-    </svg>;
-  }
+  if (subject === "physique-chimie") return <div style={visualStyle} aria-hidden="true">
+    <div style={{ ...tileStyle, flex: 1, minHeight: 104 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}><Atom size={24} color="#0FA3A3" /><span style={{ ...noteStyle, fontFamily: "Caveat, cursive", fontSize: 18, color: "#073B3A" }}>U = RI</span></div>
+      <div style={{ height: 36, display: "flex", alignItems: "center" }}><div style={{ flex: 1, height: 2, background: "#073B3A" }} /><div style={{ width: 28, height: 18, border: "2px solid #0FA3A3", borderRadius: 4 }} /><div style={{ flex: 1, height: 2, background: "#073B3A" }} /></div>
+      <div style={{ marginTop: 10, display: "flex", gap: 5 }}>{[0,1,2,3,4].map((i) => <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i % 2 ? "#7A873A" : "#0FA3A3" }} />)}</div>
+    </div>
+    <div style={{ ...tileStyle, width: 90, transform: "rotate(-4deg)" }}><span style={noteStyle}>λ = vT</span><div style={{ marginTop: 10, fontFamily: "Caveat, cursive", fontSize: 24, color: "#0FA3A3" }}>→ F</div></div>
+  </div>;
 
-  if (subject === "philosophie") {
-    return <svg viewBox="0 0 320 170" aria-hidden="true" focusable="false">
-      <rect x="12" y="12" width="296" height="146" rx="16" className="widget-paper" />
-      <rect x="31" y="33" width="58" height="28" rx="9" className="highlight-burgundy" transform="rotate(-4 31 33)" />
-      <rect x="34" y="34" width="58" height="28" rx="12" className="art-burgundy-outline" />
-      <text x="63" y="52" className="art-small burgundy" textAnchor="middle">THÈSE</text>
-      <rect x="106" y="69" width="78" height="30" rx="12" className="art-ink-outline" />
-      <text x="145" y="88" className="art-small ink" textAnchor="middle">ARGUMENT</text>
-      <rect x="42" y="112" width="72" height="28" rx="12" className="art-teal-outline" />
-      <text x="78" y="130" className="art-small teal" textAnchor="middle">OBJECTION</text>
-      <path d="M91 55l24 18m42 27-58 14" className="art-ink-light" strokeWidth="1.2" strokeDasharray="3 3" />
-      <path d="M178 43c14-6 31-6 45 0v67c-14-6-31-6-45 0z" className="art-burgundy-outline" strokeWidth="1.4" />
-      <path d="M201 43v67m-17-52 11-2m-11 12 11-2m11-8 14-2m-14 12 14-2" className="art-burgundy-light" strokeWidth=".9" />
-      <text x="247" y="132" className="art-hand burgundy" transform="rotate(6 247 132)">?</text>
-      <text x="204" y="31" className="art-hand burgundy" transform="rotate(-5 204 31)">problématiser</text>
-      <path d="M21 95c-5 10 3 18 13 15" className="art-teal" strokeWidth="1" />
-    </svg>;
-  }
+  if (subject === "svt") return <div style={visualStyle} aria-hidden="true">
+    <div style={{ ...tileStyle, flex: 1, minHeight: 104, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+      <Dna size={60} color="#7A873A" strokeWidth={1.7} />
+      <span style={{ ...noteStyle, position: "absolute", left: 12, top: 10, color: "#7A873A", fontFamily: "Caveat, cursive", fontSize: 18 }}>ADN</span>
+      <Brain size={24} color="#0FA3A3" style={{ position: "absolute", right: 12, bottom: 10 }} />
+    </div>
+    <div style={{ ...tileStyle, width: 92, transform: "rotate(4deg)" }}><span style={{ ...noteStyle, color: "#7A873A" }}>CELLULE</span><div style={{ marginTop: 8, width: 44, height: 44, borderRadius: "50%", border: "2px solid #073B3A", marginInline: "auto" }}><div style={{ width: 13, height: 13, borderRadius: "50%", background: "#DDF5F1", border: "1px solid #0FA3A3", margin: "14px auto" }} /></div></div>
+  </div>;
 
-  return <svg viewBox="0 0 320 170" aria-hidden="true" focusable="false">
-    <rect x="12" y="12" width="296" height="146" rx="16" className="widget-paper" />
-    <rect x="30" y="35" width="76" height="46" rx="7" className="art-teal-outline" transform="rotate(-4 30 35)" />
-    <rect x="42" y="58" width="76" height="46" rx="7" className="art-burgundy-outline" transform="rotate(3 42 58)" />
-    <rect x="42" y="48" width="44" height="13" rx="5" className="highlight-teal" transform="rotate(-4 42 48)" />
-    <text x="45" y="66" className="art-hand ink" transform="rotate(-4 45 66)">achieve</text>
-    <path d="M156 35h79a8 8 0 0 1 8 8v31a8 8 0 0 1-8 8h-40l-16 15v-15h-23a8 8 0 0 1-8-8V43a8 8 0 0 1 8-8z" className="art-ink-outline" strokeWidth="1.4" />
-    <path d="M168 53h47m-47 11h31" className="art-ink-light" strokeWidth="1" />
-    <rect x="184" y="106" width="69" height="31" rx="4" className="art-teal-outline" />
-    <path d="M218 106v31" className="art-teal" strokeWidth="1" />
-    <text x="192" y="126" className="art-small teal">A–Z</text>
-    <text x="30" y="131" className="art-hand olive" transform="rotate(-3 30 131)">however</text>
-    <path d="M267 102c13-5 23 2 18 12" className="art-burgundy" strokeWidth="1.2" />
-  </svg>;
+  if (subject === "philosophie") return <div style={visualStyle} aria-hidden="true">
+    <div style={{ ...tileStyle, flex: 1, minHeight: 104 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><Brain size={24} color="#76213A" /><span style={{ ...noteStyle, color: "#76213A" }}>QUESTION</span></div>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
+        <span style={{ padding: "6px 8px", borderRadius: 999, background: "rgba(118,33,58,.08)", color: "#76213A", fontSize: 9, fontWeight: 800 }}>THÈSE</span>
+        <ArrowRight size={13} color="#073B3A" />
+        <span style={{ padding: "6px 8px", borderRadius: 999, background: "#DDF5F1", color: "#073B3A", fontSize: 9, fontWeight: 800 }}>ARGUMENT</span>
+        <ArrowRight size={13} color="#073B3A" />
+        <span style={{ padding: "6px 8px", borderRadius: 999, background: "rgba(118,33,58,.08)", color: "#76213A", fontSize: 9, fontWeight: 800 }}>OBJECTION</span>
+      </div>
+    </div>
+    <div style={{ ...tileStyle, width: 86, transform: "rotate(-3deg)" }}><BookOpenText size={24} color="#76213A" /><div style={{ marginTop: 8, height: 4, width: "78%", background: "#F0E1E6", borderRadius: 6 }} /><div style={{ marginTop: 5, height: 4, width: "58%", background: "#F0E1E6", borderRadius: 6 }} /></div>
+  </div>;
+
+  return <div style={visualStyle} aria-hidden="true">
+    <div style={{ ...tileStyle, flex: 1, minHeight: 104 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><Languages size={24} color="#0FA3A3" /><span style={noteStyle}>VOCAB</span></div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {['achieve','however','although'].map((word) => <span key={word} style={{ padding: "5px 7px", background: "#DDF5F1", borderRadius: 8, color: "#073B3A", fontSize: 9, fontWeight: 800 }}>{word}</span>)}
+      </div>
+    </div>
+    <div style={{ ...tileStyle, width: 88, transform: "rotate(4deg)" }}><BookOpen size={23} color="#0FA3A3" /><span style={{ display: "block", marginTop: 8, fontSize: 10, fontWeight: 800, color: "#76213A" }}>A–Z</span><div style={{ marginTop: 6, height: 3, width: "80%", background: "#E9D7DF", borderRadius: 5 }} /></div>
+  </div>;
 }
 
 export default function Subjects() {
