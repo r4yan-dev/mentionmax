@@ -52,6 +52,7 @@ const lessons: LessonDocument[] = [
 
 export const lessonService = {
   list(subjectId?: SubjectId, trackId?: TrackId): LessonDocument[] {
+    if (subjectId === "philosophie") return [];
     return lessons.filter((lesson) => {
       if (subjectId && lesson.subjectId !== subjectId) return false;
       if (trackId === "SMB" && lesson.subjectId === "svt") return false;
@@ -59,6 +60,7 @@ export const lessonService = {
     });
   },
   getById(id: string): LessonDocument | null {
-    return lessons.find((lesson) => lesson.id === id) ?? null;
+    const lesson = lessons.find((item) => item.id === id) ?? null;
+    return lesson?.subjectId === "philosophie" ? null : lesson;
   },
 };
