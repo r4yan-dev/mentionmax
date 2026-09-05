@@ -1,0 +1,153 @@
+/* Compact lesson layout and clear lesson separators */
+
+.lesson-document {
+  row-gap: 12px;
+  padding-top: 20px;
+  padding-bottom: 48px;
+}
+
+/* Each numbered lesson/page gets a compact but unmistakable separator. */
+.lesson-document > .lesson-page-break {
+  margin: 22px 8px 4px;
+  padding: 12px 14px 8px;
+  border-left: 0;
+  border-top: 3px solid rgba(15,163,163,.28);
+  border-bottom: 1px solid rgba(23,59,57,.10);
+  position: relative;
+  background: rgba(255,255,255,.34);
+}
+
+.lesson-document > .lesson-page-break:first-of-type {
+  margin-top: 4px;
+}
+
+.lesson-document > .lesson-page-break span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #073b3a;
+  text-decoration: none;
+  letter-spacing: -.02em;
+}
+
+.lesson-document > .lesson-page-break span::before {
+  counter-increment: lesson-section;
+  content: counter(lesson-section, decimal-leading-zero);
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #0fa3a3;
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.lesson-document {
+  counter-reset: lesson-section;
+}
+
+.lesson-document > .lesson-page-break::after {
+  content: "LESSON";
+  right: 8px;
+  top: 10px;
+  padding: 5px 8px;
+  background: #e7f7f4;
+  color: #168c83;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  transform: none;
+}
+
+.lesson-document > .lesson-page-break p {
+  margin: 4px 0 0 36px;
+  max-width: 850px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Tight desktop cards: three columns, less internal air, same visual hierarchy. */
+@media (min-width: 851px) {
+  .lesson-document {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 12px;
+    row-gap: 12px;
+  }
+
+  .lesson-document > .lesson-block,
+  .lesson-document > .lesson-callout {
+    grid-column: span 1 !important;
+    padding: 17px 16px 18px;
+  }
+
+  .lesson-document > .lesson-block h2 {
+    margin-bottom: 7px;
+  }
+
+  .lesson-document > .lesson-block p,
+  .lesson-document > .lesson-callout p {
+    margin-bottom: 0;
+  }
+
+  .lesson-document > .lesson-block p + p,
+  .lesson-document > .lesson-callout p + p {
+    margin-top: 8px;
+  }
+
+  .lesson-document > .lesson-formula {
+    margin: 4px 20px 5px;
+    padding: 20px 22px 22px;
+  }
+
+  .lesson-document > .lesson-recap {
+    margin: 6px 0 4px;
+    padding: 18px 20px;
+  }
+
+  .lesson-document > .lesson-block--graph,
+  .lesson-document > .lesson-block--diagram,
+  .lesson-document > .lesson-block--comparison {
+    min-height: 215px;
+  }
+
+  .lesson-document > .lesson-block--graph .lesson-visual,
+  .lesson-document > .lesson-block--diagram .lesson-visual {
+    min-height: 110px;
+    margin-top: 8px;
+  }
+}
+
+@media (min-width: 851px) and (max-width: 1050px) {
+  .lesson-document {
+    column-gap: 10px;
+    row-gap: 10px;
+  }
+
+  .lesson-document > .lesson-block,
+  .lesson-document > .lesson-callout {
+    padding: 15px 13px 16px;
+  }
+}
+
+@media (max-width: 850px) {
+  .lesson-document {
+    row-gap: 8px;
+    padding-top: 14px;
+    padding-bottom: 40px;
+  }
+
+  .lesson-document > .lesson-page-break {
+    margin: 18px 4px 2px;
+    padding: 10px 10px 7px;
+  }
+
+  .lesson-document > .lesson-page-break p {
+    margin-left: 36px;
+  }
+}
