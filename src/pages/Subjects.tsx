@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ArrowRight, BookOpen, FileText, PenLine, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, FileText, Layers3, PenLine, Sparkles } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
@@ -118,6 +118,7 @@ export default function Subjects() {
       <div className="subjects-actions">
         <Link to={`/lecons/${selected}`} className="btn btn-primary"><BookOpen size={15} /> Voir les cours</Link>
         <Link to={`/exercices?subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><PenLine size={15} /> {exerciseCount} exercices</Link>
+        <Link to={`/flashcards?track=SP&subject=maths`} className="btn btn-secondary"><Layers3 size={15} /> Flashcards</Link>
         <Link to={`/ai-studio/handnotes?subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><FileText size={15} /> Mes notes</Link>
       </div>
 
