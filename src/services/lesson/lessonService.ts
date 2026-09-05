@@ -1,11 +1,13 @@
 import type { LessonDocument, SubjectId, TrackId } from "../../types/academic";
 import { secondBacLessons } from "../../data/curriculum/secondBac";
 import { secondBacMathLesson2 } from "../../data/curriculum/secondBacMathLesson2";
+import { secondBacMathSequencesLesson } from "../../data/curriculum/secondBacMathSequencesLesson";
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
 import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
 
 const lessons: LessonDocument[] = [
-  ...secondBacLessons.filter((lesson) => lesson.subjectId !== "physique-chimie"),
+  ...secondBacLessons.filter((lesson) => lesson.subjectId !== "physique-chimie" && lesson.id !== "2bac-maths-sequences"),
+  secondBacMathSequencesLesson,
   secondBacMathLesson2,
   ...secondBacPcLessonsLong.slice(0, 14),
   ...secondBacSvtLessons,
