@@ -32,7 +32,7 @@ const makeAxisLesson = ({ id, chapter, axis, question, positions, recap }: Philo
 export const secondBacPhilosophyLessons: LessonDocument[] = [
   makeAxisLesson({
     id: "2bac-philo-person-identity",
-    chapter: "Mجزوءة الوضع البشري — مفهوم الشخص",
+    chapter: "Le sujet humain — La personne",
     axis: "Axe 1 : L'identité de la personne",
     question: "Sur quoi se fonde l'identité de la personne ? L'identité personnelle est-elle fixe ou changeante ?",
     positions: [
@@ -46,7 +46,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-person-value",
-    chapter: "مجزوءة الوضع البشري — مفهوم الشخص",
+    chapter: "Le sujet humain — La personne",
     axis: "Axe 2 : La valeur de la personne",
     question: "D'où la personne tire-t-elle sa valeur ? Est-elle un moyen ou une fin ? Sa valeur est-elle relative ou absolue ?",
     positions: [
@@ -58,7 +58,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-person-freedom",
-    chapter: "مجزوءة الوضع البشري — مفهوم الشخص",
+    chapter: "Le sujet humain — La personne",
     axis: "Axe 3 : La personne entre nécessité et liberté",
     question: "La personne est-elle un sujet libre ou un être soumis à des nécessités et à des déterminismes qui la contrôlent ?",
     positions: [
@@ -71,7 +71,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-other-existence",
-    chapter: "مجزوءة الوضع البشري — مفهوم الغير",
+    chapter: "Le sujet humain — Autrui",
     axis: "Axe 1 : L'existence d'autrui",
     question: "L'existence d'autrui est-elle nécessaire à l'existence du moi ou constitue-t-elle une menace pour lui ?",
     positions: [
@@ -84,7 +84,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-other-knowledge",
-    chapter: "مجزوءة الوضع البشري — مفهوم الغير",
+    chapter: "Le sujet humain — Autrui",
     axis: "Axe 2 : La connaissance d'autrui",
     question: "Sur quoi se fonde la connaissance d'autrui ? Est-elle possible ou impossible ?",
     positions: [
@@ -97,7 +97,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-other-relation",
-    chapter: "مجزوءة الوضع البشري — مفهوم الغير",
+    chapter: "Le sujet humain — Autrui",
     axis: "Axe 3 : La relation à autrui",
     question: "Quelle est la nature de la relation à autrui ? Est-elle fondée sur l'amitié ou sur le conflit ?",
     positions: [
@@ -111,7 +111,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-theory-experiment",
-    chapter: "مجزوءة المعرفة — مفهوما النظرية والتجربة",
+    chapter: "La connaissance — Théorie et expérience",
     axis: "Axe 1 : Expérience et expérimentation",
     question: "Quelle différence entre expérience et expérimentation ? Les théories scientifiques se fondent-elles sur l'expérience ou sur l'expérimentation ?",
     positions: [
@@ -122,7 +122,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-scientific-rationality",
-    chapter: "مجزوءة المعرفة — مفهوما النظرية والتجربة",
+    chapter: "La connaissance — Théorie et expérience",
     axis: "Axe 2 : La rationalité scientifique",
     question: "Quel rôle la raison joue-t-elle dans la construction des théories scientifiques ? Repose-t-elle sur une rationalité idéale ou sur une rationalité ouverte au réel ?",
     positions: [
@@ -134,7 +134,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-scientific-criteria",
-    chapter: "مجزوءة المعرفة — مفهوما النظرية والتجربة",
+    chapter: "La connaissance — Théorie et expérience",
     axis: "Axe 3 : Les critères de scientificité des théories",
     question: "Quels sont les critères de scientificité d'une théorie ? Sur quels critères évaluer sa validité : sa soumission à la critique ou sa possibilité d'être réfutée ?",
     positions: [
@@ -146,7 +146,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-truth-opinion",
-    chapter: "مجزوءة المعرفة — مفهوم الحقيقة",
+    chapter: "La connaissance — La vérité",
     axis: "Axe 1 : Opinion et vérité",
     question: "Quelle est la relation entre opinion et vérité ? L'opinion fonde-t-elle la vérité ou constitue-t-elle un obstacle à celle-ci ?",
     positions: [
@@ -158,7 +158,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-truth-criteria",
-    chapter: "مجزوءة المعرفة — مفهوم الحقيقة",
+    chapter: "La connaissance — La vérité",
     axis: "Axe 2 : Les critères de la vérité",
     question: "Comment peut-on reconnaître la vérité ? Son critère est-il logique, expérimental ou les deux à la fois ?",
     positions: [
@@ -170,7 +170,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-truth-value",
-    chapter: "مجزوءة المعرفة — مفهوم الحقيقة",
+    chapter: "La connaissance — La vérité",
     axis: "Axe 3 : La valeur de la vérité",
     question: "D'où la vérité tire-t-elle sa valeur ? Est-elle une fin en soi ou seulement un moyen ?",
     positions: [
@@ -183,7 +183,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-state-legitimacy",
-    chapter: "مجزوءة السياسة — مفهوم الدولة",
+    chapter: "La politique — L'État",
     axis: "Axe 1 : Légitimité et finalités de l'État",
     question: "Quelle est la finalité de l'État ? D'où tire-t-il sa légitimité ?",
     positions: [
@@ -195,7 +195,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-state-authority",
-    chapter: "مجزوءة السياسة — مفهوم الدولة",
+    chapter: "La politique — L'État",
     axis: "Axe 2 : La nature du pouvoir politique",
     question: "Le pouvoir politique est-il transcendant aux individus ou immanent à la société, c'est-à-dire issu d'eux ?",
     positions: [
@@ -208,7 +208,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-state-right-force",
-    chapter: "مجزوءة السياسة — مفهوم الدولة",
+    chapter: "La politique — L'État",
     axis: "Axe 3 : L'État entre droit et violence",
     question: "Comment l'État exerce-t-il son pouvoir ? Par le droit et la loi, par la violence et la force, ou par les deux ?",
     positions: [
@@ -222,7 +222,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-right-natural-positive",
-    chapter: "مجزوءة السياسة — مفهوما الحق والعدالة",
+    chapter: "La politique — Le droit et la justice",
     axis: "Axe 1 : Droit naturel et droit positif",
     question: "La justice est-elle liée au droit naturel ou au droit positif ?",
     positions: [
@@ -233,7 +233,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-justice-right",
-    chapter: "مجزوءة السياسة — مفهوما الحق والعدالة",
+    chapter: "La politique — Le droit et la justice",
     axis: "Axe 2 : La justice comme fondement du droit",
     question: "Quel rapport existe-t-il entre justice et droit ? Lequel est fondement de l'autre ? Toute loi garantit-elle les droits ?",
     positions: [
@@ -245,7 +245,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-justice-equality-equity",
-    chapter: "مجزوءة السياسة — مفهوما الحق والعدالة",
+    chapter: "La politique — Le droit et la justice",
     axis: "Axe 3 : La justice entre égalité et équité",
     question: "Quel est le but de la justice ? Consiste-t-elle dans l'égalité ou dans l'équité ?",
     positions: [
@@ -259,7 +259,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-duty-coercion",
-    chapter: "مجزوءة الأخلاق — مفهوم الواجب",
+    chapter: "L'éthique — Le devoir",
     axis: "Axe 1 : Devoir et contrainte",
     question: "Le devoir provient-il d'une volonté libre ou d'un acte soumis à la nécessité et à la contrainte ?",
     positions: [
@@ -270,7 +270,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-moral-consciousness",
-    chapter: "مجزوءة الأخلاق — مفهوم الواجب",
+    chapter: "L'éthique — Le devoir",
     axis: "Axe 2 : La conscience morale",
     question: "La conscience morale vient-elle de la nature et de l'instinct ou de la culture et de la société ?",
     positions: [
@@ -281,7 +281,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-duty-society",
-    chapter: "مجزوءة الأخلاق — مفهوم الواجب",
+    chapter: "L'éthique — Le devoir",
     axis: "Axe 3 : Le devoir et la société",
     question: "Comment le devoir reflète-t-il les valeurs de la société ? Le devoir vient-il de la conscience individuelle ou de la conscience sociale ?",
     positions: [
@@ -294,7 +294,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
 
   makeAxisLesson({
     id: "2bac-philo-freedom-determinism",
-    chapter: "مجزوءة الأخلاق — مفهوم الحرية",
+    chapter: "L'éthique — La liberté",
     axis: "Axe 1 : Liberté et déterminisme",
     question: "La liberté s'oppose-t-elle au déterminisme ou la prise de conscience de celui-ci en constitue-t-elle la condition ?",
     positions: [
@@ -306,7 +306,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-freedom-will",
-    chapter: "مجزوءة الأخلاق — مفهوم الحرية",
+    chapter: "L'éthique — La liberté",
     axis: "Axe 2 : Liberté et volonté",
     question: "Comment se définit le rapport entre liberté et volonté ? Notre volonté est-elle libre ou soumise à des déterminations extérieures ?",
     positions: [
@@ -318,7 +318,7 @@ export const secondBacPhilosophyLessons: LessonDocument[] = [
   }),
   makeAxisLesson({
     id: "2bac-philo-freedom-law",
-    chapter: "مجزوءة الأخلاق — مفهوم الحرية",
+    chapter: "L'éthique — La liberté",
     axis: "Axe 3 : Liberté et loi",
     question: "Quelle est la relation entre liberté et loi ? La loi garantit-elle la liberté ou la limite-t-elle ?",
     positions: [
