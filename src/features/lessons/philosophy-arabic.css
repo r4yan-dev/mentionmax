@@ -1,0 +1,195 @@
+/* Philosophy-specific Arabic presentation layered on top of the shared lesson system. */
+.lesson-document[dir="rtl"] > .lesson-section-heading {
+  grid-column: 1 / -1 !important;
+  min-height: 84px;
+  margin: 26px 0 10px !important;
+  padding: 18px 24px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: transparent !important;
+  border: 0 !important;
+  border-top: 4px solid rgba(15,163,163,.32) !important;
+  border-bottom: 2px solid rgba(23,59,57,.12) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  position: relative;
+}
+
+.lesson-document[dir="rtl"] > .lesson-section-heading::before {
+  content: "المجزوءة";
+  flex: 0 0 auto;
+  order: 2;
+  padding: 7px 11px;
+  background: #e7f7f4;
+  color: #168c83;
+  border: 1px solid rgba(15,163,163,.16);
+  border-radius: 9px;
+  font-family: "Permanent Marker", cursive;
+  font-size: 10px;
+  transform: rotate(3deg);
+  box-shadow: 3px 4px 0 rgba(23,59,57,.06);
+}
+
+.lesson-document[dir="rtl"] > .lesson-section-heading::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: -9px;
+  width: 72px;
+  height: 9px;
+  background: rgba(255,241,154,.78);
+  transform: rotate(-2deg);
+}
+
+.lesson-document[dir="rtl"] > .lesson-section-heading h2 {
+  flex: 1;
+  margin: 0 !important;
+  font-size: clamp(28px, 3.2vw, 42px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: 0 !important;
+  text-wrap: balance;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card {
+  min-height: 286px !important;
+  padding: 24px 20px 26px !important;
+  background: rgba(255,255,255,.94) !important;
+  border: 2px solid rgba(23,59,57,.12) !important;
+  border-radius: 24px 18px 27px 20px !important;
+  box-shadow: 8px 10px 0 rgba(23,59,57,.055), 0 18px 34px rgba(23,59,57,.06) !important;
+  overflow: visible !important;
+}
+
+/* The title is a distinct yellow study-note label, while the explanation stays on white paper. */
+.lesson-document[dir="rtl"] .lesson-philosophy-card h2 {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 20px !important;
+  padding: 10px 14px 11px !important;
+  background: #fff19a;
+  color: #073b3a !important;
+  border: 0 !important;
+  border-radius: 8px 13px 9px 11px;
+  box-shadow: 4px 5px 0 rgba(23,59,57,.08);
+  font-size: clamp(23px, 2vw, 31px) !important;
+  line-height: 1.25 !important;
+  text-align: right;
+  transform: rotate(-.8deg);
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card h2::after {
+  display: none !important;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card p {
+  margin: 0 !important;
+  max-width: 100%;
+  font-size: clamp(18px, 1.48vw, 21px) !important;
+  line-height: 2.02 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-align: right !important;
+}
+
+/* Side notes and philosopher stickers are deliberately asymmetric, like annotated study notes. */
+.lesson-document[dir="rtl"] .lesson-philosophy-card::after {
+  content: attr(data-philosopher);
+  position: absolute;
+  left: 13px;
+  top: -15px;
+  padding: 7px 11px;
+  border: 2px solid #fff;
+  border-radius: 8px 12px 7px 10px;
+  background: #fff19a;
+  color: #675900;
+  font-family: "Permanent Marker", cursive;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 3px 5px 0 rgba(23,59,57,.09);
+  transform: rotate(-5deg);
+  z-index: 6;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card::before {
+  content: attr(data-note);
+  position: absolute;
+  right: -17px;
+  top: 46%;
+  padding: 7px 9px;
+  min-width: 40px;
+  text-align: center;
+  background: #e7f7f4;
+  color: #168c83;
+  border: 2px solid #fff;
+  border-radius: 7px 10px 8px 9px;
+  font-family: "Permanent Marker", cursive;
+  font-size: 9px;
+  font-weight: 700;
+  box-shadow: 3px 4px 0 rgba(23,59,57,.08);
+  transform: rotate(5deg);
+  z-index: 5;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card:nth-of-type(3n + 2)::before {
+  right: auto;
+  left: -17px;
+  transform: rotate(-6deg);
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card:nth-of-type(3n)::before {
+  top: auto;
+  right: -16px;
+  bottom: 24px;
+  transform: rotate(4deg);
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card:nth-of-type(3n + 1) {
+  transform: rotate(-.45deg) translateY(2px);
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card:nth-of-type(3n + 2) {
+  transform: rotate(.38deg) translateY(7px);
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card:nth-of-type(3n) {
+  transform: rotate(-.18deg) translateY(3px);
+}
+
+/* A little more breathing room makes the Arabic copy easier to scan without creating dead space. */
+.lesson-document[dir="rtl"] .lesson-philosophy-card + .lesson-philosophy-card {
+  margin-top: 6px;
+}
+
+@media (max-width: 850px) {
+  .lesson-document[dir="rtl"] > .lesson-section-heading {
+    min-height: 70px;
+    margin: 20px 0 8px !important;
+    padding: 15px 14px !important;
+  }
+
+  .lesson-document[dir="rtl"] > .lesson-section-heading h2 {
+    font-size: clamp(25px, 7vw, 34px) !important;
+  }
+
+  .lesson-document[dir="rtl"] > .lesson-section-heading::before {
+    font-size: 9px;
+  }
+
+  .lesson-document[dir="rtl"] .lesson-philosophy-card {
+    min-height: 250px !important;
+    padding: 20px 16px 23px !important;
+  }
+
+  .lesson-document[dir="rtl"] .lesson-philosophy-card h2 {
+    font-size: clamp(21px, 6vw, 28px) !important;
+    margin-bottom: 17px !important;
+  }
+
+  .lesson-document[dir="rtl"] .lesson-philosophy-card p {
+    font-size: 17px !important;
+    line-height: 1.95 !important;
+  }
+}
