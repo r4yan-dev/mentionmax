@@ -83,11 +83,26 @@ export default function Leaderboard() {
   }, []);
 
   const rows = useMemo(() => rankRows(records), [records]);
-  const me = rows.find((row) => row.source_app_user_id === user?.id) ?? null;
-  const leader = rows[0] ?? null;
-  const gap = me && leader ? Math.max(0, leader.weekly_xp - me.weekly_xp) : 0;
-  const gapToSecond = me && rows[1] ? Math.max(0, rows[1].weekly_xp - me.weekly_xp) : 0;
-  const meName = me?.display_name ?? profile?.display_name ?? "Toi";
+
+  // The logged-in app profile is the source of truth for the current user's
+  // display name. This makes a name change visible immediately even if the
+  // separate Menti leaderboard identity has not synchronized yet.
+  const me = rows.find((row) => row.source_app_user_id === user?.id)
+    ?? rows.find((row) => row.user_id === user?.id)
+    ?? null;
+  const displayedRows = useMemo(() => {
+    const currentName = profile?.display_name?.trim();
+    if (!currentName || !me) return rows;
+    return rows.map((row) => row.user_id === me.user_id
+      ? { ...row, display_name: currentName }
+      : row);
+  }, [rows, me?.user_id, profile?.display_name]);
+
+  const displayedMe = displayedRows.find((row) => row.user_id === me?.user_id) ?? me;
+  const leader = displayedRows[0] ?? null;
+  const gap = displayedMe && leader ? Math.max(0, leader.weekly_xp - displayedMe.weekly_xp) : 0;
+  const gapToSecond = displayedMe && displayedRows[1] ? Math.max(0, displayedRows[1].weekly_xp - displayedMe.weekly_xp) : 0;
+  const meName = displayedMe?.display_name ?? profile?.display_name ?? "Toi";
 
   return <main className="section container leaderboard-page">
     <header className="leaderboard-header">
@@ -98,16 +113,16 @@ export default function Leaderboard() {
       </div>
       <div className="leaderboard-header__badge">
         <Trophy size={18}/>
-        <strong>{me ? `#${me.rank}` : "—"}</strong>
+        <strong>{displayedMe ? `#${displayedMe.rank}` : "—"}</strong>
         <span>cette semaine</span>
       </div>
     </header>
 
     <section className="leaderboard-stats">
-      <div className="card"><span>Ta position</span><strong>{me ? `#${me.rank}` : "—"}</strong><small>{me ? "classement actuel" : "profil non lié"}</small></div>
-      <div className="card"><span>XP</span><strong>{me ? xpFormat.format(me.weekly_xp) : "—"}</strong><small>gagné cette semaine</small></div>
-      <div className="card"><span>Série</span><strong>{me ? `${me.current_streak} jours` : "—"}</strong><small>rythme actuel</small></div>
-      <div className="card"><span>Écart #1</span><strong>{me ? `${xpFormat.format(gap)} XP` : "—"}</strong><small>à combler</small></div>
+      <div className="card"><span>Ta position</span><strong>{displayedMe ? `#${displayedMe.rank}` : "—"}</strong><small>{displayedMe ? "classement actuel" : "profil non lié"}</small></div>
+      <div className="card"><span>XP</span><strong>{displayedMe ? xpFormat.format(displayedMe.weekly_xp) : "—"}</strong><small>gagné cette semaine</small></div>
+      <div className="card"><span>Série</span><strong>{displayedMe ? `${displayedMe.current_streak} jours` : "—"}</strong><small>rythme actuel</small></div>
+      <div className="card"><span>Écart #1</span><strong>{displayedMe ? `${xpFormat.format(gap)} XP` : "—"}</strong><small>à combler</small></div>
     </section>
 
     <section className="card leaderboard-board">
@@ -120,11 +135,11 @@ export default function Leaderboard() {
 
       {error && <div className="leaderboard-empty">{error}</div>}
       {!error && loading && <div className="leaderboard-empty">Synchronisation du classement…</div>}
-      {!error && !loading && rows.length === 0 && <div className="leaderboard-empty">Aucun élève n'a encore de données de classement.</div>}
+      {!error && !loading && displayedRows.length === 0 && <div className="leaderboard-empty">Aucun élève n'a encore de données de classement.</div>}
 
-      {!error && !loading && rows.length > 0 && <>
+      {!error && !loading && displayedRows.length > 0 && <>
         <div className="leaderboard-podium">
-          {rows.slice(0, 3).map((row) => <div className={`leader-podium-card rank-${row.rank}`} key={row.user_id}>
+          {displayedRows.slice(0, 3).map((row) => <div className={`leader-podium-card rank-${row.rank}`} key={row.user_id}>
             <div className="leader-podium-medal">{row.rank === 1 ? <Crown size={18}/> : row.rank === 2 ? <Medal size={18}/> : <Trophy size={18}/>}</div>
             <strong>#{row.rank}</strong>
             <span>{row.display_name}</span>
@@ -133,9 +148,9 @@ export default function Leaderboard() {
         </div>
 
         <div className="leaderboard-list">
-          {rows.map((row) => <div className={`leaderboard-row${me?.user_id === row.user_id ? " current" : ""}`} key={row.user_id}>
+          {displayedRows.map((row) => <div className={`leaderboard-row${displayedMe?.user_id === row.user_id ? " current" : ""}`} key={row.user_id}>
             <strong>#{row.rank}</strong>
-            <span className="leaderboard-name">{row.display_name}{me?.user_id === row.user_id && <em>toi</em>}</span>
+            <span className="leaderboard-name">{row.display_name}{displayedMe?.user_id === row.user_id && <em>toi</em>}</span>
             <span className="leaderboard-trend up">{row.weekly_exercises} ex.</span>
             <span className="leaderboard-streak"><Flame size={13}/> {row.weekly_focus_minutes} min</span>
             <b>{xpFormat.format(row.weekly_xp)} XP</b>
@@ -147,8 +162,8 @@ export default function Leaderboard() {
     <section className="leaderboard-tip">
       <div>
         <span className="section-eyebrow">PROCHAIN PALIER</span>
-        <h2>{me ? (rows.length > 1 ? "Atteindre la place suivante." : "Construire une vraie série.") : "Synchroniser ton profil."}</h2>
-        <p>{me ? (rows[1] ? `Il te manque ${xpFormat.format(gapToSecond)} XP pour dépasser ${rows[1].display_name}.` : `${meName}, tu es actuellement seul dans les données publiques du classement.`) : "Ton compte est connecté à mentimax-app, mais aucune liaison Menti n'est encore disponible pour ton profil."}</p>
+        <h2>{displayedMe ? (displayedRows.length > 1 ? "Atteindre la place suivante." : "Construire une vraie série.") : "Synchroniser ton profil."}</h2>
+        <p>{displayedMe ? (displayedRows[1] ? `Il te manque ${xpFormat.format(gapToSecond)} XP pour dépasser ${displayedRows[1].display_name}.` : `${meName}, tu es actuellement seul dans les données publiques du classement.`) : "Ton compte est connecté à mentimax-app, mais aucune liaison Menti n'est encore disponible pour ton profil."}</p>
       </div>
       <Trophy size={28}/>
     </section>
