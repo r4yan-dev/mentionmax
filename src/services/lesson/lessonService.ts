@@ -14,6 +14,7 @@ import { secondBacMathSpaceGeometryLesson } from "../../data/curriculum/secondBa
 import { secondBacMathCombinatoricsLesson } from "../../data/curriculum/secondBacMathCombinatoricsLesson";
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
 import { secondBacSvtLessons, secondBacEnglishLessons } from "../../data/curriculum/secondBacHumanLessons";
+import { secondBacPhilosophyLessonsBatch1 } from "../../data/curriculum/secondBacPhilosophyLessonsBatch1";
 
 const dedicatedMathLessonIds = new Set([
   "2bac-maths-sequences",
@@ -48,12 +49,11 @@ const lessons: LessonDocument[] = [
   ...secondBacPcLessonsLong.slice(0, 14),
   ...secondBacSvtLessons,
   ...secondBacEnglishLessons,
+  ...secondBacPhilosophyLessonsBatch1,
 ];
 
 export const lessonService = {
   list(subjectId?: SubjectId, trackId?: TrackId): LessonDocument[] {
-    if (subjectId === "philosophie") return [];
-
     return lessons.filter((lesson) => {
       if (subjectId && lesson.subjectId !== subjectId) return false;
       if (trackId === "SMB" && lesson.subjectId === "svt") return false;
@@ -61,7 +61,6 @@ export const lessonService = {
     });
   },
   getById(id: string): LessonDocument | null {
-    const lesson = lessons.find((item) => item.id === id) ?? null;
-    return lesson?.subjectId === "philosophie" ? null : lesson;
+    return lessons.find((lesson) => lesson.id === id) ?? null;
   },
 };
