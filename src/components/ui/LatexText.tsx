@@ -51,8 +51,16 @@ function toLatex(text: string): string {
       return `\\(${normalizedCoefficient}\\times10^{${signedExponent}}\\)`;
     })
     .replace(/10⁻([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_match, exponent: string) => `\\(10^{-${exponent.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => String("⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(c)))}}\\)`)
+    .replace(/\blim\(([^)]+)\)\s*([0-9A-Za-zΔΩμ√().,+\-*/^_=]+)(?=[.!?;,]|$)/g, (_match, variable: string, expression: string) => {
+      const limitVariable = variable.replace(/→/g, "\\to");
+      return `\\(\\lim_{${limitVariable}} ${expression}\\)`;
+    })
+    .replace(/∫\s*([0-9A-Za-zΔΩμ√().,+\-*/^_=]+(?:\s*dx)?)(?=[.!?;,]|$)/g, (_match, expression: string) => `\\(\\int ${expression}\\)`)
+    .replace(/√\(([^)]+)\)/g, (_match, expression: string) => `\\(\\sqrt{${expression}}\\)`)
+    .replace(/\b(e|x|u|v|X|f|g|P|A|B|C)\^\(([^)]+)\)/g, (_match, base: string, exponent: string) => `\\(${base}^{${exponent}}\\)`)
+    .replace(/\b(e|x|u|v|X|f|g|P|A|B|C)\^(-?\d+)\b/g, (_match, base: string, exponent: string) => `\\(${base}^{${exponent}}\\)`)
     .replace(/\b([A-Za-zΔΩμ][A-Za-z0-9ΔΩμ]*)_([A-Za-z0-9]+)\b/g, (_match, base: string, index: string) => `\\(${base}_{${index}}\\)`)
-    .replace(/([A-Za-zΔΩμ]+)·m/g, "\\($1\,\\mathrm{m}\\)");
+    .replace(/([A-Za-zΔΩμ]+)·m/g, "\\($1\\,\\mathrm{m}\\)");
 }
 
 export function LatexText({
