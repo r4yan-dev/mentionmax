@@ -179,3 +179,18 @@ generic global rules cannot change the card layout or typography. */
     flex-basis: 155px !important;
   }
 }
+
+/* TEMP TEST: proves whether the deployed launcher is loading this stylesheet. */
+.subjects-launcher-page .subject-card--maths .subject-large-card__copy h2 {
+  font-size: 0 !important;
+}
+.subjects-launcher-page .subject-card--maths .subject-large-card__copy h2::after {
+  content: "maths1" !important;
+  display: inline !important;
+  font-family: Fraunces, Georgia, serif !important;
+  font-size: 23px !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.02em !important;
+  font-weight: 500 !important;
+  color: #073b3a !important;
+}
