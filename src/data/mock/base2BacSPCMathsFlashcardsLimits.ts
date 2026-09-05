@@ -1,0 +1,52 @@
+import type { Flashcard } from "../../types/content";
+
+const trackIds = ["SP"] as const;
+const cards: Array<[string, string]> = [
+["Pour une limite d'une fraction rationnelle à +∞, premier réflexe ?","Comparer les degrés du numérateur et du dénominateur, ou factoriser par la plus grande puissance de x."],
+["Si deg P < deg Q, que vaut lim P(x)/Q(x) à ±∞ ?","0."],
+["Si P et Q ont même degré, que vaut la limite de P/Q à l'infini ?","Le rapport des coefficients dominants."],
+["Si le degré du numérateur est supérieur à celui du dénominateur ?","Le quotient ne tend pas vers une valeur finie ; il faut comparer les termes dominants et leur signe."],
+["Quelles formes indéterminées dois-tu reconnaître immédiatement ?","0/0, ∞/∞, ∞−∞, 0×∞, et éventuellement 1^∞, 0^0, ∞^0 selon le chapitre."],
+["Comment traiter une forme 0/0 avec des polynômes ?","Factoriser, simplifier le facteur commun, puis recalculer la limite."],
+["Comment traiter √A−√B ?","Multiplier par le conjugué √A+√B."],
+["Identité de rationalisation ?","(√A−√B)(√A+√B)=A−B."],
+["Pour x→−∞, comment remplacer |x| ?","|x|=−x."],
+["Limite fondamentale trigonométrique ?","lim(u→0) sin(u)/u = 1."],
+["Pour lim(x→1) sin(πx)/(x−1), substitution utile ?","u=π(x−1)."],
+["Comment reconnaître une limite calculable avec un nombre dérivé ?","Sous la forme (f(x)−f(a))/(x−a)."],
+["Nombre dérivé de f en a ?","f'(a)=lim(x→a)(f(x)−f(a))/(x−a)."],
+["Pour lim(x→e)(ln x−1)/(x−e), que reconnaître ?","Le taux d'accroissement de ln en e."],
+["lim(x→−2) (x²+5x+6)/(x+2).","Factoriser x²+5x+6=(x+2)(x+3), puis la limite vaut 1."],
+["lim(x→−3) (2x²+3x−9)/(x²+x−6).","Factoriser les deux polynômes avant substitution et simplifier."],
+["lim(x→1) (√(2x+7)−3)/(x−1).","Rationalisation, puis la limite vaut 1/3."],
+["lim(x→2−) (x²+5x+6)/(2−x).","Le numérateur tend vers 20>0, 2−x→0+, donc +∞."],
+["Pour une limite unilatérale, pourquoi le signe compte-t-il davantage ?","Parce que le dénominateur peut tendre vers 0+ d'un côté et 0− de l'autre."],
+["Pour montrer que f est continue en a, quoi comparer ?","lim(x→a) f(x) et f(a)."],
+["Critère de continuité à droite en a ?","lim(x→a+) f(x)=f(a)."],
+["Critère de continuité à gauche en a ?","lim(x→a−) f(x)=f(a)."],
+["Pour une fonction par morceaux en a, protocole ?","Calculer limite à gauche, limite à droite, valeur en a, puis comparer."],
+["Pourquoi faut-il vérifier les points de raccord ?","C'est là que deux expressions différentes doivent produire le même comportement."],
+["Toute fonction polynomiale est continue où ?","Sur ℝ."],
+["Une fonction rationnelle est continue où ?","Sur tout intervalle inclus dans son domaine de définition."],
+["Si f et g sont continues, f+g, fg et λf sont-elles continues ?","Oui."],
+["Quand f/g est-elle continue ?","Lorsque f,g sont continues et g≠0."],
+["Quand √f est-elle continue ?","Lorsque f est continue et f≥0."],
+["Comment montrer que g∘f est continue ?","Vérifier que f est continue sur I et que g est continue sur un intervalle contenant f(I)."],
+["Conditions essentielles pour appliquer le TVI sur [a,b] ?","f continue sur [a,b] et k compris entre f(a) et f(b)."],
+["Pour prouver qu'une équation f(x)=0 possède une solution dans [a,b] ?","Continuité + f(a)f(b)<0."],
+["Pour prouver que cette solution est unique ?","Ajouter la stricte monotonie de f."],
+["Comment réduire un intervalle de recherche d'une racine ?","Tester le milieu puis garder la moitié contenant le changement de signe."],
+["Pour obtenir une racine à une amplitude 0,25, que faire ?","Répéter la dichotomie jusqu'à obtenir un intervalle de longueur 0,25."],
+["Structure complète pour « il existe une unique solution α∈[a,b] » ?","Continuité + changement de signe pour l'existence ; stricte monotonie pour l'unicité."]
+];
+
+export const base2BacSPCMathsLimitsFlashcards: Flashcard[] = cards.map(([front, back], i) => ({
+  id: `spc-maths-${String(i + 1).padStart(3, "0")}`,
+  mode: "BASE",
+  source: "APPROVED",
+  target: { trackIds, subjectId: "maths", chapter: "I. Limites, continuité, TVI", topic: "Formules, réflexes et méthodes" },
+  front,
+  back,
+  tags: ["2BAC SPC", "maths", "limites", "continuité", "TVI"],
+  difficulty: i >= 14 && i <= 17 ? 2 : 1,
+}));
