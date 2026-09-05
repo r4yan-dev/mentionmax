@@ -8,8 +8,17 @@ import { extended2BacExercises } from "../../data/mock/base2BacHumanExercisesExt
 import { base2BacSPMathExercises } from "../../data/mock/base2BacSPMathExercises";
 import { base2BacSMLimitExercises } from "../../data/mock/base2BacSMLimitExercises";
 import { base2BacSMSequenceLimitLessonExercises } from "../../data/mock/base2BacSMSequenceLimitLessonExercises";
+import { base2BacSMSequencesLessonExercises } from "../../data/mock/base2BacSMSequencesLessonExercises";
 import { base2BacSMPrimitivesExercises } from "../../data/mock/base2BacSMPrimitivesExercises";
 import { base2BacSMDerivationExercises } from "../../data/mock/base2BacSMDerivationExercises";
+import {
+  base2BacSMDerivationLessonExercises,
+  base2BacSMPrimitivesLessonExercises,
+  base2BacSMProbabilityLessonExercises,
+  base2BacSMLogLessonExercises,
+  base2BacSMComplexLessonExercises,
+  base2BacSMCombinatoricsLessonExercises,
+} from "../../data/mock/base2BacSMLessonSpecificExercises";
 import { base2BacSMProbabilityExercises } from "../../data/mock/base2BacSMProbabilityExercises";
 import { base2BacSMProbabilityCorrections } from "../../data/mock/base2BacSMProbabilityCorrections";
 import { base2BacSMLogExercises } from "../../data/mock/base2BacSMLogExercises";
@@ -34,13 +43,20 @@ const allExercises: Exercise[] = [
   ...base2BacSPMathExercises,
   ...base2BacSMLimitExercises,
   ...base2BacSMSequenceLimitLessonExercises,
+  ...base2BacSMSequencesLessonExercises,
   ...base2BacSMPrimitivesExercises,
   ...base2BacSMDerivationExercises,
+  ...base2BacSMDerivationLessonExercises,
+  ...base2BacSMPrimitivesLessonExercises,
   ...base2BacSMProbabilityExercises.filter((exercise) => !["sm-prob-13", "sm-prob-21"].includes(exercise.id)),
   ...base2BacSMProbabilityCorrections,
+  ...base2BacSMProbabilityLessonExercises,
   ...base2BacSMLogExercises,
+  ...base2BacSMLogLessonExercises,
   ...base2BacSMComplexExercises,
+  ...base2BacSMComplexLessonExercises,
   ...base2BacSMCombinatoricsExercises,
+  ...base2BacSMCombinatoricsLessonExercises,
   ...base2BacSMExponentialExercises,
   ...base2BacSMDifferentialEquationsExercises,
   ...base2BacSMIntegralExercises,
