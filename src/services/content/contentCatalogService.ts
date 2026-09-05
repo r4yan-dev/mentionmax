@@ -87,7 +87,7 @@ export const contentCatalogService = {
     allFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic)),
 
   getBaseExercises: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
-    allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+    subjectId === "philosophie" ? [] : allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic)),
 
   getBaseQuizzes: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic)),
