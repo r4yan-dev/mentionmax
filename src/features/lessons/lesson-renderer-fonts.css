@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Inter:wght@500;600;700;800&family=Permanent+Marker&display=swap');
+
+.lesson-document,
+.lesson-document .lesson-block,
+.lesson-document .lesson-callout {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.lesson-document h1,
+.lesson-document h2,
+.lesson-document .lesson-page-break span,
+.lesson-document .lesson-block__eyebrow {
+  font-family: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.lesson-document h1 {
+  font-size: clamp(52px, 7vw, 82px);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+
+.lesson-document h1::before,
+.lesson-document::after,
+.lesson-document h1::after,
+.lesson-document .lesson-block::before,
+.lesson-document .lesson-block::after,
+.lesson-document .lesson-formula::before,
+.lesson-document .lesson-formula::after,
+.lesson-document .lesson-recap::after,
+.lesson-document .lesson-callout strong {
+  font-family: "Permanent Marker", cursive;
+}
+
+.lesson-document h2 {
+  font-size: clamp(24px, 2.6vw, 32px);
+  letter-spacing: -0.025em;
+}
+
+.lesson-document .lesson-block p,
+.lesson-document .lesson-callout p,
+.lesson-document .lesson-page-break p,
+.lesson-document .lesson-recap p {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(16px, 1.35vw, 19px);
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.lesson-document .lesson-page-break span {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.lesson-document .lesson-block__eyebrow {
+  font-size: 11px;
+  letter-spacing: .045em;
+}
+
+.lesson-document .lesson-formula {
+  font-family: "Inter", system-ui, sans-serif;
+}
