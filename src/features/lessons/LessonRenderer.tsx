@@ -4,6 +4,7 @@ import "./lesson-renderer.css";
 import "./lesson-renderer-fonts.css";
 import "./lesson-renderer-grid.css";
 import "./lesson-renderer-layout.css";
+import "./lesson-renderer-rtl.css";
 
 function VisualBlock({ type, title }: { type: "graph" | "diagram"; title?: string }) {
   if (type === "graph") {
@@ -37,7 +38,13 @@ function renderBlock(block: LessonBlock, index: number) {
   const key = `${block.type}-${index}`;
 
   if (block.type === "title") return <h1 key={key}>{block.title || block.text}</h1>;
-  if (block.type === "heading") return <h2 key={key}>{block.title || block.text}</h2>;
+  if (block.type === "heading") {
+    return (
+      <section key={key} className="lesson-section-heading" aria-labelledby={`lesson-heading-${index}`}>
+        <h2 id={`lesson-heading-${index}`}>{block.title || block.text}</h2>
+      </section>
+    );
+  }
   if (block.type === "text") return <section key={key} className="lesson-block lesson-block--text"><p><LatexText>{block.text || ""}</LatexText></p></section>;
   if (block.type === "page") return <header key={key} className="lesson-page-break"><span>{block.title}</span><p>{block.text ? <LatexText>{block.text}</LatexText> : null}</p></header>;
 
@@ -71,5 +78,15 @@ function renderBlock(block: LessonBlock, index: number) {
 
 export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
   const pages = lesson.blocks.filter((block) => block.type === "page").length;
-  return <article className="lesson-document" lang={lesson.language} data-page-count={pages}>{lesson.blocks.map(renderBlock)}</article>;
+  const isArabic = lesson.language === "ar";
+  return (
+    <article
+      className="lesson-document"
+      lang={lesson.language}
+      dir={isArabic ? "rtl" : "ltr"}
+      data-page-count={pages}
+    >
+      {lesson.blocks.map(renderBlock)}
+    </article>
+  );
 }
