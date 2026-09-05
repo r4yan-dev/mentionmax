@@ -36,9 +36,6 @@ function peopleVariantForSubject(subject: "maths" | "physique-chimie" | "svt" | 
 }
 
 function SubjectWidgetArt({ subject }: { subject: string }) {
-  const accent = subject === "svt" ? "#7A873A" : subject === "philosophie" ? "#76213A" : "#0FA3A3";
-  const accentSoft = subject === "svt" ? "#EEF4DF" : subject === "philosophie" ? "#F3E5EA" : "#DDF5F1";
-
   if (subject === "maths") {
     return (
       <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
