@@ -15,6 +15,7 @@ import { secondBacMathCombinatoricsLesson } from "../../data/curriculum/secondBa
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
 import { secondBacSvtLessons, secondBacEnglishLessons } from "../../data/curriculum/secondBacHumanLessons";
 import { secondBacPhilosophyLessonsBatch1 } from "../../data/curriculum/secondBacPhilosophyLessonsBatch1";
+import { secondBacPhilosophyLessonsBatch2 } from "../../data/curriculum/secondBacPhilosophyLessonsBatch2";
 
 const dedicatedMathLessonIds = new Set([
   "2bac-maths-sequences",
@@ -50,6 +51,7 @@ const lessons: LessonDocument[] = [
   ...secondBacSvtLessons,
   ...secondBacEnglishLessons,
   ...secondBacPhilosophyLessonsBatch1,
+  ...secondBacPhilosophyLessonsBatch2,
 ];
 
 export const lessonService = {
