@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { supabase } from "../lib/supabase";
+import { mentiSupabase, supabase } from "../lib/supabase";
 import { useAuth } from "./AuthContext";
 
 export interface Profile {
@@ -71,8 +71,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Some existing accounts predate the profiles row. Create it lazily so
-    // profile editing and avatar persistence work without a special migration.
     const now = new Date().toISOString();
     const defaultProfile = {
       id: user.id,
@@ -139,6 +137,25 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
 
     setProfile(data as Profile);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      throw new Error("Session introuvable pour synchroniser le classement.");
+    }
+
+    const { data: syncData, error: syncError } = await mentiSupabase.functions.invoke("sync-leaderboard-name", {
+      body: { display_name: cleanName },
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (syncError) {
+      throw new Error(`Classement: ${syncError.message}`);
+    }
+
+    if (syncData?.synced === false && syncData?.reason !== "no_identity_link") {
+      throw new Error("Impossible de synchroniser le nom dans le classement.");
+    }
   }
 
   useEffect(() => {
