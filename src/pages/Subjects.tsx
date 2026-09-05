@@ -6,13 +6,14 @@ import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
 import { useAccount } from "../context/AccountContext";
 import { getTrackSubjects, subjects as subjectCatalog } from "../data/curriculum/tracks";
 import { resolveUserPath, pathLabels, type UserPath } from "../data/curriculum/secondBac";
+import type { SubjectId } from "../types/academic";
 import { lessonService } from "../services/lesson/lessonService";
 import { contentCatalogService } from "../services/content/contentCatalogService";
 import PathSwitcher from "../components/curriculum/PathSwitcher";
 import PeopleFeature, { type PeopleFeatureVariant } from "../components/ui/PeopleFeature";
 import "../styles/curriculum-path.css";
 
-const subjectTypes: Record<string, SubjectType> = {
+const subjectTypes: Record<SubjectId, SubjectType> = {
   maths: "math",
   "physique-chimie": "physics",
   svt: "svt",
@@ -20,7 +21,7 @@ const subjectTypes: Record<string, SubjectType> = {
   philosophie: "philosophy",
 };
 
-function resolveSubject(value?: string): keyof typeof subjectTypes | null {
+function resolveSubject(value?: string): SubjectId | null {
   if (!value) return null;
   if (["maths", "mathematics", "mathematiques"].includes(value)) return "maths";
   if (["physique", "physics", "physique-chimie"].includes(value)) return "physique-chimie";
@@ -30,7 +31,7 @@ function resolveSubject(value?: string): keyof typeof subjectTypes | null {
   return null;
 }
 
-function peopleVariantForSubject(subject: keyof typeof subjectTypes): PeopleFeatureVariant {
+function peopleVariantForSubject(subject: SubjectId): PeopleFeatureVariant {
   if (subject === "maths") return "maths";
   if (subject === "physique-chimie") return "physics";
   if (subject === "svt") return "svt";
