@@ -1,3 +1,4 @@
+import { BookOpen, FileText, Layers3, PenLine } from "lucide-react";
 import type { ReactNode } from "react";
 import { LatexText } from "../../components/ui/LatexText";
 import type { LessonBlock, LessonDocument } from "../../types/academic";
@@ -7,6 +8,7 @@ import "./lesson-renderer-grid.css";
 import "./lesson-renderer-layout.css";
 import "./lesson-renderer-rtl.css";
 import "./philosophy-arabic.css";
+import "./philosophy-writing.css";
 
 function VisualBlock({ type, title }: { type: "graph" | "diagram"; title?: string }) {
   if (type === "graph") {
@@ -127,6 +129,64 @@ function renderArabicIntroCard(blocks: LessonBlock[]) {
   );
 }
 
+function renderPhilosophyWritingGuide() {
+  return (
+    <aside className="lesson-writing-method" dir="rtl" aria-label="منهجية كتابة جواب الفلسفة">
+      <h2>كيف تحوّل الدرس إلى جواب فلسفي متماسك؟</h2>
+      <p className="lesson-writing-method__intro">
+        في امتحان البكالوريا لا تكفي معرفة موقف الفيلسوف. القيمة الحقيقية للمعرفة تظهر حين توظّفها لبناء جواب متدرج، واضح، ومقنع. اكتب انطلاقا من الإشكال، واجعل كل فقرة تؤدي وظيفة محددة في الإجابة.
+      </p>
+      <div className="lesson-writing-method__steps">
+        <article className="lesson-writing-method__step">
+          <span className="lesson-writing-method__number">01</span>
+          <h3>المقدمة</h3>
+          <p>أطّر المفهوم داخل مجزوئته ومحوره، وحدد التوتر الذي يجعل الموضوع إشكاليا، ثم صغ أسئلة دقيقة تقود القارئ إلى ما ستعالجه في العرض.</p>
+        </article>
+        <article className="lesson-writing-method__step">
+          <span className="lesson-writing-method__number">02</span>
+          <h3>التحليل</h3>
+          <p>استخرج الأطروحة، واشرح المفاهيم المركزية، ثم بيّن كيف تتساند الأفكار والحجج. لا تكتف بذكر الفيلسوف، بل وضّح وظيفة موقفه داخل الجواب.</p>
+        </article>
+        <article className="lesson-writing-method__step">
+          <span className="lesson-writing-method__number">03</span>
+          <h3>المناقشة</h3>
+          <p>ضع الموقف في حوار مع تصور يؤيده وآخر يعارضه، وبيّن نقطة القوة والحدود. المناقشة ليست لائحة أسماء، بل انتقال منطقي من موقف إلى آخر.</p>
+        </article>
+        <article className="lesson-writing-method__step">
+          <span className="lesson-writing-method__number">04</span>
+          <h3>الخاتمة</h3>
+          <p>ركّب ما انتهى إليه التحليل والمناقشة، وأجب عن الإشكال بوضوح. يمكن فتح أفق جديد فقط عندما يكون مرتبطا بالموضوع ولا يتحول إلى سؤال مجاني.</p>
+        </article>
+      </div>
+      <div className="lesson-writing-method__phrases" aria-label="روابط حجاجية مفيدة">
+        <span className="lesson-writing-method__phrase">من هذا المنطلق</span>
+        <span className="lesson-writing-method__phrase">غير أن</span>
+        <span className="lesson-writing-method__phrase">في المقابل</span>
+        <span className="lesson-writing-method__phrase">بناء على ذلك</span>
+        <span className="lesson-writing-method__phrase">وعليه</span>
+        <span className="lesson-writing-method__phrase">وهكذا</span>
+      </div>
+    </aside>
+  );
+}
+
+function renderPhilosophyTools() {
+  return (
+    <aside className="lesson-philosophy-tools" dir="rtl" aria-label="موارد الفلسفة">
+      <div className="lesson-philosophy-tools__intro">
+        <strong>تابع المراجعة</strong>
+        <span>تعلّم الفكرة، ثم استعملها في الكتابة والتدريب.</span>
+      </div>
+      <div className="lesson-philosophy-tools__links">
+        <a href="/flashcards?subject=philosophie"><Layers3 size={15} /> بطاقات المراجعة</a>
+        <a href="/exercices?subject=philosophie"><PenLine size={15} /> التمارين</a>
+        <a href="/ai-studio/handnotes?subject=philosophie"><FileText size={15} /> ملاحظاتي</a>
+        <a href="/lecons/philosophie"><BookOpen size={15} /> كل دروس الفلسفة</a>
+      </div>
+    </aside>
+  );
+}
+
 function renderArabicBlocks(blocks: LessonBlock[]) {
   const rendered: ReactNode[] = [];
   let index = 0;
@@ -151,6 +211,7 @@ function renderArabicBlocks(blocks: LessonBlock[]) {
 export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
   const pages = lesson.blocks.filter((block) => block.type === "page").length;
   const isArabic = lesson.language === "ar";
+  const isPhilosophy = lesson.subjectId === "philosophie";
   const isArabicIntro = isArabic && lesson.blocks[0]?.type === "title" && lesson.blocks[1]?.type === "heading" && lesson.blocks[2]?.type === "text";
   const blocks = isArabicIntro ? lesson.blocks.slice(3) : lesson.blocks;
 
@@ -160,8 +221,11 @@ export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
       lang={lesson.language}
       dir={isArabic ? "rtl" : "ltr"}
       data-page-count={pages}
+      data-subject={lesson.subjectId}
     >
       {isArabicIntro && renderArabicIntroCard(lesson.blocks)}
+      {isPhilosophy && isArabic && renderPhilosophyWritingGuide()}
+      {isPhilosophy && isArabic && renderPhilosophyTools()}
       {isArabic ? renderArabicBlocks(blocks) : blocks.map((block, index) => renderBlock(block, index))}
     </article>
   );
