@@ -11,6 +11,8 @@ import { base2BacSMPrimitivesExercises } from "../../data/mock/base2BacSMPrimiti
 import { base2BacSMDerivationExercises } from "../../data/mock/base2BacSMDerivationExercises";
 import { base2BacSMProbabilityExercises } from "../../data/mock/base2BacSMProbabilityExercises";
 import { base2BacSMProbabilityCorrections } from "../../data/mock/base2BacSMProbabilityCorrections";
+import { base2BacSMLogExercises } from "../../data/mock/base2BacSMLogExercises";
+import { base2BacSMComplexExercises } from "../../data/mock/base2BacSMComplexExercises";
 import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
@@ -29,6 +31,8 @@ const allExercises: Exercise[] = [
   ...base2BacSMDerivationExercises,
   ...base2BacSMProbabilityExercises.filter((exercise) => !["sm-prob-13", "sm-prob-21"].includes(exercise.id)),
   ...base2BacSMProbabilityCorrections,
+  ...base2BacSMLogExercises,
+  ...base2BacSMComplexExercises,
   ...helios300MathExercises,
 ];
 const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
