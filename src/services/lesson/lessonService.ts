@@ -5,6 +5,8 @@ import { secondBacMathSequencesLesson } from "../../data/curriculum/secondBacMat
 import { secondBacMathPrimitivesLesson } from "../../data/curriculum/secondBacMathPrimitivesLesson";
 import { secondBacMathDerivationLesson } from "../../data/curriculum/secondBacMathDerivationLesson";
 import { secondBacMathProbabilityLesson } from "../../data/curriculum/secondBacMathProbabilityLesson";
+import { secondBacMathLogLesson } from "../../data/curriculum/secondBacMathLogLesson";
+import { secondBacMathComplexesLesson } from "../../data/curriculum/secondBacMathComplexesLesson";
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
 import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
 
@@ -13,6 +15,8 @@ const dedicatedMathLessonIds = new Set([
   "2bac-maths-derivation",
   "2bac-maths-primitives",
   "2bac-maths-probabilities",
+  "2bac-maths-log",
+  "2bac-maths-complexes",
 ]);
 
 const lessons: LessonDocument[] = [
@@ -23,6 +27,8 @@ const lessons: LessonDocument[] = [
   secondBacMathDerivationLesson,
   secondBacMathPrimitivesLesson,
   secondBacMathProbabilityLesson,
+  secondBacMathLogLesson,
+  secondBacMathComplexesLesson,
   secondBacMathLesson2,
   ...secondBacPcLessonsLong.slice(0, 14),
   ...secondBacSvtLessons,
