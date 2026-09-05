@@ -1,5 +1,5 @@
-import { useMemo, type CSSProperties } from "react";
-import { ArrowRight, ArrowUpRight, Atom, BookOpen, BookOpenText, Brain, Calculator, Dna, FileText, Languages, PenLine, Sparkles } from "lucide-react";
+import { useMemo } from "react";
+import { ArrowRight, ArrowUpRight, BookOpen, FileText, PenLine, Sparkles } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SubjectIcon, type SubjectType } from "../components/ui/SubjectIcon";
@@ -35,66 +35,150 @@ function peopleVariantForSubject(subject: "maths" | "physique-chimie" | "svt" | 
 }
 
 function SubjectWidgetArt({ subject }: { subject: string }) {
-  const visualStyle: CSSProperties = { width: "100%", height: "100%", padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 };
-  const tileStyle: CSSProperties = { background: "rgba(255,255,255,.82)", border: "1px solid rgba(7,59,58,.10)", borderRadius: 14, padding: "10px 12px", boxShadow: "0 8px 20px rgba(7,59,58,.06)" };
-  const noteStyle: CSSProperties = { fontSize: 11, fontWeight: 800, color: "#073B3A", letterSpacing: ".02em" };
+  const accent = subject === "svt" ? "#7A873A" : subject === "philosophie" ? "#76213A" : "#0FA3A3";
+  const accentSoft = subject === "svt" ? "#EEF4DF" : subject === "philosophie" ? "#F3E5EA" : "#DDF5F1";
 
-  if (subject === "maths") return <div style={visualStyle} aria-hidden="true">
-    <div style={{ ...tileStyle, flex: 1, minHeight: 104, position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "absolute", left: 18, right: 18, top: 50, borderTop: "1px solid #0FA3A3" }} />
-      <div style={{ position: "absolute", left: 34, top: 18, bottom: 18, borderLeft: "1px solid #0FA3A3" }} />
-      <div style={{ position: "absolute", left: 36, top: 28, width: 110, height: 62, borderTop: "3px solid #073B3A", borderRadius: "55% 55% 0 0", transform: "rotate(-16deg)" }} />
-      <Calculator size={22} color="#7A873A" style={{ position: "absolute", right: 12, top: 12 }} />
-      <span style={{ ...noteStyle, position: "absolute", right: 14, bottom: 12, fontFamily: "Caveat, cursive", fontSize: 18, color: "#0FA3A3" }}>f'(x)</span>
-    </div>
-    <div style={{ ...tileStyle, width: 92, transform: "rotate(3deg)" }}>
-      <span style={noteStyle}>∫ f(x)dx</span>
-      <div style={{ marginTop: 8, height: 4, width: "72%", borderRadius: 8, background: "#DDF5F1" }} />
-      <div style={{ marginTop: 6, height: 4, width: "52%", borderRadius: 8, background: "#DDF5F1" }} />
-    </div>
-  </div>;
+  if (subject === "maths") {
+    return (
+      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
+        <path d="M90 210V70M60 180H230" stroke="#0FA3A3" strokeWidth="5" strokeLinecap="round" />
+        <path d="M86 75L90 65L95 75M220 175L232 180L220 185" fill="none" stroke="#0FA3A3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M92 174C122 120 160 106 188 126C206 139 221 126 243 87" fill="none" stroke="#073B3A" strokeWidth="7" strokeLinecap="round" />
+        <circle cx="90" cy="174" r="7" fill="#7A873A" />
+        <circle cx="243" cy="87" r="7" fill="#0FA3A3" />
+        <g transform="translate(305 58) rotate(-4)">
+          <rect width="198" height="78" rx="16" fill="#F8FCFB" stroke="#CFE7E3" strokeWidth="2" />
+          <text x="20" y="38" fontFamily="Caveat, cursive" fontSize="28" fontWeight="700" fill="#073B3A">f′(x) = 2x − 2</text>
+          <path d="M20 56H124" stroke="#0FA3A3" strokeWidth="4" strokeLinecap="round" />
+        </g>
+        <g transform="translate(352 162) rotate(3)">
+          <rect width="150" height="58" rx="14" fill="#DDF5F1" stroke="#9FD8D2" strokeWidth="2" />
+          <text x="20" y="37" fontFamily="Caveat, cursive" fontSize="24" fontWeight="700" fill="#073B3A">∫ f(x) dx</text>
+        </g>
+        <circle cx="278" cy="190" r="33" fill="#EEF4DF" stroke="#7A873A" strokeWidth="3" />
+        <path d="M278 164V216M252 190H304" stroke="#7A873A" strokeWidth="2" strokeDasharray="4 5" />
+      </svg>
+    );
+  }
 
-  if (subject === "physique-chimie") return <div style={visualStyle} aria-hidden="true">
-    <div style={{ ...tileStyle, flex: 1, minHeight: 104 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}><Atom size={24} color="#0FA3A3" /><span style={{ ...noteStyle, fontFamily: "Caveat, cursive", fontSize: 18 }}>U = RI</span></div>
-      <div style={{ height: 36, display: "flex", alignItems: "center" }}><div style={{ flex: 1, height: 2, background: "#073B3A" }} /><div style={{ width: 28, height: 18, border: "2px solid #0FA3A3", borderRadius: 4 }} /><div style={{ flex: 1, height: 2, background: "#073B3A" }} /></div>
-      <div style={{ marginTop: 10, display: "flex", gap: 5 }}>{[0, 1, 2, 3, 4].map((i) => <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i % 2 ? "#7A873A" : "#0FA3A3" }} />)}</div>
-    </div>
-    <div style={{ ...tileStyle, width: 90, transform: "rotate(-4deg)" }}><span style={noteStyle}>λ = vT</span><div style={{ marginTop: 10, fontFamily: "Caveat, cursive", fontSize: 24, color: "#0FA3A3" }}>→ F</div></div>
-  </div>;
+  if (subject === "physique-chimie") {
+    return (
+      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
+        <g transform="translate(52 54)">
+          <circle cx="62" cy="62" r="22" fill="none" stroke="#0FA3A3" strokeWidth="5" />
+          <ellipse cx="62" cy="62" rx="52" ry="20" fill="none" stroke="#073B3A" strokeWidth="4" transform="rotate(28 62 62)" />
+          <ellipse cx="62" cy="62" rx="52" ry="20" fill="none" stroke="#073B3A" strokeWidth="4" transform="rotate(-28 62 62)" />
+          <circle cx="62" cy="62" r="8" fill="#7A873A" />
+        </g>
+        <g transform="translate(188 72)">
+          <path d="M0 42H46L56 24L66 60L76 24L86 60L96 42H140" fill="none" stroke="#073B3A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="55" y="60" width="30" height="34" rx="5" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="4" />
+          <path d="M0 42H-20M140 42H160" stroke="#073B3A" strokeWidth="5" strokeLinecap="round" />
+        </g>
+        <g transform="translate(366 54) rotate(-3)">
+          <rect width="152" height="74" rx="16" fill="#F8FCFB" stroke="#CFE7E3" strokeWidth="2" />
+          <text x="20" y="40" fontFamily="Caveat, cursive" fontSize="29" fontWeight="700" fill="#0FA3A3">U = R × I</text>
+        </g>
+        <g transform="translate(360 156) rotate(3)">
+          <rect width="162" height="60" rx="15" fill="#EEF4DF" stroke="#D4DFC0" strokeWidth="2" />
+          <text x="20" y="37" fontFamily="Caveat, cursive" fontSize="24" fontWeight="700" fill="#073B3A">λ = vT</text>
+          <path d="M91 30H136" stroke="#7A873A" strokeWidth="4" strokeLinecap="round" />
+          <path d="M126 20L138 30L126 40" fill="none" stroke="#7A873A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+        <circle cx="250" cy="190" r="5" fill="#0FA3A3" />
+        <circle cx="269" cy="190" r="5" fill="#7A873A" />
+        <circle cx="288" cy="190" r="5" fill="#0FA3A3" />
+      </svg>
+    );
+  }
 
-  if (subject === "svt") return <div style={visualStyle} aria-hidden="true">
-    <div style={{ ...tileStyle, flex: 1, minHeight: 104, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-      <Dna size={60} color="#7A873A" strokeWidth={1.7} />
-      <span style={{ ...noteStyle, position: "absolute", left: 12, top: 10, color: "#7A873A", fontFamily: "Caveat, cursive", fontSize: 18 }}>ADN</span>
-      <Brain size={24} color="#0FA3A3" style={{ position: "absolute", right: 12, bottom: 10 }} />
-    </div>
-    <div style={{ ...tileStyle, width: 92, transform: "rotate(4deg)" }}><span style={{ ...noteStyle, color: "#7A873A" }}>CELLULE</span><div style={{ marginTop: 8, width: 44, height: 44, borderRadius: "50%", border: "2px solid #073B3A", marginInline: "auto" }}><div style={{ width: 13, height: 13, borderRadius: "50%", background: "#DDF5F1", border: "1px solid #0FA3A3", margin: "14px auto" }} /></div></div>
-  </div>;
+  if (subject === "svt") {
+    return (
+      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
+        <text x="66" y="64" fontFamily="Caveat, cursive" fontSize="25" fontWeight="700" fill="#7A873A">ADN</text>
+        <g transform="translate(70 86)">
+          <path d="M0 0C58 22 58 92 0 116M48 0C-10 22 -10 92 48 116" fill="none" stroke="#7A873A" strokeWidth="6" strokeLinecap="round" />
+          <path d="M6 15H42M2 39H46M2 63H46M2 87H46M6 111H42" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
+        </g>
+        <g transform="translate(200 58)">
+          <circle cx="70" cy="70" r="56" fill="#F8FCFB" stroke="#073B3A" strokeWidth="4" />
+          <ellipse cx="70" cy="70" rx="27" ry="22" fill="#EEF4DF" stroke="#7A873A" strokeWidth="3" />
+          <circle cx="70" cy="70" r="7" fill="#7A873A" />
+          <circle cx="30" cy="88" r="8" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" />
+          <circle cx="108" cy="51" r="7" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" />
+        </g>
+        <g transform="translate(358 63)">
+          <rect x="0" y="0" width="158" height="58" rx="14" fill="#F8FCFB" stroke="#D6E5D4" strokeWidth="2" />
+          <text x="18" y="36" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="800" fill="#7A873A">CELLULE</text>
+        </g>
+        <circle cx="426" cy="174" r="43" fill="none" stroke="#0FA3A3" strokeWidth="4" />
+        <circle cx="426" cy="174" r="13" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" />
+        <circle cx="494" cy="174" r="7" fill="#7A873A" />
+        <path d="M456 174H485" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
+      </svg>
+    );
+  }
 
-  if (subject === "philosophie") return <div style={visualStyle} aria-hidden="true">
-    <div style={{ ...tileStyle, flex: 1, minHeight: 104 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><Brain size={24} color="#76213A" /><span style={{ ...noteStyle, color: "#76213A" }}>QUESTION</span></div>
-      <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
-        <span style={{ padding: "6px 8px", borderRadius: 999, background: "rgba(118,33,58,.08)", color: "#76213A", fontSize: 9, fontWeight: 800 }}>THÈSE</span>
-        <ArrowRight size={13} color="#073B3A" />
-        <span style={{ padding: "6px 8px", borderRadius: 999, background: "#DDF5F1", color: "#073B3A", fontSize: 9, fontWeight: 800 }}>ARGUMENT</span>
-        <ArrowRight size={13} color="#073B3A" />
-        <span style={{ padding: "6px 8px", borderRadius: 999, background: "rgba(118,33,58,.08)", color: "#76213A", fontSize: 9, fontWeight: 800 }}>OBJECTION</span>
-      </div>
-    </div>
-    <div style={{ ...tileStyle, width: 86, transform: "rotate(-3deg)" }}><BookOpenText size={24} color="#76213A" /><div style={{ marginTop: 8, height: 4, width: "78%", background: "#F0E1E6", borderRadius: 6 }} /><div style={{ marginTop: 5, height: 4, width: "58%", background: "#F0E1E6", borderRadius: 6 }} /></div>
-  </div>;
+  if (subject === "philosophie") {
+    return (
+      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
+        <g transform="translate(66 55)">
+          <circle cx="66" cy="54" r="36" fill="#F3E5EA" stroke="#76213A" strokeWidth="4" />
+          <path d="M50 48C55 31 79 31 84 48C89 64 75 74 66 74C57 74 45 63 50 48Z" fill="none" stroke="#76213A" strokeWidth="4" />
+          <circle cx="60" cy="49" r="4" fill="#76213A" />
+          <circle cx="73" cy="49" r="4" fill="#76213A" />
+          <path d="M58 61C63 65 68 65 74 61" fill="none" stroke="#76213A" strokeWidth="3" strokeLinecap="round" />
+          <text x="18" y="122" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="900" fill="#76213A">QUESTION</text>
+        </g>
+        <g transform="translate(205 62)">
+          <rect width="104" height="42" rx="21" fill="#F3E5EA" />
+          <text x="52" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#76213A">THÈSE</text>
+          <path d="M104 21H134" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
+          <path d="M126 13L136 21L126 29" fill="none" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+        <g transform="translate(339 62)">
+          <rect width="122" height="42" rx="21" fill="#DDF5F1" />
+          <text x="61" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#073B3A">ARGUMENT</text>
+        </g>
+        <g transform="translate(208 140)">
+          <rect width="126" height="42" rx="21" fill="#F3E5EA" />
+          <text x="63" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#76213A">OBJECTION</text>
+        </g>
+        <g transform="translate(401 134) rotate(-4)">
+          <path d="M0 0C34 -12 71 -12 102 0V92C71 80 34 80 0 92Z" fill="#F8FCFB" stroke="#76213A" strokeWidth="4" />
+          <path d="M51 0V83" stroke="#76213A" strokeWidth="3" />
+          <path d="M14 25H43M59 25H88M14 42H43M59 42H88" stroke="#C89AA9" strokeWidth="3" strokeLinecap="round" />
+        </g>
+        <text x="529" y="215" fontFamily="Caveat, cursive" fontSize="42" fill="#76213A">?</text>
+      </svg>
+    );
+  }
 
-  return <div style={visualStyle} aria-hidden="true">
-    <div style={{ ...tileStyle, flex: 1, minHeight: 104 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><Languages size={24} color="#0FA3A3" /><span style={noteStyle}>VOCAB</span></div>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {['achieve', 'however', 'although'].map((word) => <span key={word} style={{ padding: "5px 7px", background: "#DDF5F1", borderRadius: 8, color: "#073B3A", fontSize: 9, fontWeight: 800 }}>{word}</span>)}
-      </div>
-    </div>
-    <div style={{ ...tileStyle, width: 88, transform: "rotate(4deg)" }}><BookOpen size={23} color="#0FA3A3" /><span style={{ display: "block", marginTop: 8, fontSize: 10, fontWeight: 800, color: "#76213A" }}>A–Z</span><div style={{ marginTop: 6, height: 3, width: "80%", background: "#E9D7DF", borderRadius: 5 }} /></div>
-  </div>;
+  return (
+    <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+      <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
+      <g transform="translate(54 57) rotate(-4)">
+        <rect width="188" height="114" rx="16" fill="#F8FCFB" stroke="#0FA3A3" strokeWidth="4" />
+        <rect x="18" y="22" width="72" height="24" rx="8" fill="#DDF5F1" />
+        <text x="24" y="40" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#073B3A">VOCAB</text>
+        <text x="20" y="74" fontFamily="Caveat, cursive" fontSize="25" fontWeight="700" fill="#073B3A">achieve</text>
+        <text x="20" y="99" fontFamily="Caveat, cursive" fontSize="22" fontWeight="700" fill="#0FA3A3">although</text>
+      </g>
+      <g transform="translate(283 52)">
+        <path d="M0 0H164C174 0 182 8 182 18V69C182 79 174 87 164 87H76L52 110V87H18C8 87 0 79 0 69Z" fill="#FFFFFF" stroke="#073B3A" strokeWidth="4" />
+        <path d="M24 30H140M24 49H112" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
+      </g>
+      <g transform="translate(335 160) rotate(4)">
+        <rect width="166" height="61" rx="14" fill="#F3E5EA" stroke="#E2CBD3" strokeWidth="2" />
+        <text x="23" y="40" fontFamily="Fraunces, serif" fontSize="19" fontWeight="600" fill="#76213A">Writing · A–Z</text>
+      </g>
+      <path d="M61 200C91 187 120 214 150 200C180 186 208 214 238 200" fill="none" stroke="#7A873A" strokeWidth="5" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 export default function Subjects() {
