@@ -1,0 +1,150 @@
+/* Scoped overrides for the Matières launcher. Keep these selectors specific so
+   generic global rules cannot change the card layout or typography. */
+
+.subjects-launcher-page {
+  width: 100%;
+  max-width: 1160px;
+  margin-inline: auto;
+  overflow: visible;
+}
+
+.subjects-launcher-page .subject-page-grid {
+  width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+  min-width: 0 !important;
+}
+
+.subjects-launcher-page .subject-large-card {
+  position: relative;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 420px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.subjects-launcher-page .subject-large-card__top,
+.subjects-launcher-page .subject-large-card__copy,
+.subjects-launcher-page .subject-large-card__footer,
+.subjects-launcher-page .subject-large-card__illustration {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.subjects-launcher-page .subject-large-card__illustration {
+  position: relative !important;
+  width: calc(100% - 28px) !important;
+  height: 168px !important;
+  min-height: 168px !important;
+  flex: 0 0 168px !important;
+  margin: 12px 14px 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(7,59,58,.09) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(180deg, rgba(221,245,241,.58), rgba(255,255,255,.42)) !important;
+}
+
+.subjects-launcher-page .subject-widget-svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex: 1 1 auto !important;
+  overflow: visible !important;
+}
+
+.subjects-launcher-page .subject-large-card__copy {
+  flex: 0 0 auto !important;
+  padding: 16px 18px 0 !important;
+}
+
+.subjects-launcher-page .subject-large-card__copy h2,
+.subjects-launcher-page .subject-large-card__copy p {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.subjects-launcher-page .subject-large-card__footer {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-top: auto !important;
+  padding: 14px 18px 16px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+}
+
+.subjects-launcher-page .subject-large-card__footer > span:first-child {
+  display: block !important;
+  flex: 1 1 0% !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+}
+
+.subjects-launcher-page .subject-large-card__arrow {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  flex: 0 0 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1100px) {
+  .subjects-launcher-page .subject-page-grid {
+    max-width: 760px;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .subjects-launcher-page {
+    padding-inline: 14px;
+  }
+
+  .subjects-launcher-page .subject-page-grid {
+    max-width: 520px;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .subjects-launcher-page .subject-large-card {
+    min-height: 400px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .subjects-launcher-page .subject-large-card__illustration {
+    height: 155px !important;
+    min-height: 155px !important;
+    flex-basis: 155px !important;
+  }
+}
