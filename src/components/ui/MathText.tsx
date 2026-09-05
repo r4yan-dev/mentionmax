@@ -1,13 +1,11 @@
 import { LatexText } from "./LatexText";
 
 const SUPER: Record<string, string> = {
-  "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5",
-  "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9", "⁺": "+", "⁻": "-", "ⁿ": "n",
+  "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9", "⁺": "+", "⁻": "-", "ⁿ": "n",
 };
 
 const SUB: Record<string, string> = {
-  "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
-  "₆": "6", "₇": "7", "₈": "8", "₉": "9", "₊": "+", "₋": "-", "ₙ": "n",
+  "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9", "₊": "+", "₋": "-", "ₙ": "n",
   "ₐ": "a", "ₑ": "e", "ᵢ": "i", "ⱼ": "j", "ₖ": "k", "ₘ": "m",
 };
 
@@ -55,26 +53,46 @@ function normalizeAtom(value: string) {
 function normalizeIntegralText(text: string): string {
   let source = text;
 
+  // Full integral with bounds and differential: ∫_a^b f(x) dx
+  const integralWithDifferential = /∫\s*(?:_\s*(\{[^}]+\}|[^\s^=]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s=]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])(?=$|[.!?;,:])/g;
   source = source.replace(
-    /∫\s*(?:_\s*(\{[^}]+\}|[^\s^]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])(?=$|[.!?;,:])/g,
+    integralWithDifferential,
     (_match, lower: string | undefined, upper: string | undefined, body: string, variable: string) => {
       const bounds = `${lower ? `_{${unicodeIndex(lower.trim(), SUB)}}` : ""}${upper ? `^{${unicodeIndex(upper.trim(), SUPER)}}` : ""}`;
       return `\\(\\int${bounds} ${normalizeAtom(body.trim())}\\,d${variable}\\)`;
     },
   );
 
+  // Integral reversal identity, including versions without dx:
+  // ∫_a^b f = -∫_b^a f
   source = source.replace(
-    /∫([₀₁₂₃₄₅₆₇₈₉₊₋ₙ]+)([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿ]+)\s+([^.!?;\n]+)/g,
+    /∫\s*_\s*([^\s^=]+)\s*\^\s*([^\s=]+)\s+([^.!?;\n=]+?)\s*=\s*-\s*∫\s*_\s*([^\s^=]+)\s*\^\s*([^\s=]+)\s+([^.!?;\n]+?)(?=$|[.!?;])/g,
+    (_match, a: string, b: string, left: string, c: string, d: string, right: string) =>
+      `\\(\\int_{${normalizeAtom(a)}}^{${normalizeAtom(b)}} ${normalizeAtom(left.trim())} = -\\int_{${normalizeAtom(c)}}^{${normalizeAtom(d)}} ${normalizeAtom(right.trim())}\\)`,
+  );
+
+  // Standalone bounded integral without an explicit differential.
+  source = source.replace(
+    /∫\s*_\s*([^\s^=]+)\s*\^\s*([^\s=]+)\s+([^.!?;\n]+)/g,
+    (_match, lower: string, upper: string, body: string) =>
+      `\\(\\int_{${normalizeAtom(lower)}}^{${normalizeAtom(upper)}} ${normalizeAtom(body.trim())}\\)`,
+  );
+
+  // Unicode bounds: ∫₀¹ x²
+  source = source.replace(
+    new RegExp(`∫([${SUB_CHARS}]+)([${SUPER_CHARS}]+)\\s+([^.!?;\\n]+)`, "g"),
     (_match, lower: string, upper: string, body: string) =>
       `\\(\\int_{${unicodeIndex(lower, SUB)}}^{${unicodeIndex(upper, SUPER)}} ${normalizeAtom(body.trim())}\\)`,
   );
 
+  // Textual French notation: intégrale de a à b de f(x) dx
   source = source.replace(
     /\bintegr(?:ale|al)\s+de\s+([^\s]+)\s+[àa]\s+([^\s]+)\s+(?:de\s+)?(.+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/gi,
     (_match, lower: string, upper: string, body: string, variable: string) =>
       `\\(\\int_{${normalizeAtom(lower)}}^{${normalizeAtom(upper)}} ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
   );
 
+  // Indefinite integral: ∫ f(x) dx
   source = source.replace(
     /∫\s+([^.!?;\n]+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/g,
     (_match, body: string, variable: string) => `\\(\\int ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
@@ -85,28 +103,29 @@ function normalizeIntegralText(text: string): string {
 
 function escapeLatexText(value: string): string {
   return value
-    .replace(/\\/g, "\\textbackslash{}")
-    .replace(/([#$%&_{}])/g, "\\$1")
-    .replace(/~/g, "\\textasciitilde{}")
-    .replace(/\^/g, "\\textasciicircum{}");
+    .replace(/\\(?!\(.*?\))/g, "\\textbackslash{}")
+    .replace(/([#$%&])/g, "\\$1")
+    .replace(/\{/g, "\\{")
+    .replace(/\}/g, "\\}")
+    .replace(/~/g, "\\textasciitilde{}");
 }
 
 function wholeCardAsLatex(text: string): string {
   const normalized = normalizeIntegralText(text);
   const parts: string[] = [];
   let cursor = 0;
-  const mathPattern = /\\\(([\s\S]*?)\\\)/g;
   let match: RegExpExecArray | null;
+  const mathPattern = /\\\(([\s\S]*?)\\\)/g;
 
   while ((match = mathPattern.exec(normalized)) !== null) {
     const prose = normalized.slice(cursor, match.index);
-    if (prose) parts.push(`\\text{${escapeLatexText(prose)}}`);
+    if (prose.trim()) parts.push(`\\text{${escapeLatexText(prose.trim())}}`);
     parts.push(match[1]);
     cursor = match.index + match[0].length;
   }
 
   const remaining = normalized.slice(cursor);
-  if (remaining) parts.push(`\\text{${escapeLatexText(remaining)}}`);
+  if (remaining.trim()) parts.push(`\\text{${escapeLatexText(remaining.trim())}}`);
 
   const content = parts.length ? parts.join(" \\quad ") : `\\text{${escapeLatexText(text)}}`;
   return `\\[\\begin{gathered}${content}\\end{gathered}\\]`;
