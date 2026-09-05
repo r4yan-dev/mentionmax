@@ -28,10 +28,7 @@ const dedicatedMathLessonIds = new Set([
 
 const lessons: LessonDocument[] = [
   ...secondBacLessons.filter(
-    (lesson) =>
-      lesson.subjectId !== "physique-chimie" &&
-      lesson.subjectId !== "philosophie" &&
-      !dedicatedMathLessonIds.has(lesson.id),
+    (lesson) => lesson.subjectId !== "physique-chimie" && !dedicatedMathLessonIds.has(lesson.id),
   ),
   secondBacMathSequencesLesson,
   secondBacMathDerivationLesson,
@@ -52,7 +49,6 @@ const lessons: LessonDocument[] = [
 
 export const lessonService = {
   list(subjectId?: SubjectId, trackId?: TrackId): LessonDocument[] {
-    if (subjectId === "philosophie") return [];
     return lessons.filter((lesson) => {
       if (subjectId && lesson.subjectId !== subjectId) return false;
       if (trackId === "SMB" && lesson.subjectId === "svt") return false;
@@ -60,7 +56,6 @@ export const lessonService = {
     });
   },
   getById(id: string): LessonDocument | null {
-    const lesson = lessons.find((item) => item.id === id) ?? null;
-    return lesson?.subjectId === "philosophie" ? null : lesson;
+    return lessons.find((lesson) => lesson.id === id) ?? null;
   },
 };
