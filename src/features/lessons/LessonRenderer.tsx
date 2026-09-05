@@ -82,13 +82,13 @@ function renderArabicIntroCard(blocks: LessonBlock[]) {
   const textBlock = blocks[2];
 
   return (
-    <section className="lesson-intro-card" aria-labelledby="lesson-intro-title">
+    <div className="lesson-intro-card" aria-labelledby="lesson-intro-title">
       <div className="lesson-intro-card__title">
         <h1 id="lesson-intro-title">{titleBlock.title || titleBlock.text}</h1>
       </div>
       {headingBlock?.type === "heading" && <h2>{headingBlock.title || headingBlock.text}</h2>}
       {textBlock?.type === "text" && textBlock.text && <p><LatexText>{textBlock.text}</LatexText></p>}
-    </section>
+    </div>
   );
 }
 
