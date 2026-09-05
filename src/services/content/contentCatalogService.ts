@@ -30,6 +30,10 @@ import { base2BacSMDifferentialEquationsExercises } from "../../data/mock/base2B
 import { base2BacSMIntegralExercises } from "../../data/mock/base2BacSMIntegralExercises";
 import { base2BacSMSpaceGeometryExercises } from "../../data/mock/base2BacSMSpaceGeometryExercises";
 import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
+import { base2BacPhilosophyIdentityFlashcards } from "../../data/mock/base2BacPhilosophyIdentityFlashcards";
+import { base2BacPhilosophyMethodologyFlashcards } from "../../data/mock/base2BacPhilosophyMethodologyFlashcards";
+import { base2BacPhilosophyIdentityExercises } from "../../data/mock/base2BacPhilosophyIdentityExercises";
+import { base2BacPhilosophyMethodologyExercises } from "../../data/mock/base2BacPhilosophyMethodologyExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
@@ -37,6 +41,8 @@ const allFlashcards: Flashcard[] = [
   ...baseContent.flashcards,
   ...basePCFlashcards,
   ...base2BacSPCMathsFlashcards,
+  ...base2BacPhilosophyMethodologyFlashcards,
+  ...base2BacPhilosophyIdentityFlashcards,
 ];
 const allExercises: Exercise[] = [
   ...basePCExercises,
@@ -67,6 +73,8 @@ const allExercises: Exercise[] = [
   ...base2BacSMIntegralExercises,
   ...base2BacSMSpaceGeometryExercises,
   ...helios300MathExercises,
+  ...base2BacPhilosophyMethodologyExercises,
+  ...base2BacPhilosophyIdentityExercises,
 ];
 const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
 const allRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
@@ -87,7 +95,7 @@ export const contentCatalogService = {
     allFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic)),
 
   getBaseExercises: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
-    subjectId === "philosophie" ? [] : allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+    allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic)),
 
   getBaseQuizzes: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic)),
