@@ -53,36 +53,46 @@ function normalizeAtom(value: string) {
 function normalizeIntegralText(text: string): string {
   let source = text;
 
-  // Full integral with bounds and differential: ∫_a^b f(x) dx
-  const integralWithDifferential = /∫\s*(?:_\s*(\{[^}]+\}|[^\s^=]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s=]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])(?=$|[.!?;,:])/g;
+  // Definite/indefinite integrals written directly with ∫.
   source = source.replace(
-    integralWithDifferential,
+    /∫\s*(?:_\s*(\{[^}]+\}|[^\s^=]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s=]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])(?=$|[.!?;,:])/g,
     (_match, lower: string | undefined, upper: string | undefined, body: string, variable: string) => {
       const bounds = `${lower ? `_{${unicodeIndex(lower.trim(), SUB)}}` : ""}${upper ? `^{${unicodeIndex(upper.trim(), SUPER)}}` : ""}`;
       return `\\(\\int${bounds} ${normalizeAtom(body.trim())}\\,d${variable}\\)`;
     },
   );
 
-  // Integral reversal identity, including versions without dx:
-  // ∫_a^b f = -∫_b^a f
+  // Integral reversal identity: ∫_a^b f = -∫_b^a f
   source = source.replace(
     /∫\s*_\s*([^\s^=]+)\s*\^\s*([^\s=]+)\s+([^.!?;\n=]+?)\s*=\s*-\s*∫\s*_\s*([^\s^=]+)\s*\^\s*([^\s=]+)\s+([^.!?;\n]+?)(?=$|[.!?;])/g,
     (_match, a: string, b: string, left: string, c: string, d: string, right: string) =>
       `\\(\\int_{${normalizeAtom(a)}}^{${normalizeAtom(b)}} ${normalizeAtom(left.trim())} = -\\int_{${normalizeAtom(c)}}^{${normalizeAtom(d)}} ${normalizeAtom(right.trim())}\\)`,
   );
 
-  // Standalone bounded integral without an explicit differential.
+  // Bounded integrals without dx, including products such as xe^x.
   source = source.replace(
     /∫\s*_\s*([^\s^=]+)\s*\^\s*([^\s=]+)\s+([^.!?;\n]+)/g,
     (_match, lower: string, upper: string, body: string) =>
       `\\(\\int_{${normalizeAtom(lower)}}^{${normalizeAtom(upper)}} ${normalizeAtom(body.trim())}\\)`,
   );
 
-  // Unicode bounds: ∫₀¹ x²
+  // Unicode bounds: ∫₀¹ x² or ∫ₐᵇ xeˣ
   source = source.replace(
     new RegExp(`∫([${SUB_CHARS}]+)([${SUPER_CHARS}]+)\\s+([^.!?;\\n]+)`, "g"),
     (_match, lower: string, upper: string, body: string) =>
       `\\(\\int_{${unicodeIndex(lower, SUB)}}^{${unicodeIndex(upper, SUPER)}} ${normalizeAtom(body.trim())}\\)`,
+  );
+
+  // Explicit malformed plain form produced by older conversion: /xe {x} dx, or /xe^x dx.
+  source = source.replace(
+    /(?:^|\s)\/?\s*x\s*e(?:\^\s*\{?x\}?|\{x\})\s+d\s*x(?=$|[.!?;,:])/gi,
+    (_match) => " \\(x e^{x}\\,dx\\)",
+  );
+
+  // Generic indefinite integral, including products like xe^x.
+  source = source.replace(
+    /∫\s+([^.!?;\n]+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/g,
+    (_match, body: string, variable: string) => `\\(\\int ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
   );
 
   // Textual French notation: intégrale de a à b de f(x) dx
@@ -90,12 +100,6 @@ function normalizeIntegralText(text: string): string {
     /\bintegr(?:ale|al)\s+de\s+([^\s]+)\s+[àa]\s+([^\s]+)\s+(?:de\s+)?(.+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/gi,
     (_match, lower: string, upper: string, body: string, variable: string) =>
       `\\(\\int_{${normalizeAtom(lower)}}^{${normalizeAtom(upper)}} ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
-  );
-
-  // Indefinite integral: ∫ f(x) dx
-  source = source.replace(
-    /∫\s+([^.!?;\n]+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/g,
-    (_match, body: string, variable: string) => `\\(\\int ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
   );
 
   return source;
