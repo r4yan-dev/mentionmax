@@ -1,5 +1,6 @@
 import { baseContent } from "../../data/mock/baseContent";
 import { basePCExercises, basePCFlashcards, basePCQuizzes, basePCRevisionSheets } from "../../data/mock/basePCContent";
+import { base2BacSPCMathsFlashcards } from "../../data/mock/base2BacSPCMathsFlashcards";
 import { basePCHardExercises } from "../../data/mock/basePCHardExercises";
 import { baseSMMathExercises } from "../../data/mock/baseSMMathExercises";
 import { baseSMPCExercises } from "../../data/mock/baseSMPCExercises";
@@ -32,7 +33,11 @@ import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
-const allFlashcards: Flashcard[] = [...baseContent.flashcards, ...basePCFlashcards];
+const allFlashcards: Flashcard[] = [
+  ...baseContent.flashcards,
+  ...basePCFlashcards,
+  ...base2BacSPCMathsFlashcards,
+];
 const allExercises: Exercise[] = [
   ...basePCExercises,
   ...basePCHardExercises,
