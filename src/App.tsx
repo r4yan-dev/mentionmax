@@ -15,6 +15,7 @@ import AiStudio from "./pages/AiStudio";
 import AIHelp from "./pages/AIHelp";
 import Handnotes from "./pages/Handnotes";
 import Subjects from "./pages/Subjects";
+import SubjectsLauncher from "./pages/SubjectsLauncher";
 import Lessons from "./pages/Lessons";
 import Focus from "./pages/Focus";
 import FocusGroupDetail from "./pages/FocusGroupDetail";
@@ -41,8 +42,8 @@ export default function App() {
     <Route path="/connexion" element={<Auth />} />
     <Route element={<ProtectedRoute><AuthenticatedShell /></ProtectedRoute>}>
       <Route path="/accueil" element={<Dashboard />} />
-      <Route path="/matieres" element={<Subjects />} />
-      <Route path="/subjects" element={<Subjects />} />
+      <Route path="/matieres" element={<SubjectsLauncher />} />
+      <Route path="/subjects" element={<SubjectsLauncher />} />
       <Route path="/subjects/:subjectId" element={<Subjects />} />
       <Route path="/lecons/:subjectId" element={<Lessons />} />
       <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
