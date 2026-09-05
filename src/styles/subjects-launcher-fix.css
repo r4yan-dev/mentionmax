@@ -1,5 +1,5 @@
 /* Scoped overrides for the Matières launcher. Keep these selectors specific so
-   generic global rules cannot change the card layout or typography. */
+generic global rules cannot change the card layout or typography. */
 
 .subjects-launcher-page {
   width: 100%;
@@ -47,31 +47,35 @@
   flex: 0 0 168px !important;
   margin: 12px 14px 0 !important;
   overflow: hidden !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   border: 1px solid rgba(7,59,58,.09) !important;
   border-radius: 15px !important;
   background: linear-gradient(180deg, rgba(221,245,241,.58), rgba(255,255,255,.42)) !important;
 }
 
-/* Hard-pin the SVG to the illustration viewport. This prevents any global
-   svg/card rules from translating it to the right or shrinking its box. */
+/* Keep the artwork in normal flow. The previous absolute positioning was
+   allowing the SVG viewport to inherit hostile global geometry and appear
+   pushed to the right edge of the card. */
 .subjects-launcher-page .subject-large-card__illustration .subject-widget-svg {
-  position: absolute !important;
-  inset: 0 !important;
+  position: static !important;
+  inset: auto !important;
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   transform: none !important;
   translate: none !important;
   rotate: none !important;
   scale: 1 !important;
-  flex: none !important;
+  flex: 0 0 100% !important;
+  align-self: stretch !important;
   overflow: hidden !important;
 }
 
