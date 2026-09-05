@@ -1,0 +1,208 @@
+/* Arabic lesson presentation: RTL reading flow, sequential cards, no collage drift. */
+.lesson-document[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  display: block;
+  padding-top: 88px !important;
+  padding-bottom: 120px !important;
+  overflow: visible;
+}
+
+.lesson-document[dir="rtl"]::after {
+  content: "✦ وضع الباك · تركيز";
+  left: 22px;
+  right: auto;
+  top: 18px;
+  transform: rotate(-3deg);
+}
+
+.lesson-document[dir="rtl"] h1 {
+  margin: 0 10px 24px !important;
+  padding: 12px 0 18px !important;
+  text-align: right;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+  transform: none !important;
+  scroll-margin-top: 100px;
+}
+
+.lesson-document[dir="rtl"] h1::before {
+  content: "فلسفة · ورقة الدرس";
+  margin: 0 0 12px;
+  text-align: right;
+  letter-spacing: 0;
+  direction: rtl;
+  transform: none;
+}
+
+.lesson-document[dir="rtl"] h1::after {
+  right: auto;
+  left: -8px;
+  bottom: -18px;
+  transform: rotate(-8deg);
+}
+
+.lesson-document[dir="rtl"] > h2.lesson-section-heading,
+.lesson-document[dir="rtl"] > .lesson-section-heading {
+  margin: 28px 0 12px;
+  padding: 10px 16px;
+  border-right: 5px solid var(--turquoise, #42c9bd);
+  border-left: 0;
+  border-radius: 10px;
+  background: rgba(221,245,241,.72);
+  color: #073b3a;
+}
+
+.lesson-document[dir="rtl"] > .lesson-section-heading h2 {
+  margin: 0;
+  font-family: "Kalam", cursive;
+  font-size: clamp(25px, 2.8vw, 34px);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.lesson-document[dir="rtl"] .lesson-block,
+.lesson-document[dir="rtl"] .lesson-callout {
+  display: block;
+  width: auto;
+  grid-column: auto !important;
+  margin: 0 0 16px !important;
+  padding: 20px 20px 22px !important;
+  transform: none !important;
+  text-align: right;
+}
+
+.lesson-document[dir="rtl"] .lesson-block::before,
+.lesson-document[dir="rtl"] .lesson-block::after,
+.lesson-document[dir="rtl"] .lesson-callout::before,
+.lesson-document[dir="rtl"] .lesson-callout::after {
+  transform: none;
+}
+
+.lesson-document[dir="rtl"] .lesson-block:nth-of-type(4n + 1)::before {
+  left: auto;
+  right: 28px;
+  transform: rotate(4deg);
+}
+
+.lesson-document[dir="rtl"] .lesson-block:nth-of-type(4n + 2)::before {
+  left: -18px;
+  right: auto;
+  transform: rotate(-7deg);
+}
+
+.lesson-document[dir="rtl"] .lesson-block:nth-of-type(5n)::after {
+  left: -13px;
+  right: auto;
+  content: "تذكّر!";
+  direction: rtl;
+  transform: rotate(6deg);
+}
+
+.lesson-document[dir="rtl"] .lesson-block h2 {
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.2;
+  margin-bottom: 10px;
+  text-align: right;
+}
+
+.lesson-document[dir="rtl"] .lesson-block h2::after {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+.lesson-document[dir="rtl"] .lesson-block p,
+.lesson-document[dir="rtl"] .lesson-callout p {
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-size: clamp(17px, 1.45vw, 21px);
+  line-height: 1.85;
+  font-weight: 500;
+  text-align: right;
+}
+
+.lesson-document[dir="rtl"] .lesson-page-break {
+  margin: 24px 0 14px;
+  padding: 12px 16px 10px 0;
+  border-right: 5px solid var(--turquoise, #42c9bd);
+  border-left: 0;
+  text-align: right;
+}
+
+.lesson-document[dir="rtl"] .lesson-page-break span {
+  font-size: 19px;
+}
+
+.lesson-document[dir="rtl"] .lesson-page-break p {
+  margin: 6px 0 0;
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  line-height: 1.7;
+}
+
+.lesson-document[dir="rtl"] .lesson-page-break::after {
+  right: auto;
+  left: -58px;
+  content: "الدرس";
+}
+
+.lesson-document[dir="rtl"] .lesson-formula {
+  margin: 16px 0;
+  transform: none;
+  text-align: center;
+}
+
+.lesson-document[dir="rtl"] .lesson-recap {
+  margin-top: 20px !important;
+}
+
+.lesson-document[dir="rtl"] .lesson-recap::after {
+  right: auto;
+  left: 17px;
+  content: "✓ تم";
+}
+
+.lesson-document[dir="rtl"] .lesson-block--definition::after {
+  right: auto;
+  left: 15px;
+  content: "تعريف";
+}
+
+.lesson-document[dir="rtl"] .lesson-block--warning::after,
+.lesson-document[dir="rtl"] .lesson-block--common-mistake::after {
+  right: auto;
+  left: 13px;
+  content: "⚠ تنبيه";
+}
+
+.lesson-document[dir="rtl"] .lesson-block--exam-tip::before,
+.lesson-document[dir="rtl"] .lesson-block--exercise::before {
+  right: auto;
+  left: 15px;
+}
+
+/* Keep decorative SVGs from becoming part of the reading path. */
+.lesson-document[dir="rtl"] .lesson-visual {
+  direction: ltr;
+  margin: 12px auto 0;
+}
+
+/* Netlify's optional badge should never cover lesson content. */
+body > a[href*="netlify"] {
+  z-index: 1 !important;
+}
+
+@media (max-width: 850px) {
+  .lesson-document[dir="rtl"] {
+    padding-top: 72px !important;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .lesson-document[dir="rtl"] h1 {
+    font-size: clamp(48px, 14vw, 74px);
+  }
+
+  .lesson-document[dir="rtl"] .lesson-block,
+  .lesson-document[dir="rtl"] .lesson-callout {
+    padding: 17px 15px 19px !important;
+  }
+}
