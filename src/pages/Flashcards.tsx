@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { contentCatalogService } from "../services/content/contentCatalogService";
-import { LatexText } from "../components/ui/LatexText";
+import { MathText } from "../components/ui/MathText";
 import type { Flashcard } from "../types/content";
 import "./Flashcards.css";
 
@@ -69,7 +69,7 @@ export default function Flashcards() {
                     <span className="flashcard-chapter">{current.target.chapter}</span>
                     <div className="flashcard-content">
                       <span className="flashcard-label">QUESTION</span>
-                      <div className="flashcard-text"><LatexText>{current.front}</LatexText></div>
+                      <div className="flashcard-text"><MathText>{current.front}</MathText></div>
                     </div>
                     <span className="flashcard-hint">Clique pour retourner</span>
                   </span>
@@ -77,7 +77,7 @@ export default function Flashcards() {
                     <span className="flashcard-chapter">{current.target.chapter}</span>
                     <div className="flashcard-content">
                       <span className="flashcard-label">RÉPONSE</span>
-                      <div className="flashcard-text"><LatexText>{current.back}</LatexText></div>
+                      <div className="flashcard-text"><MathText>{current.back}</MathText></div>
                     </div>
                     <span className="flashcard-hint">Clique pour revenir</span>
                   </span>
