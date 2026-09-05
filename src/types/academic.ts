@@ -19,4 +19,4 @@ export interface LessonBlock {
   items?: string[];
   data?: Record<string, unknown>;
 }
-export interface LessonDocument { id: string; title: string; language: "fr"; source: ContentSource; subjectId: SubjectId; chapter: string; topic: string; blocks: LessonBlock[]; }
+export interface LessonDocument { id: string; title: string; language: "fr" | "ar"; source: ContentSource; subjectId: SubjectId; chapter: string; topic: string; blocks: LessonBlock[]; }
