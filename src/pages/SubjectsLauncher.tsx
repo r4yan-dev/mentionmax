@@ -1,7 +1,7 @@
 import { ArrowRight, Atom, Brain, Calculator, BookOpen, Dna, Languages } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "../components/ui/PageHeader";
-import { getTrackSubjects, subjects as subjectCatalog } from "../data/curriculum/tracks";
+import { getTrackSubjects } from "../data/curriculum/tracks";
 import { resolveUserPath, pathLabels, type UserPath } from "../data/curriculum/secondBac";
 import { useAccount } from "../context/AccountContext";
 import PathSwitcher from "../components/curriculum/PathSwitcher";
@@ -48,7 +48,7 @@ const accentSoft: Record<SubjectId, string> = {
   anglais: "#EEE9F0",
 };
 
-function paperStyle(accentColor: string, soft: string): React.CSSProperties {
+function paperStyle(soft: string): React.CSSProperties {
   return {
     position: "relative",
     height: 168,
@@ -71,7 +71,7 @@ function WidgetArt({ subject }: { subject: SubjectId }) {
   const color = accent[subject];
 
   if (subject === "maths") {
-    return <div style={paperStyle(color, soft)} aria-hidden="true">
+    return <div style={paperStyle(soft)} aria-hidden="true">
       <div style={{ position: "absolute", inset: 20, borderLeft: `1.5px solid ${color}`, borderBottom: `1.5px solid ${color}` }} />
       <div style={{ position: "absolute", left: 52, bottom: 36, width: 138, height: 76, borderTop: "3px solid #073B3A", borderRadius: "60% 55% 0 0", transform: "rotate(-11deg)" }} />
       <div style={{ position: "absolute", left: 18, top: 17, padding: "5px 10px", borderRadius: 8, background: "rgba(15,163,163,.13)", transform: "rotate(-3deg)", ...note, fontSize: 20, color }}>
@@ -86,7 +86,7 @@ function WidgetArt({ subject }: { subject: SubjectId }) {
   }
 
   if (subject === "physique-chimie") {
-    return <div style={paperStyle(color, soft)} aria-hidden="true">
+    return <div style={paperStyle(soft)} aria-hidden="true">
       <div style={{ position: "absolute", left: 16, top: 30, right: 16, height: 40 }}>
         <svg viewBox="0 0 280 40" width="100%" height="100%" preserveAspectRatio="none"><path d="M0 20 C20 -3 40 43 60 20 S100 -3 120 20 S160 43 180 20 S220 -3 240 20 S260 43 280 20" fill="none" stroke="#073B3A" strokeWidth="2.3" strokeLinecap="round" /></svg>
       </div>
@@ -104,7 +104,7 @@ function WidgetArt({ subject }: { subject: SubjectId }) {
   }
 
   if (subject === "svt") {
-    return <div style={paperStyle(color, soft)} aria-hidden="true">
+    return <div style={paperStyle(soft)} aria-hidden="true">
       <Dna size={72} color="#7A873A" strokeWidth={1.55} style={{ position: "absolute", left: 28, top: 22 }} />
       <div style={{ position: "absolute", left: 33, top: 90, ...note, fontSize: 19, color: "#7A873A", transform: "rotate(-4deg)" }}>ADN</div>
       <div style={{ position: "absolute", left: 140, top: 35, width: 76, height: 76, borderRadius: "50%", border: "1.6px solid #073B3A" }}>
@@ -113,14 +113,14 @@ function WidgetArt({ subject }: { subject: SubjectId }) {
       </div>
       <Brain size={28} color="#0FA3A3" style={{ position: "absolute", right: 23, top: 26 }} />
       <div style={{ position: "absolute", right: 18, bottom: 27, width: 72, height: 52 }}>
-        {[0,1,2,3].map((i) => <div key={i} style={{ height: 7, marginBottom: 4, background: i % 2 ? "rgba(15,163,163,.22)" : "rgba(122,135,58,.22)", borderRadius: 3 }} />)}
+        {[0, 1, 2, 3].map((i) => <div key={i} style={{ height: 7, marginBottom: 4, background: i % 2 ? "rgba(15,163,163,.22)" : "rgba(122,135,58,.22)", borderRadius: 3 }} />)}
       </div>
       <div style={{ position: "absolute", left: 140, bottom: 22, ...note, fontSize: 15, color: "#0FA3A3", transform: "rotate(3deg)" }}>cellule</div>
     </div>;
   }
 
   if (subject === "philosophie") {
-    return <div style={paperStyle(color, soft)} aria-hidden="true">
+    return <div style={paperStyle(soft)} aria-hidden="true">
       <div style={{ position: "absolute", left: 20, top: 27, padding: "7px 10px", borderRadius: 12, border: `1px solid ${color}`, color, fontSize: 10, fontWeight: 850 }}>THÈSE</div>
       <div style={{ position: "absolute", left: 95, top: 67, padding: "7px 11px", borderRadius: 12, border: "1px solid #073B3A", color: "#073B3A", fontSize: 10, fontWeight: 850 }}>ARGUMENT</div>
       <div style={{ position: "absolute", left: 22, bottom: 27, padding: "7px 10px", borderRadius: 12, border: "1px solid #0FA3A3", color: "#0FA3A3", fontSize: 10, fontWeight: 850 }}>OBJECTION</div>
@@ -132,7 +132,7 @@ function WidgetArt({ subject }: { subject: SubjectId }) {
     </div>;
   }
 
-  return <div style={paperStyle(color, soft)} aria-hidden="true">
+  return <div style={paperStyle(soft)} aria-hidden="true">
     <div style={{ position: "absolute", left: 18, top: 25, width: 92, height: 54, border: "1px solid #0FA3A3", borderRadius: 8, transform: "rotate(-4deg)", background: "rgba(255,255,255,.6)" }} />
     <div style={{ position: "absolute", left: 31, top: 41, padding: "4px 8px", background: "rgba(15,163,163,.13)", borderRadius: 7, ...note, fontSize: 19, color: "#073B3A", transform: "rotate(-4deg)" }}>achieve</div>
     <div style={{ position: "absolute", left: 42, top: 89, padding: "4px 8px", background: "rgba(118,33,58,.09)", borderRadius: 7, ...note, fontSize: 16, color: "#76213A", transform: "rotate(2deg)" }}>however</div>
