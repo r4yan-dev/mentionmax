@@ -7,6 +7,7 @@ import { base2BacSPCMathsRootsPrimitivesFlashcards } from "./base2BacSPCMathsFla
 import { base2BacSPCMathsLogComplexFlashcards } from "./base2BacSPCMathsFlashcardsLogComplex";
 import { base2BacSPCMathsAdvancedFlashcards } from "./base2BacSPCMathsFlashcardsAdvanced";
 import { base2BacSPCMathsFlashcards340to510 } from "./base2BacSPCMathsFlashcards340to510";
+import { base2BacSPCMathsFlashcards511to830 } from "./base2BacSPCMathsFlashcards511to830";
 
 export const base2BacSPCMathsFlashcards: Flashcard[] = [
   ...base2BacSPCMathsLimitsFlashcards,
@@ -17,4 +18,5 @@ export const base2BacSPCMathsFlashcards: Flashcard[] = [
   ...base2BacSPCMathsLogComplexFlashcards,
   ...base2BacSPCMathsAdvancedFlashcards,
   ...base2BacSPCMathsFlashcards340to510,
+  ...base2BacSPCMathsFlashcards511to830,
 ];
