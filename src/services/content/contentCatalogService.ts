@@ -13,6 +13,7 @@ import { base2BacSMProbabilityExercises } from "../../data/mock/base2BacSMProbab
 import { base2BacSMProbabilityCorrections } from "../../data/mock/base2BacSMProbabilityCorrections";
 import { base2BacSMLogExercises } from "../../data/mock/base2BacSMLogExercises";
 import { base2BacSMComplexExercises } from "../../data/mock/base2BacSMComplexExercises";
+import { base2BacSMCombinatoricsExercises } from "../../data/mock/base2BacSMCombinatoricsExercises";
 import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
@@ -33,6 +34,7 @@ const allExercises: Exercise[] = [
   ...base2BacSMProbabilityCorrections,
   ...base2BacSMLogExercises,
   ...base2BacSMComplexExercises,
+  ...base2BacSMCombinatoricsExercises,
   ...helios300MathExercises,
 ];
 const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
