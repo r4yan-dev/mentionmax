@@ -7,6 +7,7 @@ import { base2BacHumanExercises } from "../../data/mock/base2BacHumanExercises";
 import { extended2BacExercises } from "../../data/mock/base2BacHumanExercisesExtended";
 import { base2BacSPMathExercises } from "../../data/mock/base2BacSPMathExercises";
 import { base2BacSMLimitExercises } from "../../data/mock/base2BacSMLimitExercises";
+import { base2BacSMSequenceLimitLessonExercises } from "../../data/mock/base2BacSMSequenceLimitLessonExercises";
 import { base2BacSMPrimitivesExercises } from "../../data/mock/base2BacSMPrimitivesExercises";
 import { base2BacSMDerivationExercises } from "../../data/mock/base2BacSMDerivationExercises";
 import { base2BacSMProbabilityExercises } from "../../data/mock/base2BacSMProbabilityExercises";
@@ -14,6 +15,10 @@ import { base2BacSMProbabilityCorrections } from "../../data/mock/base2BacSMProb
 import { base2BacSMLogExercises } from "../../data/mock/base2BacSMLogExercises";
 import { base2BacSMComplexExercises } from "../../data/mock/base2BacSMComplexExercises";
 import { base2BacSMCombinatoricsExercises } from "../../data/mock/base2BacSMCombinatoricsExercises";
+import { base2BacSMExponentialExercises } from "../../data/mock/base2BacSMExponentialExercises";
+import { base2BacSMDifferentialEquationsExercises } from "../../data/mock/base2BacSMDifferentialEquationsExercises";
+import { base2BacSMIntegralExercises } from "../../data/mock/base2BacSMIntegralExercises";
+import { base2BacSMSpaceGeometryExercises } from "../../data/mock/base2BacSMSpaceGeometryExercises";
 import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
 import type { Exercise, Flashcard, Quiz, RevisionSheet } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
@@ -28,6 +33,7 @@ const allExercises: Exercise[] = [
   ...extended2BacExercises,
   ...base2BacSPMathExercises,
   ...base2BacSMLimitExercises,
+  ...base2BacSMSequenceLimitLessonExercises,
   ...base2BacSMPrimitivesExercises,
   ...base2BacSMDerivationExercises,
   ...base2BacSMProbabilityExercises.filter((exercise) => !["sm-prob-13", "sm-prob-21"].includes(exercise.id)),
@@ -35,6 +41,10 @@ const allExercises: Exercise[] = [
   ...base2BacSMLogExercises,
   ...base2BacSMComplexExercises,
   ...base2BacSMCombinatoricsExercises,
+  ...base2BacSMExponentialExercises,
+  ...base2BacSMDifferentialEquationsExercises,
+  ...base2BacSMIntegralExercises,
+  ...base2BacSMSpaceGeometryExercises,
   ...helios300MathExercises,
 ];
 const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
