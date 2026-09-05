@@ -12,6 +12,7 @@ import { secondBacMathDifferentialEquationsLesson } from "../../data/curriculum/
 import { secondBacMathIntegralLesson } from "../../data/curriculum/secondBacMathIntegralLesson";
 import { secondBacMathSpaceGeometryLesson } from "../../data/curriculum/secondBacMathSpaceGeometryLesson";
 import { secondBacMathCombinatoricsLesson } from "../../data/curriculum/secondBacMathCombinatoricsLesson";
+import { mathMasteryExamples } from "../../data/curriculum/mathMasteryExamples";
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
 import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
 
@@ -23,7 +24,7 @@ const dedicatedMathLessonIds = new Set([
   "2bac-maths-log",
   "2bac-maths-complexes",
   "2bac-maths-exp",
-  "2bac-maths-differential",
+  "2bac-maths-differential-equations",
 ]);
 
 const lessons: LessonDocument[] = [
@@ -48,15 +49,37 @@ const lessons: LessonDocument[] = [
   ...secondBacPhilosophyLessons,
 ];
 
+const enrichLesson = (lesson: LessonDocument): LessonDocument => {
+  const masteryBlocks = mathMasteryExamples[lesson.id];
+  if (!masteryBlocks?.length) return lesson;
+
+  const recapIndex = lesson.blocks.findIndex((block) => block.type === "recap");
+  if (recapIndex === -1) {
+    return { ...lesson, blocks: [...lesson.blocks, ...masteryBlocks] };
+  }
+
+  return {
+    ...lesson,
+    blocks: [
+      ...lesson.blocks.slice(0, recapIndex),
+      ...masteryBlocks,
+      ...lesson.blocks.slice(recapIndex),
+    ],
+  };
+};
+
 export const lessonService = {
   list(subjectId?: SubjectId, trackId?: TrackId): LessonDocument[] {
-    return lessons.filter((lesson) => {
-      if (subjectId && lesson.subjectId !== subjectId) return false;
-      if (trackId === "SMB" && lesson.subjectId === "svt") return false;
-      return true;
-    });
+    return lessons
+      .filter((lesson) => {
+        if (subjectId && lesson.subjectId !== subjectId) return false;
+        if (trackId === "SMB" && lesson.subjectId === "svt") return false;
+        return true;
+      })
+      .map(enrichLesson);
   },
   getById(id: string): LessonDocument | null {
-    return lessons.find((lesson) => lesson.id === id) ?? null;
+    const lesson = lessons.find((item) => item.id === id);
+    return lesson ? enrichLesson(lesson) : null;
   },
 };
