@@ -76,6 +76,48 @@ function renderBlock(block: LessonBlock, index: number) {
   return <section key={key} className={`lesson-block lesson-block--${block.type}`}><h2>{block.title}</h2>{block.text && <p><LatexText>{block.text}</LatexText></p>}</section>;
 }
 
+function philosopherSticker(title: string) {
+  const philosophers = [
+    "جون لوك",
+    "شوبنهاور",
+    "كانط",
+    "غوسدورف",
+    "فرويد",
+    "سارتر",
+    "هيغل",
+    "هايدغر",
+    "بيرجي",
+    "جيل دولوز",
+    "كريستيفا",
+    "أرسطو",
+    "أفلاطون",
+    "سبينوزا",
+    "روسو",
+    "هوبز",
+    "مونتسكيو",
+    "نيتشه",
+    "ديكارت",
+    "باشلار",
+    "غاستون باشلار",
+  ];
+  return philosophers.find((name) => title.includes(name)) || "فيلسوف";
+}
+
+function renderArabicConceptCard(heading: LessonBlock, text: LessonBlock, index: number) {
+  const headingTitle = heading.title || heading.text || "";
+  return (
+    <section
+      key={`arabic-concept-${index}`}
+      className="lesson-block lesson-philosophy-card"
+      data-philosopher={philosopherSticker(headingTitle)}
+      aria-labelledby={`philosophy-card-title-${index}`}
+    >
+      <h2 id={`philosophy-card-title-${index}`}>{headingTitle}</h2>
+      <p><LatexText>{text.text || ""}</LatexText></p>
+    </section>
+  );
+}
+
 function renderArabicIntroCard(blocks: LessonBlock[]) {
   const titleBlock = blocks[0];
   const headingBlock = blocks[1];
@@ -92,6 +134,27 @@ function renderArabicIntroCard(blocks: LessonBlock[]) {
   );
 }
 
+function renderArabicBlocks(blocks: LessonBlock[]) {
+  const rendered: React.ReactNode[] = [];
+  let index = 0;
+
+  while (index < blocks.length) {
+    const block = blocks[index];
+    const next = blocks[index + 1];
+
+    if (block.type === "heading" && next?.type === "text") {
+      rendered.push(renderArabicConceptCard(block, next, index));
+      index += 2;
+      continue;
+    }
+
+    rendered.push(renderBlock(block, index));
+    index += 1;
+  }
+
+  return rendered;
+}
+
 export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
   const pages = lesson.blocks.filter((block) => block.type === "page").length;
   const isArabic = lesson.language === "ar";
@@ -106,7 +169,7 @@ export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
       data-page-count={pages}
     >
       {isArabicIntro && renderArabicIntroCard(lesson.blocks)}
-      {blocks.map((block, index) => renderBlock(block, index + (isArabicIntro ? 3 : 0)))}
+      {isArabic ? renderArabicBlocks(blocks) : blocks.map((block, index) => renderBlock(block, index))}
     </article>
   );
 }
