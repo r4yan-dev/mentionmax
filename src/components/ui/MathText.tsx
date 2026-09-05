@@ -59,8 +59,6 @@ function normalizeBound(value: string, map: Record<string, string>) {
 function normalizeIntegralText(text: string): string {
   let source = text;
 
-  // Definite integral with regular or Unicode bounds:
-  // ∫_a^b f(x) dx, ∫₀¹ x² dx, ∫{0}^{1} x^2 dx
   source = source.replace(
     /∫\s*(?:_\s*(\{[^}]+\}|[^\s^]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])(?=$|[.!?;,:])/g,
     (_match, lower: string | undefined, upper: string | undefined, body: string, variable: string) => {
@@ -69,7 +67,6 @@ function normalizeIntegralText(text: string): string {
     },
   );
 
-  // Same notation when the whole card ends immediately after dx/dt/etc.
   source = source.replace(
     /∫\s*(?:_\s*(\{[^}]+\}|[^\s^]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])$/g,
     (_match, lower: string | undefined, upper: string | undefined, body: string, variable: string) => {
@@ -78,21 +75,17 @@ function normalizeIntegralText(text: string): string {
     },
   );
 
-  // Unicode bound form that may not contain an explicit differential:
-  // ∫₀¹ x²
   source = source.replace(
     new RegExp(`∫([${SUB_CHARS}]+)([${SUP_CHARS}]+)\\s+([^.!?;\\n]+)`, "g"),
     (_match, lower: string, upper: string, body: string) =>
       `\\(\\int_{${normalizeBound(lower, SUB)}}^{${normalizeBound(upper, SUPER)}} ${normalizeAtom(body.trim())}\\)`,
   );
 
-  // Indefinite integral: ∫ f(x) dx
   source = source.replace(
     /∫\s+([^.!?;\n]+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/g,
     (_match, body: string, variable: string) => `\\(\\int ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
   );
 
-  // Textual French notation: intégrale de a à b de f(x) dx
   source = source.replace(
     /\bintegr(?:ale|al)\s+de\s+([^\s]+)\s+[àa]\s+([^\s]+)\s+(?:de\s+)?(.+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/gi,
     (_match, lower: string, upper: string, body: string, variable: string) =>
@@ -102,6 +95,26 @@ function normalizeIntegralText(text: string): string {
   return source;
 }
 
+function escapeText(value: string) {
+  return value
+    .replace(/\\/g, "\\textbackslash{}")
+    .replace(/[{}]/g, (char) => `\\${char}`)
+    .replace(/([#$%&_])/g, "\\$1")
+    .replace(/~/g, "\\textasciitilde{}");
+}
+
+function renderEverythingAsMathJax(text: string) {
+  const normalized = normalizeIntegralText(text);
+  const tokens = normalized.split(/(\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$)/g).filter(Boolean);
+
+  return tokens.map((token) => {
+    if (/^\\\[[\s\S]*\\\]$/.test(token) || /^\\\([\s\S]*\\\)$/.test(token) || /^\$\$[\s\S]*\$\$$/.test(token)) {
+      return token;
+    }
+    return `\\(\\text{${escapeText(token)}}\\)`;
+  }).join("");
+}
+
 export function MathText({ children, className }: { children: string; className?: string }) {
-  return <LatexText className={className}>{normalizeIntegralText(children)}</LatexText>;
+  return <LatexText className={className}>{renderEverythingAsMathJax(children)}</LatexText>;
 }
