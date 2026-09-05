@@ -1,0 +1,1 @@
+Implementation note: route should be registered in src/App.tsx.
