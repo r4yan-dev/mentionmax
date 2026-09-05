@@ -11,7 +11,7 @@ const SUB: Record<string, string> = {
   "ₐ": "a", "ₑ": "e", "ᵢ": "i", "ⱼ": "j", "ₖ": "k", "ₘ": "m",
 };
 
-const SUP_CHARS = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿ";
+const SUPER_CHARS = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿ";
 const SUB_CHARS = "₀₁₂₃₄₅₆₇₈₉₊₋ₙₐₑᵢⱼₖₘ";
 
 function unicodeIndex(value: string, map: Record<string, string>) {
@@ -22,7 +22,7 @@ function unicodeIndex(value: string, map: Record<string, string>) {
 
 function normalizeAtom(value: string) {
   return value
-    .replace(new RegExp(`([A-Za-z0-9)])([${SUP_CHARS}]+)`, "g"), (_m, base: string, power: string) => `${base}^{${unicodeIndex(power, SUPER)}}`)
+    .replace(new RegExp(`([A-Za-z0-9)])([${SUPER_CHARS}]+)`, "g"), (_m, base: string, power: string) => `${base}^{${unicodeIndex(power, SUPER)}}`)
     .replace(new RegExp(`([A-Za-z0-9)])([${SUB_CHARS}]+)`, "g"), (_m, base: string, index: string) => `${base}_{${unicodeIndex(index, SUB)}}`)
     .replace(/√\s*\(([^()]*)\)/g, "\\sqrt{$1}")
     .replace(/√\s*([A-Za-z0-9]+)/g, "\\sqrt{$1}")
@@ -52,38 +52,21 @@ function normalizeAtom(value: string) {
     .replace(/ℂ/g, "\\mathbb{C}");
 }
 
-function normalizeBound(value: string, map: Record<string, string>) {
-  return normalizeAtom(unicodeIndex(value.trim(), map));
-}
-
 function normalizeIntegralText(text: string): string {
   let source = text;
 
   source = source.replace(
     /∫\s*(?:_\s*(\{[^}]+\}|[^\s^]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])(?=$|[.!?;,:])/g,
     (_match, lower: string | undefined, upper: string | undefined, body: string, variable: string) => {
-      const bounds = `${lower ? `_{${normalizeBound(lower, SUB)}}` : ""}${upper ? `^{${normalizeBound(upper, SUPER)}}` : ""}`;
+      const bounds = `${lower ? `_{${unicodeIndex(lower.trim(), SUB)}}` : ""}${upper ? `^{${unicodeIndex(upper.trim(), SUPER)}}` : ""}`;
       return `\\(\\int${bounds} ${normalizeAtom(body.trim())}\\,d${variable}\\)`;
     },
   );
 
   source = source.replace(
-    /∫\s*(?:_\s*(\{[^}]+\}|[^\s^]+))?\s*(?:\^\s*(\{[^}]+\}|[^\s]+))?\s*([\s\S]*?)\s+d\s*([A-Za-z])$/g,
-    (_match, lower: string | undefined, upper: string | undefined, body: string, variable: string) => {
-      const bounds = `${lower ? `_{${normalizeBound(lower, SUB)}}` : ""}${upper ? `^{${normalizeBound(upper, SUPER)}}` : ""}`;
-      return `\\(\\int${bounds} ${normalizeAtom(body.trim())}\\,d${variable}\\)`;
-    },
-  );
-
-  source = source.replace(
-    new RegExp(`∫([${SUB_CHARS}]+)([${SUP_CHARS}]+)\\s+([^.!?;\\n]+)`, "g"),
+    /∫([₀₁₂₃₄₅₆₇₈₉₊₋ₙ]+)([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿ]+)\s+([^.!?;\n]+)/g,
     (_match, lower: string, upper: string, body: string) =>
-      `\\(\\int_{${normalizeBound(lower, SUB)}}^{${normalizeBound(upper, SUPER)}} ${normalizeAtom(body.trim())}\\)`,
-  );
-
-  source = source.replace(
-    /∫\s+([^.!?;\n]+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/g,
-    (_match, body: string, variable: string) => `\\(\\int ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
+      `\\(\\int_{${unicodeIndex(lower, SUB)}}^{${unicodeIndex(upper, SUPER)}} ${normalizeAtom(body.trim())}\\)`,
   );
 
   source = source.replace(
@@ -92,29 +75,43 @@ function normalizeIntegralText(text: string): string {
       `\\(\\int_{${normalizeAtom(lower)}}^{${normalizeAtom(upper)}} ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
   );
 
+  source = source.replace(
+    /∫\s+([^.!?;\n]+?)\s+d\s*([A-Za-z])(?=$|[.!?;])/g,
+    (_match, body: string, variable: string) => `\\(\\int ${normalizeAtom(body.trim())}\\,d${variable}\\)`,
+  );
+
   return source;
 }
 
-function escapeText(value: string) {
+function escapeLatexText(value: string): string {
   return value
     .replace(/\\/g, "\\textbackslash{}")
-    .replace(/[{}]/g, (char) => `\\${char}`)
-    .replace(/([#$%&_])/g, "\\$1")
-    .replace(/~/g, "\\textasciitilde{}");
+    .replace(/([#$%&_{}])/g, "\\$1")
+    .replace(/~/g, "\\textasciitilde{}")
+    .replace(/\^/g, "\\textasciicircum{}");
 }
 
-function renderEverythingAsMathJax(text: string) {
+function wholeCardAsLatex(text: string): string {
   const normalized = normalizeIntegralText(text);
-  const tokens = normalized.split(/(\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$)/g).filter(Boolean);
+  const parts: string[] = [];
+  let cursor = 0;
+  const mathPattern = /\\\(([\s\S]*?)\\\)/g;
+  let match: RegExpExecArray | null;
 
-  return tokens.map((token) => {
-    if (/^\\\[[\s\S]*\\\]$/.test(token) || /^\\\([\s\S]*\\\)$/.test(token) || /^\$\$[\s\S]*\$\$$/.test(token)) {
-      return token;
-    }
-    return `\\(\\text{${escapeText(token)}}\\)`;
-  }).join("");
+  while ((match = mathPattern.exec(normalized)) !== null) {
+    const prose = normalized.slice(cursor, match.index);
+    if (prose) parts.push(`\\text{${escapeLatexText(prose)}}`);
+    parts.push(match[1]);
+    cursor = match.index + match[0].length;
+  }
+
+  const remaining = normalized.slice(cursor);
+  if (remaining) parts.push(`\\text{${escapeLatexText(remaining)}}`);
+
+  const content = parts.length ? parts.join(" \\quad ") : `\\text{${escapeLatexText(text)}}`;
+  return `\\[\\begin{gathered}${content}\\end{gathered}\\]`;
 }
 
 export function MathText({ children, className }: { children: string; className?: string }) {
-  return <LatexText className={className}>{renderEverythingAsMathJax(children)}</LatexText>;
+  return <LatexText className={className}>{wholeCardAsLatex(children)}</LatexText>;
 }
