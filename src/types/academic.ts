@@ -12,11 +12,11 @@ export interface StudentKnowledgeState { studentId: string; subjectId: SubjectId
 export interface StudentProfile { id: string; displayName: string; avatarUrl: string | null; trackId: TrackId; city: string | null; school: string | null; className: string | null; targetScore: number | null; bacDate: string; }
 
 export interface LessonBlock {
-  type: "title" | "page" | "intro" | "concept" | "definition" | "theorem" | "formula" | "method" | "example" | "worked-solution" | "warning" | "common-mistake" | "exam-tip" | "diagram" | "graph" | "comparison" | "exercise" | "recap" | "annotation" | "highlight" | "animation" | "interactive";
+  type: "title" | "page" | "intro" | "concept" | "definition" | "theorem" | "formula" | "method" | "example" | "worked-solution" | "warning" | "common-mistake" | "exam-tip" | "diagram" | "graph" | "comparison" | "exercise" | "recap" | "annotation" | "highlight" | "animation" | "interactive" | "text" | "heading";
   text?: string;
   latex?: string;
   title?: string;
   items?: string[];
   data?: Record<string, unknown>;
 }
-export interface LessonDocument { id: string; title: string; language: "fr"; source: ContentSource; subjectId: SubjectId; chapter: string; topic: string; blocks: LessonBlock[]; }
+export interface LessonDocument { id: string; title: string; language: "fr" | "ar"; source: ContentSource; subjectId: SubjectId; chapter: string; topic: string; blocks: LessonBlock[]; }
