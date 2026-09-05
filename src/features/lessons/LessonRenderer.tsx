@@ -2,21 +2,56 @@ import { LatexText } from "../../components/ui/LatexText";
 import type { LessonBlock, LessonDocument } from "../../types/academic";
 import "./lesson-renderer.css";
 
+function VisualBlock({ type, title }: { type: "graph" | "diagram"; title?: string }) {
+  if (type === "graph") {
+    return (
+      <div className="lesson-visual" aria-label={title || "Graphique"}>
+        <svg viewBox="0 0 620 260" role="img" aria-hidden="true">
+          <path className="axis" d="M45 220H580M70 235V28" />
+          <path className="accent" d="M92 188 C150 170 180 110 232 104 C280 98 302 166 346 155 C395 143 407 82 458 78 C500 74 520 110 555 48" />
+          <path className="curve" d="M92 205 C140 185 172 145 212 139 C260 132 285 188 326 178 C372 167 396 111 445 105 C493 100 520 140 555 73" />
+          <path className="accent" d="M70 88H575M70 145H575" opacity=".18" />
+          <circle className="point" cx="445" cy="105" r="8" />
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <div className="lesson-visual" aria-label={title || "Schéma"}>
+      <svg viewBox="0 0 620 240" role="img" aria-hidden="true">
+        <path className="axis" d="M70 120H550" />
+        <path className="accent" d="M120 72 C185 72 182 168 250 168 C318 168 310 72 380 72 C447 72 440 168 510 168" />
+        <circle className="point" cx="250" cy="168" r="8" />
+        <circle className="point" cx="380" cy="72" r="8" />
+        <path className="curve" d="M120 120 H250 M380 120 H510" />
+      </svg>
+    </div>
+  );
+}
+
 function renderBlock(block: LessonBlock, index: number) {
   const key = `${block.type}-${index}`;
 
   if (block.type === "title") return <h1 key={key}>{block.title || block.text}</h1>;
-  if (block.type === "page") return <header key={key} className="lesson-page-break"><span>{block.title}</span><p>{block.text}</p></header>;
+  if (block.type === "page") return <header key={key} className="lesson-page-break"><span>{block.title}</span><p>{block.text ? <LatexText>{block.text}</LatexText> : null}</p></header>;
 
-  // Formula blocks contain raw LaTeX and are always rendered as display math.
-  // The explicit delimiters make strings such as `\\frac{a}{b}` render correctly
-  // even when the content source does not include $$...$$ itself.
   if (block.type === "formula") {
     const latex = block.latex?.trim() || block.text?.trim() || "";
     return (
-      <div key={key} className="lesson-block lesson-formula" role="math" aria-label="Formule">
+      <div key={key} className="lesson-formula" role="math" aria-label="Formule">
         <LatexText display>{latex}</LatexText>
       </div>
+    );
+  }
+
+  if (block.type === "graph" || block.type === "diagram") {
+    return (
+      <section key={key} className={`lesson-block lesson-block--${block.type}`}>
+        {block.title && <h2>{block.title}</h2>}
+        {block.text && <p><LatexText>{block.text}</LatexText></p>}
+        <VisualBlock type={block.type} title={block.title} />
+      </section>
     );
   }
 
