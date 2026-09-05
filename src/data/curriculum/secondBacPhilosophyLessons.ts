@@ -12,7 +12,7 @@ type Axis = {
 const makeLesson = ({ id, chapter, title, question, positions, recap }: Axis): LessonDocument => ({
   id,
   title: `${title} — ${chapter}`,
-  language: "fr",
+  language: "ar",
   source: "APPROVED",
   subjectId: "philosophie",
   chapter,
@@ -20,144 +20,160 @@ const makeLesson = ({ id, chapter, title, question, positions, recap }: Axis): L
   blocks: [
     { type: "title", title: `${title} — ${chapter}` },
     { type: "intro", text: question },
-    { type: "concept", title: "Problématique", text: question },
-    { type: "comparison", title: "Positions philosophiques", items: positions },
-    { type: "method", title: "Méthode Bac", text: "Définis les notions, pose clairement le problème, expose les thèses en présence, puis confronte-les avec des arguments et des exemples précis." },
-    { type: "common-mistake", title: "Erreur fréquente", text: "Réciter les philosophes sans expliquer leur réponse à la problématique. Chaque référence doit soutenir une idée." },
-    { type: "exam-tip", title: "Réflexe Bac", text: "Mémorise pour chaque philosophe : sa thèse, son argument central et le point précis de la problématique auquel il répond." },
-    { type: "recap", title: "À retenir", items: recap },
+    { type: "concept", title: "الإشكالية", text: question },
+    { type: "comparison", title: "مواقف الفلاسفة", items: positions },
+    { type: "method", title: "منهجية البكالوريا", text: "حدد المفاهيم، اطرح الإشكال بوضوح، اعرض مواقف الفلاسفة وحججهم، ثم قارن بينها واربطها بالإشكالية قبل تركيب خلاصة شخصية معللة." },
+    { type: "common-mistake", title: "خطأ شائع", text: "لا تكتف بذكر أسماء الفلاسفة؛ اشرح أطروحة كل موقف وعلاقته المباشرة بالإشكالية." },
+    { type: "exam-tip", title: "نصيحة للبكالوريا", text: "احفظ لكل فيلسوف ثلاثة عناصر: الأطروحة، الحجة الأساسية، والجواب الذي يقدمه عن الإشكالية." },
+    { type: "recap", title: "خلاصة", items: recap },
   ],
 });
 
 export const secondBacPhilosophyLessons: LessonDocument[] = [
-  makeLesson({ id: "2bac-philo-person-identity", chapter: "Le sujet humain — La personne", title: "Axe 1 : L'identité de la personne", question: "Sur quoi se fonde l'identité de la personne ? L'identité personnelle est-elle fixe ou changeante ?", positions: [
-    "Jules Lachelier : l'identité de la personne est changeante ; elle repose sur la permanence du caractère et la continuité des souvenirs, puisque les événements qui constituent les souvenirs se renouvellent et s'enchaînent.",
-    "Sigmund Freud : l'identité est en changement permanent et reste instable en raison de la dynamique du conflit entre le surmoi, le ça et le moi dans l'appareil psychique.",
-    "John Locke : le fondement de l'identité personnelle est la conscience et la mémoire ; elles font de l'individu un être rationnel qui demeure lui-même malgré les changements.",
-    "René Descartes : l'identité de la personne se fonde sur la pensée qui rend le sujet identique à lui-même ; elle est stable avec la permanence de la raison.",
-    "Arthur Schopenhauer : l'identité se détermine par la volonté, qui demeure constante et assure la continuité de l'individu.",
-  ], recap: ["Identité entre permanence et changement", "Conscience et mémoire", "Pensée et raison", "Volonté", "Dynamique psychique"] }),
-  makeLesson({ id: "2bac-philo-person-value", chapter: "Le sujet humain — La personne", title: "Axe 2 : La valeur de la personne", question: "D'où la personne tire-t-elle sa valeur ? Est-elle un moyen ou une fin ? Sa valeur est-elle relative ou absolue ?", positions: [
-    "Friedrich Hegel : la valeur des personnes dépend de leur contribution à l'histoire, qui peut utiliser les individus comme des moyens pour réaliser ses objectifs.",
-    "Emmanuel Kant : la personne est une fin en soi parce qu'elle est un sujet doué d'une raison pratique et morale ; elle ne peut donc pas être traitée comme un simple moyen et doit être respectée.",
-    "Georges Gusdorf : la solidarité et la coexistence fondent la valeur et l'accomplissement de la personne ; son existence se réalise par la participation à la vie des autres, l'appartenance au groupe et l'acceptation d'autrui.",
-  ], recap: ["Personne comme moyen ou comme fin", "Respect et dignité", "Valeur historique", "Solidarité et coexistence"] }),
-  makeLesson({ id: "2bac-philo-person-freedom", chapter: "Le sujet humain — La personne", title: "Axe 3 : La personne entre nécessité et liberté", question: "La personne est-elle un sujet libre ou un être soumis à des nécessités et à des déterminismes ?", positions: [
-    "Jean-Paul Sartre : la personne est un projet libre ; l'existence précède l'essence, elle se dépasse constamment et peut transcender les situations qui semblent la déterminer à l'avance.",
-    "Baruch Spinoza : la personne n'est pas libre dans ses choix et ses actions ; elle est soumise aux nécessités de la nature qui déterminent son agir.",
-    "Sigmund Freud : la personne n'est pas libre en elle-même en raison des déterminismes biologiques et psychologiques qui influencent son comportement.",
-  ], recap: ["Liberté comme projet", "Nécessité de la nature", "Déterminismes biologiques et psychologiques", "Limites du choix"] }),
+  makeLesson({ id: "2bac-philo-person-identity", chapter: "مجزوءة الوضع البشري — مفهوم الشخص", title: "المحور الأول: هوية الشخص", question: "على ماذا تتأسس هوية الشخص؟ وهل هوية الشخص ثابتة أم متغيرة؟", positions: [
+    "جول لاشوليي: هوية الشخص متغيرة، وأساسها دوام نفس الطبع وترابط الذكريات، لأن الأحداث التي تشكل الذكريات تتجدد وتتسلسل.",
+    "سيغموند فرويد: هوية الشخص دائمة التغير وغير مستقرة بسبب دينامية الصراع بين الأنا الأعلى والهو والأنا داخل الجهاز النفسي.",
+    "جون لوك: أساس الهوية الشخصية هو الشعور والذاكرة، وهما ما يجعلان الشخص كائنا عاقلا يبقى هو نفسه رغم التغير.",
+    "رونيه ديكارت: هوية الشخص تتأسس على التفكير الذي يجعل الذات مطابقة لذاتها، وهي هوية ثابتة بثبات العقل.",
+    "آرثر شوبنهاور: هوية الشخص تتحدد بالإرادة التي لا تتغير، وتضمن استمرارية الفرد.",
+  ], recap: ["الهوية بين الثبات والتغير", "الشعور والذاكرة", "التفكير والعقل", "الإرادة", "دينامية الجهاز النفسي"] }),
 
-  makeLesson({ id: "2bac-philo-other-existence", chapter: "Le sujet humain — Autrui", title: "Axe 1 : L'existence d'autrui", question: "L'existence d'autrui est-elle nécessaire à l'existence du moi ou constitue-t-elle une menace pour lui ?", positions: [
-    "Jean-Paul Sartre : l'existence d'autrui est ambivalente, à la fois positive et négative ; autrui est une source de relation mais aussi de conflit et de menace pour le moi.",
-    "Friedrich Hegel : autrui est nécessaire au moi pour prendre conscience de lui-même ; les deux sont inséparables, comme le montre la dialectique du maître et de l'esclave.",
-    "René Descartes : le sujet n'a pas besoin d'autrui pour se connaître ou atteindre la vérité de son existence, puisqu'il dispose de la raison ; le cogito en constitue l'exemple : « Je pense, donc je suis ».",
-    "Martin Heidegger : l'existence d'autrui peut menacer l'existence du moi, qui risque de se disperser et de se dissoudre dans l'existence quotidienne.",
-  ], recap: ["Autrui et conscience de soi", "Reconnaissance et conflit", "Autonomie du cogito", "Menace et dissolution du moi"] }),
-  makeLesson({ id: "2bac-philo-other-knowledge", chapter: "Le sujet humain — Autrui", title: "Axe 2 : La connaissance d'autrui", question: "Sur quoi se fonde la connaissance d'autrui ? Est-elle possible ou impossible ?", positions: [
-    "Nicolas Malebranche : la connaissance d'autrui se fonde sur la supposition et la conjecture, puisque les sensations, émotions et inclinations du moi diffèrent de celles d'autrui.",
-    "Gaston Berger : la connaissance d'autrui est impossible en raison de l'isolement du moi et de son monde intérieur ; un mur sépare le moi d'autrui.",
-    "Max Scheler : la connaissance d'autrui est possible en considérant l'unité de l'être humain ; l'apparence extérieure peut être la traduction de l'intériorité.",
-    "Maurice Merleau-Ponty : la connaissance d'autrui est possible grâce à l'ouverture, à l'empathie et à la communication.",
-  ], recap: ["Supposition et conjecture", "Isolement du moi", "Expression de l'intériorité", "Empathie et communication"] }),
-  makeLesson({ id: "2bac-philo-other-relation", chapter: "Le sujet humain — Autrui", title: "Axe 3 : La relation à autrui", question: "Quelle est la nature de la relation à autrui ? Est-elle fondée sur l'amitié ou sur le conflit ?", positions: [
-    "Aristote : la relation à autrui est positive et repose sur une amitié fondée sur la vertu ; elle est nécessaire à la vie commune et favorise la coopération.",
-    "Emmanuel Kant : l'amitié est la plus haute des relations humaines, car elle repose sur le respect mutuel et la bonne volonté ; elle constitue un devoir moral.",
-    "Alexandre Kojève : la relation à autrui est un conflit pour obtenir la reconnaissance et imposer sa domination.",
-    "Julia Kristeva : autrui est l'étranger qui habite le sujet ; il est présent dans les profondeurs de la subjectivité.",
-  ], recap: ["Amitié et vertu", "Respect mutuel", "Lutte pour la reconnaissance", "L'étranger en soi"] }),
+  makeLesson({ id: "2bac-philo-person-value", chapter: "مجزوءة الوضع البشري — مفهوم الشخص", title: "المحور الثاني: قيمة الشخص", question: "من أين يستمد الشخص قيمته؟ هل باعتباره وسيلة أم غاية؟ وهل قيمته نسبية أم مطلقة؟", positions: [
+    "فريدريك هيغل: قيمة الأشخاص مرتبطة بمدى إسهامهم في التاريخ، والتاريخ قد يتخذ الأفراد مجرد وسائل لتحقيق أهدافه.",
+    "إمانويل كانط: الشخص غاية في ذاته لكونه ذاتا لعقل عملي أخلاقي، ولذلك لا يجوز معاملته كوسيلة فقط، بل يجب احترامه.",
+    "جورج غوسدورف: التضامن والتعايش أساس قيمة الشخص وكماله؛ فالوجود الشخصي يتحقق بمشاركة الآخرين حياتهم والتواجد داخل الجماعة وقبول الغير.",
+  ], recap: ["الشخص كغاية لا كوسيلة", "الاحترام والكرامة", "القيمة التاريخية", "التضامن والتعايش"] }),
 
-  makeLesson({ id: "2bac-philo-theory-experiment", chapter: "La connaissance — Théorie et expérience", title: "Axe 1 : Expérience et expérimentation", question: "Quelle différence entre expérience et expérimentation ? Les théories scientifiques se fondent-elles sur l'expérience ou sur l'expérimentation ?", positions: [
-    "Claude Bernard : les théories scientifiques se fondent sur l'expérimentation, qui recrée les conditions de la phénomènes selon les étapes : observation, hypothèse, expérimentation, loi.",
-    "René Thom : la science ne peut être réduite à l'expérience empirique ; elle doit aussi s'ouvrir à l'expérience imaginaire et mentale.",
-  ], recap: ["Expérience et expérimentation", "Observation", "Hypothèse", "Expérimentation", "Loi scientifique", "Expérience mentale"] }),
-  makeLesson({ id: "2bac-philo-scientific-rationality", chapter: "La connaissance — Théorie et expérience", title: "Axe 2 : La rationalité scientifique", question: "Quel rôle la raison joue-t-elle dans la construction des théories scientifiques ? Repose-t-elle sur une rationalité idéale ou ouverte au réel ?", positions: [
-    "Albert Einstein : la science moderne accorde une place décisive à la construction rationnelle ; la connaissance ne dépend pas simplement des données de l'expérience, mais aussi de l'activité créatrice de la raison.",
-    "Gaston Bachelard : la rationalité scientifique se construit dans un dialogue ouvert entre la raison et l'expérience pour produire une connaissance objective.",
-    "Hans Reichenbach : la rationalité scientifique mathématique remplace la simple perception sensible par la compréhension rationnelle des relations formelles.",
-  ], recap: ["Primauté de la raison", "Dialogue raison-expérience", "Construction mathématique", "Connaissance objective"] }),
-  makeLesson({ id: "2bac-philo-scientific-criteria", chapter: "La connaissance — Théorie et expérience", title: "Axe 3 : Les critères de scientificité des théories", question: "Quels sont les critères de scientificité des théories scientifiques ? Leur validité dépend-elle de la critique ou de leur possibilité d'être réfutées ?", positions: [
-    "Ibn al-Haytham : la critique constructive constitue un critère essentiel pour vérifier et évaluer une théorie scientifique.",
-    "Karl Popper : le critère fondamental de scientificité est la falsifiabilité, c'est-à-dire la possibilité de mettre la théorie à l'épreuve par des observations susceptibles de la réfuter.",
-  ], recap: ["Critique constructive", "Test scientifique", "Falsifiabilité", "Réfutation", "Validité"] }),
+  makeLesson({ id: "2bac-philo-person-freedom", chapter: "مجزوءة الوضع البشري — مفهوم الشخص", title: "المحور الثالث: الشخص بين الضرورة والحرية", question: "هل الشخص ذات حرة أم كيان خاضع لضرورات وحتميات متحكمة فيه؟", positions: [
+    "جان بول سارتر: الشخص مشروع حر؛ وجوده يسبق ماهيته، وهو دائم التجاوز وقادر على التعالي عن الوضعيات المحددة سلفا.",
+    "باروخ اسبينوزا: الشخص ليس حرا في اختياراته وأفعاله، بل يخضع لضرورات الطبيعة التي تحدد أفعاله.",
+    "سيغموند فرويد: الشخص غير حر بشكل مطلق بفعل الحتميات البيولوجية والسيكولوجية المؤثرة في سلوكه.",
+  ], recap: ["الحرية كمشروع", "ضرورة الطبيعة", "الحتميات النفسية والبيولوجية", "حدود الاختيار"] }),
 
-  makeLesson({ id: "2bac-philo-truth-opinion", chapter: "La connaissance — La vérité", title: "Axe 1 : Opinion et vérité", question: "Quelle est la relation entre opinion et vérité ? L'opinion fonde-t-elle la vérité ou constitue-t-elle un obstacle ?", positions: [
-    "Gaston Bachelard : l'opinion est un obstacle épistémologique au savoir scientifique ; il faut la dépasser par une recherche méthodique.",
-    "René Descartes : il faut rompre avec l'opinion et reconstruire la vérité par une méthode rationnelle fondée sur l'examen et l'évidence.",
-    "Gottfried Wilhelm Leibniz : malgré son caractère probable, l'opinion peut jouer un rôle productif dans l'histoire des idées en ouvrant des pistes de réflexion.",
-  ], recap: ["Opinion comme obstacle", "Rupture méthodique", "Construction rationnelle", "Rôle heuristique de l'opinion"] }),
-  makeLesson({ id: "2bac-philo-truth-criteria", chapter: "La connaissance — La vérité", title: "Axe 2 : Les critères de la vérité", question: "Comment peut-on reconnaître la vérité ? Son critère est-il logique, expérimental ou les deux à la fois ?", positions: [
-    "René Descartes : l'intuition intellectuelle et la déduction sont deux critères rationnels permettant d'atteindre la vérité.",
-    "David Hume : il faut distinguer les vérités de raison, fondées sur les relations entre idées, et les vérités de fait, qui dépendent de l'expérience.",
-    "Michel Foucault : la vérité est aussi liée au pouvoir, car elle est produite et diffusée par des dispositifs et des institutions qui déterminent ce qui est reconnu comme vrai.",
-  ], recap: ["Intuition", "Déduction", "Vérité de raison", "Vérité de fait", "Pouvoir et production du vrai"] }),
-  makeLesson({ id: "2bac-philo-truth-value", chapter: "La connaissance — La vérité", title: "Axe 3 : La valeur de la vérité", question: "D'où la vérité tire-t-elle sa valeur ? Est-elle une fin en soi ou seulement un moyen ?", positions: [
-    "Emmanuel Kant : la vérité possède une valeur morale, car elle est liée à l'exigence du devoir et à l'usage responsable de la raison.",
-    "William James : la valeur d'une vérité se mesure aussi aux conséquences utiles qu'elle peut produire pour répondre aux besoins des individus.",
-    "Friedrich Nietzsche : la vérité comporte une dimension vitale ; elle peut être liée à la conservation et à l'affirmation de la vie.",
-  ], recap: ["Valeur morale", "Utilité et conséquences", "Vérité et vie", "Fin ou moyen"] }),
+  makeLesson({ id: "2bac-philo-other-existence", chapter: "مجزوءة الوضع البشري — مفهوم الغير", title: "المحور الأول: وجود الغير", question: "هل وجود الغير ضروري لوجود الأنا أم أنه يشكل تهديدا لها؟", positions: [
+    "جان بول سارتر: وجود الغير مزدوج، إيجابي وسلبي؛ فهو شرط للعلاقة لكنه قد يكون مصدرا للصراع والتهديد.",
+    "فريدريك هيغل: الغير ضروري للأنا لكي تمارس وعيها بذاتها؛ لا يستغني أحدهما عن الآخر، كما يظهر في جدلية السيد والعبد.",
+    "رونيه ديكارت: الذات لا تحتاج إلى الغير لمعرفة ذاتها أو حقيقة وجودها ما دامت تمتلك العقل، ويتجلى ذلك في الكوجيطو: أنا أفكر إذن أنا موجود.",
+    "مارتن هايدغر: وجود الغير قد يشكل تهديدا للأنا لأنها معرضة للتشظي والذوبان في الوجود اليومي.",
+  ], recap: ["الغير والوعي بالذات", "الاعتراف والصراع", "استقلال الذات في الكوجيطو", "تهديد الذات وذوبانها"] }),
 
-  makeLesson({ id: "2bac-philo-state-legitimacy", chapter: "La politique — L'État", title: "Axe 1 : Légitimité et finalités de l'État", question: "Quelle est la finalité de l'État ? D'où tire-t-il sa légitimité ?", positions: [
-    "Baruch Spinoza : l'État a pour finalité de garantir la liberté des individus et de leur permettre de conserver leur droit naturel à l'existence.",
-    "Thomas Hobbes : l'État vise la paix et la sécurité, à condition que les individus transfèrent leur droit naturel à une autorité souveraine chargée d'assurer l'ordre.",
-    "Max Weber : la légitimité de l'État repose sur trois types de domination : traditionnelle, charismatique et légale-rationnelle.",
-  ], recap: ["Liberté", "Paix et sécurité", "Souveraineté", "Légitimité traditionnelle", "Légitimité charismatique", "Légitimité légale-rationnelle"] }),
-  makeLesson({ id: "2bac-philo-state-authority", chapter: "La politique — L'État", title: "Axe 2 : La nature du pouvoir politique", question: "Le pouvoir politique est-il transcendant aux individus ou immanent à la société ?", positions: [
-    "Louis Althusser : le pouvoir politique peut être autoritaire et s'appuyer sur des appareils répressifs et idéologiques qui reproduisent l'ordre social.",
-    "Montesquieu : la concentration des pouvoirs dans une seule main produit l'arbitraire ; il faut séparer les pouvoirs afin que l'autorité appartienne aux institutions.",
-    "Ibn Khaldoun : lorsque le souverain est despotique, le pouvoir devient arbitraire et la justice disparaît ; le gouvernement doit rechercher la mesure et la modération.",
-    "Michel Foucault : le pouvoir circule dans la société et ne se réduit pas à une autorité centralisée ; il se manifeste dans les pratiques et les relations.",
-  ], recap: ["Appareils répressifs et idéologiques", "Séparation des pouvoirs", "Justice et modération", "Pouvoir diffus dans la société"] }),
-  makeLesson({ id: "2bac-philo-state-right-force", chapter: "La politique — L'État", title: "Axe 3 : L'État entre droit et violence", question: "Comment l'État exerce-t-il son pouvoir : par le droit, par la force, ou par les deux ?", positions: [
-    "Max Weber : l'État détient le monopole de l'usage légitime de la violence physique afin de faire respecter l'ordre juridique.",
-    "Nicolas Machiavel : le pouvoir de l'État doit savoir combiner force et stratégie ; le prince peut utiliser des moyens légitimes ou illégitimes selon les nécessités de la conservation du pouvoir.",
-    "Jacqueline Russ : l'État contemporain doit être un pouvoir rationalisé et moral, soumis au respect de la personne, de ses droits et de sa dignité.",
-    "Abdallah Laroui : l'État despotique est l'opposé de l'État de droit ; il repose sur la domination et manque de légitimité et de consensus.",
-  ], recap: ["Violence légitime", "Force et stratégie", "État de droit", "Droits et dignité", "Légitimité"] }),
+  makeLesson({ id: "2bac-philo-other-knowledge", chapter: "مجزوءة الوضع البشري — مفهوم الغير", title: "المحور الثاني: معرفة الغير", question: "على ماذا تتأسس معرفة الغير؟ وهل معرفة الغير ممكنة أم مستحيلة؟", positions: [
+    "نيكولا مالبرانش: معرفة الغير تتأسس على الافتراض والتخمين، لأن أحاسيس وانفعالات وميولات الأنا تختلف عن أحاسيس الغير.",
+    "غاستون بيرجي: معرفة الغير غير ممكنة بسبب عزلة الأنا وانطوائها على عالمها الخاص، وبين الأنا والغير جدار يصعب تجاوزه.",
+    "ماكس شيلر: معرفة الغير ممكنة إذا نظرنا إلى الإنسان باعتباره وحدة واحدة؛ فالظاهر يمكن أن يكون ترجمة للباطن.",
+    "موريس ميرلوبونتي: معرفة الغير ممكنة بفضل الانفتاح والتعاطف والتواصل معه.",
+  ], recap: ["الافتراض والتخمين", "عزلة الأنا", "الظاهر وترجمة الباطن", "التعاطف والتواصل"] }),
 
-  makeLesson({ id: "2bac-philo-right-natural-positive", chapter: "La politique — Le droit et la justice", title: "Axe 1 : Droit naturel et droit positif", question: "La justice est-elle liée au droit naturel ou au droit positif ?", positions: [
-    "Thomas Hobbes : le droit naturel est la liberté fondamentale d'agir selon la nature et les désirs de l'individu ; il entre en tension avec le droit positif, qui impose des règles communes.",
-    "Jean-Jacques Rousseau : le droit est d'origine civile et politique ; il se fonde sur le contrat social et la volonté générale, sources des droits civils.",
-  ], recap: ["Droit naturel", "Liberté", "Droit positif", "Contrat social", "Volonté générale"] }),
-  makeLesson({ id: "2bac-philo-justice-right", chapter: "La politique — Le droit et la justice", title: "Axe 2 : La justice comme fondement du droit", question: "Quel rapport existe-t-il entre justice et droit ? Lequel fonde l'autre ? Toute loi garantit-elle les droits ?", positions: [
-    "Aristote : la justice est une vertu qui consiste à agir conformément aux lois justes et permet de garantir les droits.",
-    "Baruch Spinoza : la justice réalise le droit ; il n'existe pas de droit effectif en dehors de l'ordre juridique de l'État.",
-    "Cicéron : une loi peut devenir un instrument dangereux de privation des droits lorsqu'elle est injuste ; il faut se référer à la justice comme sentiment naturel commun.",
-  ], recap: ["Justice comme vertu", "Droit et ordre juridique", "Limites de la loi", "Justice naturelle"] }),
-  makeLesson({ id: "2bac-philo-justice-equality-equity", chapter: "La politique — Le droit et la justice", title: "Axe 3 : La justice entre égalité et équité", question: "Quel est le but de la justice ? Consiste-t-elle dans l'égalité ou dans l'équité ?", positions: [
-    "Platon : la justice réalise l'harmonie entre les forces de l'âme et, dans la cité, lorsque chacun accomplit la fonction qui lui revient selon sa nature.",
-    "Alain (Émile Chartier) : on ne peut parler de justice sans une égalité aussi complète que possible entre les personnes ; les fortes différences sociales compromettent la justice.",
-    "Max Scheler : les êtres humains ne naissent pas identiques et ne vivent pas dans les mêmes situations ; la justice exige donc l'équité plutôt qu'une égalité mécanique.",
-    "John Rawls : la justice repose sur l'équité ; les inégalités ne sont admissibles que si elles améliorent la situation des plus défavorisés.",
-  ], recap: ["Harmonie", "Égalité", "Équité", "Inégalités", "Justice comme équité"] }),
+  makeLesson({ id: "2bac-philo-other-relation", chapter: "مجزوءة الوضع البشري — مفهوم الغير", title: "المحور الثالث: العلاقة مع الغير", question: "ما طبيعة العلاقة مع الغير؟ هل هي علاقة صداقة أم صراع؟", positions: [
+    "أرسطو: العلاقة مع الغير إيجابية وقائمة على الصداقة المبنية على الفضيلة، وهي ضرورية للحياة المشتركة.",
+    "إمانويل كانط: الصداقة أسمى العلاقات الإنسانية لأنها قائمة على الاحترام المتبادل والإرادة الخيرة، وهي واجب أخلاقي.",
+    "ألكسندر كوجيف: العلاقة مع الغير علاقة صراع من أجل نيل الاعتراف وفرض الهيمنة.",
+    "جوليا كريستيفا: الغير هو الغريب الذي يسكن الذات، فهو يوجد في ثنايا الذات وليس خارجها فقط.",
+  ], recap: ["الصداقة والفضيلة", "الاحترام المتبادل", "الصراع من أجل الاعتراف", "الغريب الذي يسكن الذات"] }),
 
-  makeLesson({ id: "2bac-philo-duty-coercion", chapter: "L'éthique — Le devoir", title: "Axe 1 : Devoir et contrainte", question: "Le devoir provient-il d'une volonté libre ou d'un acte soumis à la nécessité et à la contrainte ?", positions: [
-    "Emmanuel Kant : le devoir moral est une obligation qui s'impose à la raison pratique et se réalise par une volonté bonne et libre.",
-    "Émile Durkheim : le devoir moral est obligatoire parce qu'il est issu de la conscience collective et des normes sociales, tout en pouvant être intériorisé comme souhaitable.",
-  ], recap: ["Obligation morale", "Raison pratique", "Volonté libre", "Conscience collective", "Normes sociales"] }),
-  makeLesson({ id: "2bac-philo-moral-consciousness", chapter: "L'éthique — Le devoir", title: "Axe 2 : La conscience morale", question: "La conscience morale vient-elle de la nature ou de la culture et de la société ?", positions: [
-    "Sigmund Freud : la conscience morale dépend du surmoi, instance psychique qui intériorise l'autorité et permet d'évaluer le comportement humain.",
-    "Jean-Jacques Rousseau : la conscience morale possède une origine naturelle et spontanée ; elle permet de porter des jugements sur les conduites humaines.",
-  ], recap: ["Surmoi", "Intériorisation de l'autorité", "Origine psychique", "Origine naturelle"] }),
-  makeLesson({ id: "2bac-philo-duty-society", chapter: "L'éthique — Le devoir", title: "Axe 3 : Le devoir et la société", question: "Comment le devoir reflète-t-il les valeurs de la société ? Vient-il de la conscience individuelle ou de la conscience sociale ?", positions: [
-    "Émile Durkheim : la société est la source principale du devoir moral ; par son autorité, elle inscrit dans la conscience individuelle ce qu'il faut faire.",
-    "Max Weber : le devoir peut être lié à une éthique de conviction fondée sur des principes religieux ou idéologiques, mais aussi à une éthique de responsabilité attentive aux conséquences de l'action.",
-    "John Rawls : le devoir moral possède une portée universelle et humaine, notamment à travers la solidarité envers les générations futures.",
-  ], recap: ["Société comme source du devoir", "Éthique de conviction", "Éthique de responsabilité", "Universalité", "Solidarité intergénérationnelle"] }),
+  makeLesson({ id: "2bac-philo-theory-experiment", chapter: "مجزوءة المعرفة — مفهوما النظرية والتجربة", title: "المحور الأول: التجربة والتجريب", question: "ما الفرق بين التجربة والتجريب؟ وهل تتأسس النظريات العلمية على التجربة أم التجريب؟", positions: [
+    "كلود برنار: تتأسس النظريات العلمية على التجريب، باعتباره إعادة إنشاء شروط الظاهرة وفق خطوات الملاحظة، الفرضية، التجربة ثم القانون.",
+    "روني طوم: العلم لا يقتصر على التجربة الحسية، بل ينفتح أيضا على التجربة الخيالية والذهنية.",
+  ], recap: ["التجربة والتجريب", "الملاحظة", "الفرضية", "التجريب", "القانون", "التجربة الذهنية"] }),
 
-  makeLesson({ id: "2bac-philo-freedom-determinism", chapter: "L'éthique — La liberté", title: "Axe 1 : Liberté et déterminisme", question: "La liberté s'oppose-t-elle au déterminisme ou la prise de conscience de celui-ci peut-elle en constituer la condition ?", positions: [
-    "Ibn Rushd (Averroès) : l'action humaine possède une liberté partielle issue de la volonté de l'individu, tout en restant liée à l'ordre et à la volonté divine.",
-    "Maurice Merleau-Ponty : la liberté humaine est relative et se déploie à l'intérieur de conditions sociales, historiques et psychologiques.",
-    "Abdallah Laroui : la science constitue un projet d'émancipation qui sert la liberté humaine en permettant de comprendre, maîtriser et réduire certains déterminismes.",
-  ], recap: ["Liberté partielle", "Conditions sociales et historiques", "Déterminismes psychologiques", "Science et émancipation"] }),
-  makeLesson({ id: "2bac-philo-freedom-will", chapter: "L'éthique — La liberté", title: "Axe 2 : Liberté et volonté", question: "Comment se définit le rapport entre liberté et volonté ? Notre volonté est-elle libre ou soumise à des déterminations extérieures ?", positions: [
-    "René Descartes : l'être humain est libre dans ses choix et sa liberté est liée à l'exercice de sa volonté.",
-    "Emmanuel Kant : l'être humain possède une volonté libre parce qu'il est doué d'une raison pratique et morale qui lui permet d'agir selon des principes et dans le respect de la dignité.",
-    "Jean-Paul Sartre : la volonté permet à l'individu de poursuivre consciemment les fins auxquelles il aspire et de se projeter au-delà de sa situation présente.",
-  ], recap: ["Liberté et volonté", "Autonomie", "Raison pratique", "Choix des fins", "Projet"] }),
-  makeLesson({ id: "2bac-philo-freedom-law", chapter: "L'éthique — La liberté", title: "Axe 3 : Liberté et loi", question: "Quelle est la relation entre liberté et loi ? La loi garantit-elle la liberté ou la limite-t-elle ?", positions: [
-    "Thomas Hobbes : la liberté véritable est une liberté organisée par la loi et compatible avec l'ordre juridique commun.",
-    "Montesquieu : être libre signifie pouvoir faire ce que les lois permettent, et non faire tout ce que l'on désire.",
-    "Hannah Arendt : la politique et la vie sociale constituent le domaine de la liberté effective ; sans un cadre politique permettant l'action et la participation, la liberté ne peut réellement apparaître.",
-  ], recap: ["Liberté civile", "Loi et limites", "Sécurité juridique", "Action politique", "Liberté dans l'espace public"] }),
+  makeLesson({ id: "2bac-philo-scientific-rationality", chapter: "مجزوءة المعرفة — مفهوما النظرية والتجربة", title: "المحور الثاني: العقلانية العلمية", question: "ما دور العقل في تأسيس النظريات العلمية؟ وهل تتأسس على عقلانية مثالية أم عقلانية منفتحة على الواقع؟", positions: [
+    "ألبرت أينشتاين: بناء المعرفة العلمية يمنح العقل دورا أساسيا؛ فالعلم لا يعتمد على التجربة وحدها بل على البناء العقلي الخلاق.",
+    "غاستون باشلار: العقلانية العلمية تتأسس من خلال حوار مفتوح بين العقل والتجربة لبناء معرفة موضوعية.",
+    "هانز رايشنباخ: العقلانية العلمية الرياضية تستبدل الإدراك الحسي المباشر بالفهم والاستبصار العقلي للعلاقات الصورية.",
+  ], recap: ["أولوية العقل في البناء العلمي", "الحوار بين العقل والتجربة", "الرياضيات والفهم العقلي", "المعرفة الموضوعية"] }),
+
+  makeLesson({ id: "2bac-philo-scientific-criteria", chapter: "مجزوءة المعرفة — مفهوما النظرية والتجربة", title: "المحور الثالث: معايير علمية النظريات العلمية", question: "ما معايير علمية النظريات العلمية؟ وهل صلاحيتها تقوم على قابليتها للنقد أم على إمكانية تكذيبها؟", positions: [
+    "الحسن ابن الهيثم: النقد البناء معيار أساسي للتحقق من النظرية وتقييمها.",
+    "كارل بوبر: القابلية للتكذيب هي المعيار الأساسي لعلمية النظرية، أي قابليتها للاختبار بما قد يكشف خطأها.",
+  ], recap: ["النقد البناء", "اختبار النظرية", "القابلية للتكذيب", "التحقق والتقييم"] }),
+
+  makeLesson({ id: "2bac-philo-truth-opinion", chapter: "مجزوءة المعرفة — مفهوم الحقيقة", title: "المحور الأول: الرأي والحقيقة", question: "ما طبيعة العلاقة بين الرأي والحقيقة؟ وهل الرأي يؤسس الحقيقة أم أنه عائق أمامها؟", positions: [
+    "غاستون باشلار: الرأي عائق إبستيمولوجي أمام تكون المعرفة العلمية، ولذلك ينبغي هدمه وتجاوزه ببحث منهجي.",
+    "رونيه ديكارت: الحقيقة تقتضي القطيعة مع الرأي وبناء المعرفة بناء منهجيا عقليا.",
+    "ليبنتز: للرأي دور منتج في تاريخ الأفكار رغم طابعه الاحتمالي، لأنه قد يفتح إمكانات جديدة للتفكير.",
+  ], recap: ["الرأي كعائق", "القطيعة مع الرأي", "البناء المنهجي", "الدور المنتج للرأي"] }),
+
+  makeLesson({ id: "2bac-philo-truth-criteria", chapter: "مجزوءة المعرفة — مفهوم الحقيقة", title: "المحور الثاني: معايير الحقيقة", question: "كيف يمكن التأكد من الحقيقة؟ وهل معيارها عقلي منطقي أم تجريبي واقعي أم هما معا؟", positions: [
+    "رونيه ديكارت: الحدس العقلي والاستنباط معياران ضامنان للوصول إلى الحقيقة.",
+    "دافيد هيوم: يجب التمييز بين الحقيقة العقلية القائمة على علاقات الأفكار والحقيقة التجريبية القائمة على الوقائع.",
+    "ميشيل فوكو: الحقيقة مرتبطة بالسلطة، إذ تنتجها وتفرضها أجهزة ومؤسسات تحدد ما يعترف به بوصفه حقيقة.",
+  ], recap: ["الحدس", "الاستنباط", "الحقيقة العقلية", "الحقيقة التجريبية", "السلطة وإنتاج الحقيقة"] }),
+
+  makeLesson({ id: "2bac-philo-truth-value", chapter: "مجزوءة المعرفة — مفهوم الحقيقة", title: "المحور الثالث: قيمة الحقيقة", question: "من أين تستمد الحقيقة قيمتها؟ هل هي غاية في ذاتها أم مجرد وسيلة؟", positions: [
+    "إمانويل كانط: الحقيقة قيمة أخلاقية مرتبطة بالعقل والواجب الأخلاقي.",
+    "وليام جيمس: قيمة الحقيقة تقاس بمدى المنافع والنتائج التي يمكن أن تنتج عنها في حياة الناس.",
+    "فريدريك نيتشه: الحقيقة ترتبط بالحياة والبقاء، وقد تتضمن تأويلات واستعارات تخدم إرادة الحياة.",
+  ], recap: ["القيمة الأخلاقية", "المنفعة والنتائج", "الحقيقة والحياة", "الحقيقة كغاية أو وسيلة"] }),
+
+  makeLesson({ id: "2bac-philo-state-legitimacy", chapter: "مجزوءة السياسة — مفهوم الدولة", title: "المحور الأول: مشروعية الدولة وغاياتها", question: "ما الغاية من الدولة؟ ومن أين تستمد مشروعيتها؟", positions: [
+    "باروخ اسبينوزا: غاية الدولة توفير الحرية للأفراد وتمكينهم من الحفاظ على حقهم الطبيعي في الوجود.",
+    "طوماس هوبز: غاية الدولة تحقيق السلم والأمن، مقابل تنازل الأفراد عن جزء من حقهم الطبيعي لسلطة سيادية تحفظ النظام.",
+    "ماكس فيبر: مشروعية الدولة تقوم على أنماط ثلاثة للسلطة: التقليدية، الكاريزمية، والشرعية القانونية العقلانية.",
+  ], recap: ["الحرية", "السلم والأمن", "السيادة", "السلطة التقليدية", "السلطة الكاريزمية", "السلطة القانونية العقلانية"] }),
+
+  makeLesson({ id: "2bac-philo-state-authority", chapter: "مجزوءة السياسة — مفهوم الدولة", title: "المحور الثاني: طبيعة السلطة السياسية", question: "هل طبيعة السلطة السياسية متعالية على الأفراد أم محايثة لهم ونابعة من المجتمع؟", positions: [
+    "لوي ألتوسير: السلطة السياسية قد تكون استبدادية وتعتمد على أجهزة قمعية وأيديولوجية تعيد إنتاج النظام الاجتماعي.",
+    "مونتيسكيو: جمع السلط في يد واحدة ينتج الاستبداد، ولذلك يجب فصل السلط حتى تصبح السلطة للمؤسسات لا للأشخاص.",
+    "ابن خلدون: إذا كان الحاكم متجبرا أصبحت السلطة متعالية وغاب العدل، لذلك ينبغي أن يتسم الحكم بالوسطية والاعتدال.",
+    "ميشيل فوكو: السلطة ليست متمركزة في الدولة وحدها، بل تنتشر داخل المجتمع وتظهر في العلاقات والممارسات.",
+  ], recap: ["الأجهزة القمعية والأيديولوجية", "فصل السلط", "الاعتدال والعدل", "انتشار السلطة داخل المجتمع"] }),
+
+  makeLesson({ id: "2bac-philo-state-right-force", chapter: "مجزوءة السياسة — مفهوم الدولة", title: "المحور الثالث: الدولة بين الحق والعنف", question: "كيف تمارس الدولة سلطتها؟ هل بالقانون والحق أم بالعنف والقوة أم بهما معا؟", positions: [
+    "ماكس فيبر: للدولة وحدها الحق في احتكار العنف المادي المشروع بهدف إخضاع الناس للقانون.",
+    "نيكولا ماكيافيلي: يجب أن يجمع الأمير بين القوة والحيلة، وقد يستخدم الوسائل المشروعة وغير المشروعة حسب ضرورات الحفاظ على الدولة.",
+    "جاكلين روس: الدولة المعاصرة ينبغي أن تكون سلطة أخلاقية معقلنة تحترم الشخص وحقوقه وكرامته.",
+    "عبد الله العروي: دولة الاستبداد نقيض دولة الحق لأنها دولة تسلطية تفتقد الشرعية والإجماع.",
+  ], recap: ["العنف المشروع", "القوة والدهاء السياسي", "دولة الحق", "الحقوق والكرامة", "الشرعية"] }),
+
+  makeLesson({ id: "2bac-philo-right-natural-positive", chapter: "مجزوءة السياسة — مفهوما الحق والعدالة", title: "المحور الأول: الحق الطبيعي والحق الوضعي", question: "هل العدالة ترتبط بالحق الطبيعي أم بالحق الوضعي؟", positions: [
+    "طوماس هوبز: الحق الطبيعي هو الحرية الأساسية للتصرف وفق طبيعة الإنسان ورغباته، وهو يدخل في تعارض مع الحق الوضعي الملزم.",
+    "جان جاك روسو: أصل الحق وضعي ومدني، أساسه التعاقد الاجتماعي والارادة العامة كمصدر للحقوق المدنية.",
+  ], recap: ["الحق الطبيعي", "الحرية", "الحق الوضعي", "العقد الاجتماعي", "الإرادة العامة"] }),
+
+  makeLesson({ id: "2bac-philo-justice-right", chapter: "مجزوءة السياسة — مفهوما الحق والعدالة", title: "المحور الثاني: العدالة كأساس للحق", question: "ما علاقة العدالة بالحق؟ وأيهما أساس الآخر؟ وهل كل قانون ضامن للحقوق؟", positions: [
+    "أرسطو: العدالة أساس الفضيلة، وتتحقق بالسلوك المشروع والموافق للقوانين العادلة بما يكفل الحقوق.",
+    "باروخ اسبينوزا: العدالة تجسيد للحق وتحقيق له، ولا يوجد حق فعلي خارج قوانين الدولة.",
+    "شيشرون: القانون قد يصبح وسيلة لسلب الحقوق إذا كان جائرا، لذلك يجب الاحتكام إلى العدالة كإحساس طبيعي مشترك.",
+  ], recap: ["العدالة والفضيلة", "الحق والقانون", "حدود القانون", "العدالة الطبيعية"] }),
+
+  makeLesson({ id: "2bac-philo-justice-equality-equity", chapter: "مجزوءة السياسة — مفهوما الحق والعدالة", title: "المحور الثالث: العدالة بين المساواة والإنصاف", question: "ما الغاية من العدالة؟ هل تتحقق بالمساواة أم بالإنصاف؟", positions: [
+    "أفلاطون: العدالة فضيلة تتحقق بانسجام قوى النفس، وفي المجتمع حين يؤدي كل فرد الوظيفة التي تناسب طبيعته.",
+    "آلان إميل شارتيي: لا يمكن الحديث عن العدالة دون المساواة، لأن التفاوتات الكبيرة تهدد العدالة.",
+    "ماكس شيلر: الناس لا يولدون متساوين ولا يعيشون الظروف نفسها، لذلك يضمن الإنصاف العدالة أكثر من المساواة الميكانيكية.",
+    "جون راولز: العدالة تتأسس على الإنصاف، ولا تقبل اللامساواة إلا إذا حسنت وضع الفئات الأقل حظا.",
+  ], recap: ["الانسجام", "المساواة", "الإنصاف", "اللامساواة", "العدالة كإنصاف"] }),
+
+  makeLesson({ id: "2bac-philo-duty-coercion", chapter: "مجزوءة الأخلاق — مفهوم الواجب", title: "المحور الأول: الواجب والإكراه", question: "هل الواجب يصدر عن إرادة حرة أم هو فعل تحكمه الضرورة والإكراه؟", positions: [
+    "إمانويل كانط: الواجب الأخلاقي إلزام يشرعه العقل العملي وتجسده الإرادة الخيرة والحرة.",
+    "إميل دوركهايم: الواجب الأخلاقي إلزامي ونابع من الضمير الجمعي والقواعد الاجتماعية التي يتم استدخالها في الفرد.",
+  ], recap: ["الإلزام الأخلاقي", "العقل العملي", "الإرادة الحرة", "الضمير الجمعي", "القواعد الاجتماعية"] }),
+
+  makeLesson({ id: "2bac-philo-moral-consciousness", chapter: "مجزوءة الأخلاق — مفهوم الواجب", title: "المحور الثاني: الوعي الأخلاقي", question: "هل الوعي الأخلاقي نابع من الفطرة والطبيعة أم من الثقافة والمجتمع؟", positions: [
+    "سيغموند فرويد: الوعي الأخلاقي مرتبط بسلطة الأنا الأعلى التي تمثل القيم والسلطة الداخلية التي تقيم السلوك.",
+    "جان جاك روسو: الوعي الأخلاقي فطري وطبيعي، وهو قدرة على إصدار أحكام معيارية على السلوكات الإنسانية.",
+  ], recap: ["الأنا الأعلى", "السلطة الداخلية", "التنشئة والقيم", "الفطرة والطبيعة"] }),
+
+  makeLesson({ id: "2bac-philo-duty-society", chapter: "مجزوءة الأخلاق — مفهوم الواجب", title: "المحور الثالث: الواجب والمجتمع", question: "كيف يعكس الواجب قيم المجتمع؟ وهل الواجب نابع من الضمير الفردي أم الضمير الاجتماعي العام؟", positions: [
+    "إميل دوركهايم: المجتمع مصدر الواجب الأخلاقي، ومن خلال سلطته يرسخ في وعي الفرد ما يجب القيام به.",
+    "ماكس فيبر: يرتبط الواجب بأخلاق الاعتقاد المبنية على المبادئ الدينية أو الإيديولوجية، وبأخلاق المسؤولية التي تراعي نتائج الفعل.",
+    "جون راولز: الواجب الأخلاقي ذو بعد كوني إنساني، ويرتبط بالتضامن مع الأجيال اللاحقة.",
+  ], recap: ["المجتمع مصدر الواجب", "أخلاق الاعتقاد", "أخلاق المسؤولية", "الكونية الإنسانية", "التضامن بين الأجيال"] }),
+
+  makeLesson({ id: "2bac-philo-freedom-determinism", chapter: "مجزوءة الأخلاق — مفهوم الحرية", title: "المحور الأول: الحرية والحتمية", question: "هل الحرية تتعارض مع الحتمية أم أن الوعي بها يمكن أن يكون أساسا لها؟", positions: [
+    "ابن رشد: الفعل الإنساني يتصف بحرية جزئية مصدرها الإرادة الحرة، مع بقائه مرتبطا بالمشيئة الإلهية.",
+    "ميرلوبونتي: حرية الإنسان نسبية، وتمارس داخل شروط اجتماعية وتاريخية ونفسية.",
+    "عبد الله العروي: العلم مشروع تنويري يخدم الحرية الإنسانية بقدر ما يساعد على محاصرة بعض الحتميات وفهمها والسيطرة عليها.",
+  ], recap: ["الحرية الجزئية", "الشروط الاجتماعية والتاريخية", "الحتميات النفسية", "العلم والتحرر"] }),
+
+  makeLesson({ id: "2bac-philo-freedom-will", chapter: "مجزوءة الأخلاق — مفهوم الحرية", title: "المحور الثاني: الحرية والإرادة", question: "كيف تتحدد العلاقة بين الحرية والإرادة؟ وهل إرادتنا حرة أم خاضعة لإملاءات خارجية؟", positions: [
+    "رونيه ديكارت: الإنسان حر في اختياراته، وحريته مرتبطة بإرادته.",
+    "إمانويل كانط: الإنسان يمتلك حرية الإرادة لأنه ذو عقل عملي أخلاقي، قادر على الالتزام بالمبادئ واحترام الكرامة.",
+    "جان بول سارتر: الإرادة تمكن الفرد من السعي بوعي وتأمل وراء الغايات التي يطمح إليها ومن تجاوز وضعه الراهن.",
+  ], recap: ["الحرية والإرادة", "الاستقلالية", "العقل العملي", "اختيار الغايات", "المشروع"] }),
+
+  makeLesson({ id: "2bac-philo-freedom-law", chapter: "مجزوءة الأخلاق — مفهوم الحرية", title: "المحور الثالث: الحرية والقانون", question: "ما طبيعة العلاقة بين الحرية والقانون؟ وهل يضمن القانون الحرية أم يسلبها؟", positions: [
+    "طوماس هوبز: الحرية الحقيقية هي الحرية المنظمة بالقانون والخاضعة لقواعد العيش المشترك.",
+    "مونتسكيو: الحرية هي القيام بما تسمح به القوانين، وليس القيام بكل ما يريده الإنسان.",
+    "حنا أرندت: السياسة والحياة الاجتماعية مجال للحرية الفعلية، ولا يمكن الحديث عن الحرية دون فضاء سياسي يسمح بالفعل والمشاركة.",
+  ], recap: ["الحرية المدنية", "القانون والحدود", "الأمن القانوني", "الفعل السياسي", "الحرية في المجال العام"] }),
 ];
