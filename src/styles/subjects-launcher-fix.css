@@ -20,14 +20,28 @@ generic global rules cannot change the card layout or typography. */
 }
 
 .subjects-launcher-page .subject-large-card {
-  position: relative;
+  position: relative !important;
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   min-height: 420px !important;
   display: flex !important;
   flex-direction: column !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: none !important;
+  grid-auto-flow: row !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  padding: 0 !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.subjects-launcher-page .subject-large-card > * {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -37,6 +51,13 @@ generic global rules cannot change the card layout or typography. */
 .subjects-launcher-page .subject-large-card__illustration {
   min-width: 0 !important;
   box-sizing: border-box !important;
+}
+
+.subjects-launcher-page .subject-large-card__top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 18px 0 !important;
 }
 
 .subjects-launcher-page .subject-large-card__illustration {
@@ -55,9 +76,6 @@ generic global rules cannot change the card layout or typography. */
   background: linear-gradient(180deg, rgba(221,245,241,.58), rgba(255,255,255,.42)) !important;
 }
 
-/* Keep the artwork in normal flow. The previous absolute positioning was
-   allowing the SVG viewport to inherit hostile global geometry and appear
-   pushed to the right edge of the card. */
 .subjects-launcher-page .subject-large-card__illustration .subject-widget-svg {
   position: static !important;
   inset: auto !important;
@@ -66,8 +84,8 @@ generic global rules cannot change the card layout or typography. */
   height: 100% !important;
   min-width: 0 !important;
   min-height: 0 !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   margin: 0 !important;
   padding: 0 !important;
   transform: none !important;
@@ -77,6 +95,7 @@ generic global rules cannot change the card layout or typography. */
   flex: 0 0 100% !important;
   align-self: stretch !important;
   overflow: hidden !important;
+  object-fit: fill !important;
 }
 
 .subjects-launcher-page .subject-large-card__copy {
