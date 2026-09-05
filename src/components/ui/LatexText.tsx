@@ -4,7 +4,6 @@ declare global {
   interface Window {
     MathJax?: {
       typesetPromise?: (elements?: Element[]) => Promise<void>;
-      startup?: { promise?: Promise<void> };
       tex?: { inlineMath?: string[][]; displayMath?: string[][] };
     };
   }
@@ -43,161 +42,111 @@ function loadMathJax(): Promise<void> {
   return mathJaxPromise;
 }
 
-const superscriptMap: Record<string, string> = {
+const SUPERSCRIPTS: Record<string, string> = {
   "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5",
   "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9", "⁺": "+", "⁻": "-",
-  "⁽": "(", "⁾": ")",
+  "ⁿ": "n", "ᵃ": "a", "ᵇ": "b", "ᶜ": "c", "ᵈ": "d", "ᵉ": "e",
+  "ᵏ": "k", "ᵐ": "m", "ᵖ": "p", "ʳ": "r", "ˣ": "x",
 };
 
-const subscriptMap: Record<string, string> = {
+const SUBSCRIPTS: Record<string, string> = {
   "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
   "₆": "6", "₇": "7", "₈": "8", "₉": "9", "₊": "+", "₋": "-",
-  "₍": "(", "₎": ")",
+  "ₙ": "n", "ₐ": "a", "ᵢ": "i", "ⱼ": "j", "ₖ": "k", "ₘ": "m",
 };
 
-function replaceUnicodePowers(text: string): string {
-  return text.replace(/([A-Za-z0-9)\\]])([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)/g, (_match, base: string, power: string) => {
-    const exponent = [...power].map((char) => superscriptMap[char] ?? char).join("");
-    return `${base}^{${exponent}}`;
-  });
+const SYMBOLS: Array<[RegExp, string]> = [
+  [/≤/g, "\\leq"], [/≥/g, "\\geq"], [/≠/g, "\\neq"], [/≈/g, "\\approx"],
+  [/±/g, "\\pm"], [/∞/g, "\\infty"], [/∈/g, "\\in"], [/∉/g, "\\notin"],
+  [/∪/g, "\\cup"], [/∩/g, "\\cap"], [/∅/g, "\\varnothing"],
+  [/ℝ/g, "\\mathbb{R}"], [/ℤ/g, "\\mathbb{Z}"], [/ℚ/g, "\\mathbb{Q}"],
+  [/ℕ/g, "\\mathbb{N}"], [/ℂ/g, "\\mathbb{C}"], [/×/g, "\\times"],
+  [/·/g, "\\cdot"], [/→/g, "\\to"], [/↦/g, "\\mapsto"], [/π/g, "\\pi"],
+  [/α/g, "\\alpha"], [/β/g, "\\beta"], [/γ/g, "\\gamma"], [/δ/g, "\\delta"],
+  [/ε/g, "\\varepsilon"], [/λ/g, "\\lambda"], [/μ/g, "\\mu"], [/σ/g, "\\sigma"],
+  [/τ/g, "\\tau"], [/φ/g, "\\varphi"], [/ω/g, "\\omega"],
+  [/Δ/g, "\\Delta"], [/Ω/g, "\\Omega"],
+];
+
+function normalizePowers(value: string): string {
+  return value
+    .replace(/([A-Za-z0-9)\]])([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᵏᵐᵖʳˣ]+)/g, (_m, base: string, power: string) => {
+      const exponent = [...power].map((c) => SUPERSCRIPTS[c] ?? c).join("");
+      return `${base}^{${exponent}}`;
+    })
+    .replace(/([A-Za-z])([₀₁₂₃₄₅₆₇₈₉ₙₐᵢⱼₖₘ]+)/g, (_m, base: string, subscript: string) => {
+      const index = [...subscript].map((c) => SUBSCRIPTS[c] ?? c).join("");
+      return `${base}_{${index}}`;
+    });
 }
 
-function replaceUnicodeIndices(text: string): string {
-  return text.replace(/([A-Za-z])([₀₁₂₃₄₅₆₇₈₉₊₋]+)/g, (_match, base: string, index: string) => {
-    const subscript = [...index].map((char) => subscriptMap[char] ?? char).join("");
-    return `${base}_{${subscript}}`;
-  });
-}
+function normalizeFormula(value: string): string {
+  let result = normalizePowers(value);
+  for (const [pattern, replacement] of SYMBOLS) result = result.replace(pattern, replacement);
 
-function escapeTexText(text: string): string {
-  return text
-    .replace(/\\/g, "\\textbackslash{}")
-    .replace(/([{}])/g, "\\$1")
-    .replace(/#/g, "\\#")
-    .replace(/%/g, "\\%");
-}
-
-function normalizeSymbols(text: string): string {
-  return text
-    .replace(/≤/g, "\\leq")
-    .replace(/≥/g, "\\geq")
-    .replace(/≠/g, "\\neq")
-    .replace(/≈/g, "\\approx")
-    .replace(/∞/g, "\\infty")
-    .replace(/±/g, "\\pm")
-    .replace(/∈/g, "\\in")
-    .replace(/∉/g, "\\notin")
-    .replace(/⊂/g, "\\subset")
-    .replace(/⊆/g, "\\subseteq")
-    .replace(/∪/g, "\\cup")
-    .replace(/∩/g, "\\cap")
-    .replace(/∅/g, "\\varnothing")
-    .replace(/ℝ/g, "\\mathbb{R}")
-    .replace(/ℤ/g, "\\mathbb{Z}")
-    .replace(/ℚ/g, "\\mathbb{Q}")
-    .replace(/ℕ/g, "\\mathbb{N}")
-    .replace(/ℂ/g, "\\mathbb{C}")
-    .replace(/×/g, "\\times")
-    .replace(/·/g, "\\cdot")
-    .replace(/→/g, "\\to")
-    .replace(/↦/g, "\\mapsto")
-    .replace(/π/g, "\\pi")
-    .replace(/α/g, "\\alpha")
-    .replace(/β/g, "\\beta")
-    .replace(/γ/g, "\\gamma")
-    .replace(/δ/g, "\\delta")
-    .replace(/ε/g, "\\varepsilon")
-    .replace(/λ/g, "\\lambda")
-    .replace(/μ/g, "\\mu")
-    .replace(/σ/g, "\\sigma")
-    .replace(/τ/g, "\\tau")
-    .replace(/φ/g, "\\varphi")
-    .replace(/ω/g, "\\omega")
-    .replace(/Σ/g, "\\Sigma")
-    .replace(/Δ/g, "\\Delta")
-    .replace(/Ω/g, "\\Omega");
-}
-
-function protectExplicitLatex(text: string): { text: string; tokens: string[] } {
-  const tokens: string[] = [];
-  const protectedText = text.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$/g, (match) => {
-    const id = `@@LATEX_${tokens.length}@@`;
-    tokens.push(match);
-    return id;
-  });
-  return { text: protectedText, tokens };
-}
-
-function restoreExplicitLatex(text: string, tokens: string[]): string {
-  return text.replace(/@@LATEX_(\d+)@@/g, (_match, index: string) => tokens[Number(index)] ?? _match);
-}
-
-function convertMathChunk(chunk: string): string {
-  let value = chunk.trim();
-  if (!value) return chunk;
-
-  value = replaceUnicodePowers(value);
-  value = replaceUnicodeIndices(value);
-  value = normalizeSymbols(value);
-
-  value = value
+  result = result
     .replace(/\blim\s*\(([^)]*)\)/g, "\\lim_{$1}")
-    .replace(/\blim\s*([A-Za-z][^\s,;!?]*)/g, "\\lim_{$1}")
     .replace(/\b(sin|cos|tan)\s*\(([^)]*)\)/g, "\\$1($2)")
     .replace(/\b(ln|log|exp)\s*\(([^)]*)\)/g, "\\$1($2)")
-    .replace(/\bsqrt\s*\(([^)]*)\)/g, "\\sqrt{$1}")
     .replace(/√\s*\(([^)]*)\)/g, "\\sqrt{$1}")
     .replace(/√\s*([A-Za-z0-9]+)/g, "\\sqrt{$1}")
-    .replace(/\b([A-Za-z])\/([A-Za-z0-9]+)/g, "\\frac{$1}{$2}")
-    .replace(/\b([A-Za-z0-9]+)\/([A-Za-z0-9]+)\b/g, "\\frac{$1}{$2}")
-    .replace(/\b([A-Za-z]+)'\(([A-Za-z0-9]+)\)/g, "$1'($2)")
+    .replace(/\bsqrt\s*\(([^)]*)\)/g, "\\sqrt{$1}")
+    .replace(/\bC\s*\(([^,]+),\s*([^\)]+)\)/g, "C($1,$2)")
+    .replace(/\b([A-Za-z]+)'\(([^)]*)\)/g, "$1'($2)")
     .replace(/\b([A-Za-z]+)_\{([^}]+)\}/g, "$1_{$2}")
     .replace(/\b([A-Za-z]+)\^\{([^}]+)\}/g, "$1^{$2}");
 
-  return `\\(${value}\\)`;
+  return result;
 }
 
-function looksMathematical(value: string): boolean {
-  return /(?:\\b(?:lim|sin|cos|tan|ln|log|exp)\\b|[=<>≤≥≠≈]|\d\s*[\/^]|[⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉]|[∞ℝℤℚℕℂπ]|[∫√∑∏]|[A-Za-z]_\{|[A-Za-z]\^\{|[A-Za-z]'\(|\bP\([^)]*\)|\bC\([^)]*\)|\bdeg\s+[A-Za-z]|\\(?:leq|geq|neq|in|times|cdot|to)\b)/.test(value);
+function looksLikeMath(value: string): boolean {
+  return /(?:[⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉]|∞|ℝ|ℤ|ℚ|ℕ|ℂ|π|α|β|γ|δ|ε|λ|μ|σ|τ|φ|ω|Δ|Ω|[=<>≤≥≠≈]|→|↦|∫|√|∩|∪|\^|_|\\b(?:lim|sin|cos|tan|ln|log|exp)\\b|\\bP\s*\(|\\bC\s*\(|\\b(?:deg|f'|g'|h')\b)/.test(value);
+}
+
+function protectLatex(text: string): { source: string; tokens: string[] } {
+  const tokens: string[] = [];
+  const source = text.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$/g, (match) => {
+    const token = `@@MM_LATEX_${tokens.length}@@`;
+    tokens.push(match);
+    return token;
+  });
+  return { source, tokens };
+}
+
+function restoreLatex(text: string, tokens: string[]): string {
+  return text.replace(/@@MM_LATEX_(\d+)@@/g, (_m, index: string) => tokens[Number(index)] ?? _m);
+}
+
+function wrapFormula(value: string): string {
+  const formula = normalizeFormula(value.trim());
+  return `\\(${formula}\\)`;
 }
 
 function toLatex(text: string): string {
   if (!text) return text;
   if (/\\\(|\\\[|\$\$/.test(text)) return text;
 
-  const protectedValue = protectExplicitLatex(text);
-  let source = protectedValue.text;
-  source = replaceUnicodePowers(source);
-  source = replaceUnicodeIndices(source);
+  const protectedValue = protectLatex(text);
+  let source = protectedValue.source;
 
-  const chunks = source.split(/(?<=[.!?;:,])\s+|\s{2,}/g);
-  let output = chunks.map((chunk) => {
-    const trimmed = chunk.trim();
-    if (!trimmed) return chunk;
+  // Highest-confidence standalone formulas first.
+  source = source.replace(/\b(?:lim\s*\([^)]*\)|sin\s*\([^)]*\)|cos\s*\([^)]*\)|tan\s*\([^)]*\)|ln\s*\([^)]*\)|log\s*\([^)]*\)|exp\s*\([^)]*\)|√\s*\([^)]*\)|sqrt\s*\([^)]*\)|P\s*\([^)]*\)|C\s*\([^)]*\))/g, wrapFormula);
 
-    if (looksMathematical(trimmed)) {
-      const pieces = trimmed.match(/(?:[^=<>≤≥≠≈]*[=<>≤≥≠≈][^.!?;,]*|\\b(?:lim|sin|cos|tan|ln|log|exp)[^.!?;,]*|[^.!?;,]*[⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉∞ℝℤℚℕℂπ√∫∑∏][^.!?;,]*|[^.!?;,]*\\bP\([^)]*\)[^.!?;,]*|[^.!?;,]*\\bC\([^)]*\)[^.!?;,]*)/g);
-      if (pieces?.length) {
-        let remainder = trimmed;
-        for (const piece of pieces) {
-          const start = remainder.indexOf(piece);
-          if (start < 0) continue;
-          const before = remainder.slice(0, start);
-          const after = remainder.slice(start + piece.length);
-          output = output;
-          remainder = after;
-          source;
-          void before;
-        }
-      }
-      return convertMathChunk(trimmed);
-    }
+  // Function notation, derivatives, powers and indexed quantities.
+  source = source.replace(/\b(?:[fgh])'\([A-Za-z0-9]+\)/g, wrapFormula);
+  source = source.replace(/\b[A-Za-z]+\^\{[^}]+\}/g, wrapFormula);
+  source = source.replace(/\b[A-Za-z]+_[A-Za-z0-9]+/g, wrapFormula);
+  source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉ⁿ]+/g, wrapFormula);
 
-    return trimmed;
-  }).join(" ");
+  // Expressions with a clear relation/operator, bounded by normal punctuation.
+  source = source.replace(/(^|[(:]\s*)([A-Za-z0-9][^,.;!?]*?(?:=|<|>|≤|≥|≠|≈|→|↦)[^,.;!?]*)(?=\s*[,.;!?]|$)/g, (_m, prefix: string, formula: string) => `${prefix}${wrapFormula(formula)}`);
 
-  output = restoreExplicitLatex(output, protectedValue.tokens);
-  return output;
+  // Limits/integrals written with Unicode notation.
+  source = source.replace(/∫\s*[^,.;!?]+/g, (match) => wrapFormula(match));
+
+  source = normalizeFormula(source);
+  source = restoreLatex(source, protectedValue.tokens);
+  return source;
 }
 
 export function LatexText({
