@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { LatexText } from "../../components/ui/LatexText";
 import type { LessonBlock, LessonDocument } from "../../types/academic";
 import "./lesson-renderer.css";
@@ -78,27 +79,9 @@ function renderBlock(block: LessonBlock, index: number) {
 
 function philosopherSticker(title: string) {
   const philosophers = [
-    "جون لوك",
-    "شوبنهاور",
-    "كانط",
-    "غوسدورف",
-    "فرويد",
-    "سارتر",
-    "هيغل",
-    "هايدغر",
-    "بيرجي",
-    "جيل دولوز",
-    "كريستيفا",
-    "أرسطو",
-    "أفلاطون",
-    "سبينوزا",
-    "روسو",
-    "هوبز",
-    "مونتسكيو",
-    "نيتشه",
-    "ديكارت",
-    "باشلار",
-    "غاستون باشلار",
+    "جون لوك", "شوبنهاور", "كانط", "غوسدورف", "فرويد", "سارتر", "هيغل", "هايدغر",
+    "بيرجي", "جيل دولوز", "كريستيفا", "أرسطو", "أفلاطون", "سبينوزا", "روسو", "هوبز",
+    "مونتسكيو", "نيتشه", "ديكارت", "باشلار", "غاستون باشلار",
   ];
   return philosophers.find((name) => title.includes(name)) || "فيلسوف";
 }
@@ -135,7 +118,7 @@ function renderArabicIntroCard(blocks: LessonBlock[]) {
 }
 
 function renderArabicBlocks(blocks: LessonBlock[]) {
-  const rendered: React.ReactNode[] = [];
+  const rendered: ReactNode[] = [];
   let index = 0;
 
   while (index < blocks.length) {
