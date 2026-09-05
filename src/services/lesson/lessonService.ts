@@ -13,7 +13,8 @@ import { secondBacMathIntegralLesson } from "../../data/curriculum/secondBacMath
 import { secondBacMathSpaceGeometryLesson } from "../../data/curriculum/secondBacMathSpaceGeometryLesson";
 import { secondBacMathCombinatoricsLesson } from "../../data/curriculum/secondBacMathCombinatoricsLesson";
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
-import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
+import { secondBacSvtLessons, secondBacEnglishLessons } from "../../data/curriculum/secondBacHumanLessons";
+import { secondBacPhilosophyLessons } from "../../data/curriculum/secondBacPhilosophyLessons";
 
 const dedicatedMathLessonIds = new Set([
   "2bac-maths-sequences",
