@@ -3,6 +3,7 @@ import type { LessonBlock, LessonDocument } from "../../types/academic";
 import "./lesson-renderer.css";
 import "./lesson-renderer-fonts.css";
 import "./lesson-renderer-grid.css";
+import "./lesson-renderer-layout.css";
 
 function VisualBlock({ type, title }: { type: "graph" | "diagram"; title?: string }) {
   if (type === "graph") {
