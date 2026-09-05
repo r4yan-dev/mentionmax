@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { contentCatalogService } from "../services/content/contentCatalogService";
+import { LatexText } from "../components/ui/LatexText";
 import type { Flashcard } from "../types/content";
 import "./Flashcards.css";
 
@@ -62,14 +63,26 @@ export default function Flashcards() {
         <section className="flashcards-study">
           {current ? (
             <>
-              <button className="flashcard" onClick={() => setFlipped((value) => !value)} aria-label="Retourner la flashcard">
-                <span className="flashcard-chapter">{current.target.chapter}</span>
-                <div className="flashcard-content">
-                  <span className="flashcard-label">{flipped ? "RÉPONSE" : "QUESTION"}</span>
-                  <div className="flashcard-text">{flipped ? current.back : current.front}</div>
-                </div>
-                <span className="flashcard-hint">Clique pour retourner</span>
-              </button>
+              <div className={`flashcard-scene ${flipped ? "is-flipped" : ""}`}>
+                <button className="flashcard" onClick={() => setFlipped((value) => !value)} aria-label={flipped ? "Voir la question" : "Voir la réponse"}>
+                  <span className="flashcard-face flashcard-front">
+                    <span className="flashcard-chapter">{current.target.chapter}</span>
+                    <div className="flashcard-content">
+                      <span className="flashcard-label">QUESTION</span>
+                      <div className="flashcard-text"><LatexText>{current.front}</LatexText></div>
+                    </div>
+                    <span className="flashcard-hint">Clique pour retourner</span>
+                  </span>
+                  <span className="flashcard-face flashcard-back">
+                    <span className="flashcard-chapter">{current.target.chapter}</span>
+                    <div className="flashcard-content">
+                      <span className="flashcard-label">RÉPONSE</span>
+                      <div className="flashcard-text"><LatexText>{current.back}</LatexText></div>
+                    </div>
+                    <span className="flashcard-hint">Clique pour revenir</span>
+                  </span>
+                </button>
+              </div>
 
               <div className="flashcards-controls">
                 <button onClick={previous} aria-label="Carte précédente"><ChevronLeft size={20} /></button>
