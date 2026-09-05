@@ -29,7 +29,10 @@ const dedicatedMathLessonIds = new Set([
 
 const lessons: LessonDocument[] = [
   ...secondBacLessons.filter(
-    (lesson) => lesson.subjectId !== "physique-chimie" && !dedicatedMathLessonIds.has(lesson.id),
+    (lesson) =>
+      lesson.subjectId !== "physique-chimie" &&
+      lesson.subjectId !== "philosophie" &&
+      !dedicatedMathLessonIds.has(lesson.id),
   ),
   secondBacMathSequencesLesson,
   secondBacMathDerivationLesson,
