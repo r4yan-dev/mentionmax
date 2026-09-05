@@ -59,140 +59,24 @@ function SubjectWidgetArt({ subject }: { subject: string }) {
       </svg>
     );
   }
-
-  if (subject === "physique-chimie") {
-    return (
-      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
-        <g transform="translate(52 54)">
-          <circle cx="62" cy="62" r="22" fill="none" stroke="#0FA3A3" strokeWidth="5" />
-          <ellipse cx="62" cy="62" rx="52" ry="20" fill="none" stroke="#073B3A" strokeWidth="4" transform="rotate(28 62 62)" />
-          <ellipse cx="62" cy="62" rx="52" ry="20" fill="none" stroke="#073B3A" strokeWidth="4" transform="rotate(-28 62 62)" />
-          <circle cx="62" cy="62" r="8" fill="#7A873A" />
-        </g>
-        <g transform="translate(188 72)">
-          <path d="M0 42H46L56 24L66 60L76 24L86 60L96 42H140" fill="none" stroke="#073B3A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="55" y="60" width="30" height="34" rx="5" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="4" />
-          <path d="M0 42H-20M140 42H160" stroke="#073B3A" strokeWidth="5" strokeLinecap="round" />
-        </g>
-        <g transform="translate(366 54) rotate(-3)">
-          <rect width="152" height="74" rx="16" fill="#F8FCFB" stroke="#CFE7E3" strokeWidth="2" />
-          <text x="20" y="40" fontFamily="Caveat, cursive" fontSize="29" fontWeight="700" fill="#0FA3A3">U = R × I</text>
-        </g>
-        <g transform="translate(360 156) rotate(3)">
-          <rect width="162" height="60" rx="15" fill="#EEF4DF" stroke="#D4DFC0" strokeWidth="2" />
-          <text x="20" y="37" fontFamily="Caveat, cursive" fontSize="24" fontWeight="700" fill="#073B3A">λ = vT</text>
-          <path d="M91 30H136" stroke="#7A873A" strokeWidth="4" strokeLinecap="round" />
-          <path d="M126 20L138 30L126 40" fill="none" stroke="#7A873A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-        </g>
-        <circle cx="250" cy="190" r="5" fill="#0FA3A3" />
-        <circle cx="269" cy="190" r="5" fill="#7A873A" />
-        <circle cx="288" cy="190" r="5" fill="#0FA3A3" />
-      </svg>
-    );
-  }
-
-  if (subject === "svt") {
-    return (
-      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
-        <text x="66" y="64" fontFamily="Caveat, cursive" fontSize="25" fontWeight="700" fill="#7A873A">ADN</text>
-        <g transform="translate(70 86)">
-          <path d="M0 0C58 22 58 92 0 116M48 0C-10 22 -10 92 48 116" fill="none" stroke="#7A873A" strokeWidth="6" strokeLinecap="round" />
-          <path d="M6 15H42M2 39H46M2 63H46M2 87H46M6 111H42" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
-        </g>
-        <g transform="translate(200 58)">
-          <circle cx="70" cy="70" r="56" fill="#F8FCFB" stroke="#073B3A" strokeWidth="4" />
-          <ellipse cx="70" cy="70" rx="27" ry="22" fill="#EEF4DF" stroke="#7A873A" strokeWidth="3" />
-          <circle cx="70" cy="70" r="7" fill="#7A873A" />
-          <circle cx="30" cy="88" r="8" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" />
-          <circle cx="108" cy="51" r="7" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" />
-        </g>
-        <g transform="translate(358 63)">
-          <rect x="0" y="0" width="158" height="58" rx="14" fill="#F8FCFB" stroke="#D6E5D4" strokeWidth="2" />
-          <text x="18" y="36" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="800" fill="#7A873A">CELLULE</text>
-        </g>
-        <circle cx="426" cy="174" r="43" fill="none" stroke="#0FA3A3" strokeWidth="4" />
-        <circle cx="426" cy="174" r="13" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" />
-        <circle cx="494" cy="174" r="7" fill="#7A873A" />
-        <path d="M456 174H485" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (subject === "philosophie") {
-    return (
-      <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
-        <g transform="translate(66 55)">
-          <circle cx="66" cy="54" r="36" fill="#F3E5EA" stroke="#76213A" strokeWidth="4" />
-          <path d="M50 48C55 31 79 31 84 48C89 64 75 74 66 74C57 74 45 63 50 48Z" fill="none" stroke="#76213A" strokeWidth="4" />
-          <circle cx="60" cy="49" r="4" fill="#76213A" />
-          <circle cx="73" cy="49" r="4" fill="#76213A" />
-          <path d="M58 61C63 65 68 65 74 61" fill="none" stroke="#76213A" strokeWidth="3" strokeLinecap="round" />
-          <text x="18" y="122" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="900" fill="#76213A">QUESTION</text>
-        </g>
-        <g transform="translate(205 62)">
-          <rect width="104" height="42" rx="21" fill="#F3E5EA" />
-          <text x="52" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#76213A">THÈSE</text>
-          <path d="M104 21H134" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
-          <path d="M126 13L136 21L126 29" fill="none" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-        </g>
-        <g transform="translate(339 62)">
-          <rect width="122" height="42" rx="21" fill="#DDF5F1" />
-          <text x="61" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#073B3A">ARGUMENT</text>
-        </g>
-        <g transform="translate(208 140)">
-          <rect width="126" height="42" rx="21" fill="#F3E5EA" />
-          <text x="63" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#76213A">OBJECTION</text>
-        </g>
-        <g transform="translate(401 134) rotate(-4)">
-          <path d="M0 0C34 -12 71 -12 102 0V92C71 80 34 80 0 92Z" fill="#F8FCFB" stroke="#76213A" strokeWidth="4" />
-          <path d="M51 0V83" stroke="#76213A" strokeWidth="3" />
-          <path d="M14 25H43M59 25H88M14 42H43M59 42H88" stroke="#C89AA9" strokeWidth="3" strokeLinecap="round" />
-        </g>
-        <text x="529" y="215" fontFamily="Caveat, cursive" fontSize="42" fill="#76213A">?</text>
-      </svg>
-    );
-  }
-
-  return (
-    <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-      <rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" />
-      <g transform="translate(54 57) rotate(-4)">
-        <rect width="188" height="114" rx="16" fill="#F8FCFB" stroke="#0FA3A3" strokeWidth="4" />
-        <rect x="18" y="22" width="72" height="24" rx="8" fill="#DDF5F1" />
-        <text x="24" y="40" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#073B3A">VOCAB</text>
-        <text x="20" y="74" fontFamily="Caveat, cursive" fontSize="25" fontWeight="700" fill="#073B3A">achieve</text>
-        <text x="20" y="99" fontFamily="Caveat, cursive" fontSize="22" fontWeight="700" fill="#0FA3A3">although</text>
-      </g>
-      <g transform="translate(283 52)">
-        <path d="M0 0H164C174 0 182 8 182 18V69C182 79 174 87 164 87H76L52 110V87H18C8 87 0 79 0 69Z" fill="#FFFFFF" stroke="#073B3A" strokeWidth="4" />
-        <path d="M24 30H140M24 49H112" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" />
-      </g>
-      <g transform="translate(335 160) rotate(4)">
-        <rect width="166" height="61" rx="14" fill="#F3E5EA" stroke="#E2CBD3" strokeWidth="2" />
-        <text x="23" y="40" fontFamily="Fraunces, serif" fontSize="19" fontWeight="600" fill="#76213A">Writing · A–Z</text>
-      </g>
-      <path d="M61 200C91 187 120 214 150 200C180 186 208 214 238 200" fill="none" stroke="#7A873A" strokeWidth="5" strokeLinecap="round" />
-    </svg>
-  );
+  if (subject === "physique-chimie") return <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" /><g transform="translate(52 54)"><circle cx="62" cy="62" r="22" fill="none" stroke="#0FA3A3" strokeWidth="5" /><ellipse cx="62" cy="62" rx="52" ry="20" fill="none" stroke="#073B3A" strokeWidth="4" transform="rotate(28 62 62)" /><ellipse cx="62" cy="62" rx="52" ry="20" fill="none" stroke="#073B3A" strokeWidth="4" transform="rotate(-28 62 62)" /><circle cx="62" cy="62" r="8" fill="#7A873A" /></g><g transform="translate(188 72)"><path d="M0 42H46L56 24L66 60L76 24L86 60L96 42H140" fill="none" stroke="#073B3A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><rect x="55" y="60" width="30" height="34" rx="5" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="4" /><path d="M0 42H-20M140 42H160" stroke="#073B3A" strokeWidth="5" strokeLinecap="round" /></g><g transform="translate(366 54) rotate(-3)"><rect width="152" height="74" rx="16" fill="#F8FCFB" stroke="#CFE7E3" strokeWidth="2" /><text x="20" y="40" fontFamily="Caveat, cursive" fontSize="29" fontWeight="700" fill="#0FA3A3">U = R × I</text></g><g transform="translate(360 156) rotate(3)"><rect width="162" height="60" rx="15" fill="#EEF4DF" stroke="#D4DFC0" strokeWidth="2" /><text x="20" y="37" fontFamily="Caveat, cursive" fontSize="24" fontWeight="700" fill="#073B3A">λ = vT</text><path d="M91 30H136" stroke="#7A873A" strokeWidth="4" strokeLinecap="round" /><path d="M126 20L138 30L126 40" fill="none" stroke="#7A873A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" /></g><circle cx="250" cy="190" r="5" fill="#0FA3A3" /><circle cx="269" cy="190" r="5" fill="#7A873A" /><circle cx="288" cy="190" r="5" fill="#0FA3A3" /></svg>;
+  if (subject === "svt") return <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" /><text x="66" y="64" fontFamily="Caveat, cursive" fontSize="25" fontWeight="700" fill="#7A873A">ADN</text><g transform="translate(70 86)"><path d="M0 0C58 22 58 92 0 116M48 0C-10 22 -10 92 48 116" fill="none" stroke="#7A873A" strokeWidth="6" strokeLinecap="round" /><path d="M6 15H42M2 39H46M2 63H46M2 87H46M6 111H42" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" /></g><g transform="translate(200 58)"><circle cx="70" cy="70" r="56" fill="#F8FCFB" stroke="#073B3A" strokeWidth="4" /><ellipse cx="70" cy="70" rx="27" ry="22" fill="#EEF4DF" stroke="#7A873A" strokeWidth="3" /><circle cx="70" cy="70" r="7" fill="#7A873A" /><circle cx="30" cy="88" r="8" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" /><circle cx="108" cy="51" r="7" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" /></g><g transform="translate(358 63)"><rect width="158" height="58" rx="14" fill="#F8FCFB" stroke="#D6E5D4" strokeWidth="2" /><text x="18" y="36" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="800" fill="#7A873A">CELLULE</text></g><circle cx="426" cy="174" r="43" fill="none" stroke="#0FA3A3" strokeWidth="4" /><circle cx="426" cy="174" r="13" fill="#DDF5F1" stroke="#0FA3A3" strokeWidth="3" /><circle cx="494" cy="174" r="7" fill="#7A873A" /><path d="M456 174H485" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" /></svg>;
+  if (subject === "philosophie") return <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" /><g transform="translate(66 55)"><circle cx="66" cy="54" r="36" fill="#F3E5EA" stroke="#76213A" strokeWidth="4" /><path d="M50 48C55 31 79 31 84 48C89 64 75 74 66 74C57 74 45 63 50 48Z" fill="none" stroke="#76213A" strokeWidth="4" /><circle cx="60" cy="49" r="4" fill="#76213A" /><circle cx="73" cy="49" r="4" fill="#76213A" /><path d="M58 61C63 65 68 65 74 61" fill="none" stroke="#76213A" strokeWidth="3" strokeLinecap="round" /><text x="18" y="122" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="900" fill="#76213A">QUESTION</text></g><g transform="translate(205 62)"><rect width="104" height="42" rx="21" fill="#F3E5EA" /><text x="52" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#76213A">THÈSE</text><path d="M104 21H134" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" /><path d="M126 13L136 21L126 29" fill="none" stroke="#073B3A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" /></g><g transform="translate(339 62)"><rect width="122" height="42" rx="21" fill="#DDF5F1" /><text x="61" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#073B3A">ARGUMENT</text></g><g transform="translate(208 140)"><rect width="126" height="42" rx="21" fill="#F3E5EA" /><text x="63" y="27" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#76213A">OBJECTION</text></g><g transform="translate(401 134) rotate(-4)"><path d="M0 0C34 -12 71 -12 102 0V92C71 80 34 80 0 92Z" fill="#F8FCFB" stroke="#76213A" strokeWidth="4" /><path d="M51 0V83" stroke="#76213A" strokeWidth="3" /><path d="M14 25H43M59 25H88M14 42H43M59 42H88" stroke="#C89AA9" strokeWidth="3" strokeLinecap="round" /></g><text x="529" y="215" fontFamily="Caveat, cursive" fontSize="42" fill="#76213A">?</text></svg>;
+  return <svg className="subject-widget-svg" viewBox="0 0 600 280" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><rect x="30" y="30" width="540" height="220" rx="24" fill="#FFFFFF" stroke="#D9EAE7" strokeWidth="2" /><g transform="translate(54 57) rotate(-4)"><rect width="188" height="114" rx="16" fill="#F8FCFB" stroke="#0FA3A3" strokeWidth="4" /><rect x="18" y="22" width="72" height="24" rx="8" fill="#DDF5F1" /><text x="24" y="40" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="900" fill="#073B3A">VOCAB</text><text x="20" y="74" fontFamily="Caveat, cursive" fontSize="25" fontWeight="700" fill="#073B3A">achieve</text><text x="20" y="99" fontFamily="Caveat, cursive" fontSize="22" fontWeight="700" fill="#0FA3A3">although</text></g><g transform="translate(283 52)"><path d="M0 0H164C174 0 182 8 182 18V69C182 79 174 87 164 87H76L52 110V87H18C8 87 0 79 0 69Z" fill="#FFFFFF" stroke="#073B3A" strokeWidth="4" /><text x="18" y="38" fontFamily="Inter, sans-serif" fontSize="13" fontWeight="900" fill="#073B3A">ENGLISH</text></g></svg>;
 }
 
 export default function Subjects() {
   const { subjectId } = useParams<{ subjectId?: string }>();
-  const { schoolPreferences } = useAccount();
-  const path: UserPath = resolveUserPath(schoolPreferences?.track ?? null, schoolPreferences?.section ?? null);
-  const trackSubjects = getTrackSubjects(path);
+  const { profile, account } = useAccount();
+  const path = resolveUserPath((profile?.academic_path ?? account?.academic_path) as UserPath | undefined);
   const requested = resolveSubject(subjectId);
-  const selected = requested && trackSubjects.some((item) => item.id === requested) ? requested : null;
-
+  const selected = subjectId ? requested : null;
+  const trackSubjects = getTrackSubjects(path);
   const lessons = useMemo(() => selected ? lessonService.list(selected, path) : [], [selected, path]);
   const exerciseCount = useMemo(() => selected ? contentCatalogService.getBaseExercises(path, selected).length : 0, [selected, path]);
 
   if (subjectId) {
     if (!selected) return <main className="section container"><div className="subject-path-banner"><div className="subject-path-banner__title"><div><strong>{pathLabels[path]}</strong><span>Ce choix détermine les matières disponibles.</span></div></div><PathSwitcher /></div><PageHeader eyebrow="Programme 2BAC" title="Cette matière n'est pas disponible." description={path === "SMB" && requested === "svt" ? "La SVT n'est pas proposée en Sciences Mathématiques B." : "Utilise le sélecteur de parcours pour consulter un autre programme."} /><Link to="/subjects" className="btn btn-secondary">Retour aux matières</Link></main>;
-
     const subject = subjectCatalog[selected];
     return <main className="section container">
       <div className="subject-path-banner"><div className="subject-path-banner__title"><SubjectIcon type={subjectTypes[selected]} label={subject.name} /><div><strong>{pathLabels[path]}</strong><span>{subject.name} · programme 2BAC</span></div></div><PathSwitcher /></div>
@@ -229,7 +113,7 @@ export default function Subjects() {
         <div className="subject-large-card__top"><span className="subject-large-card__index">0{index + 1}</span><span className="subject-large-card__open">Ouvrir <ArrowUpRight size={13} /></span></div>
         <div className="subject-large-card__illustration"><SubjectWidgetArt subject={subject.id} /></div>
         <div className="subject-large-card__copy">
-          <h2>{subject.name}</h2>
+          <h2>{subject.id === "maths" ? "maths1" : subject.name}</h2>
           <p>{subject.id === "maths" ? "Fonctions, analyse, probabilités et méthodes du Bac." : subject.id === "physique-chimie" ? "Ondes, mécanique, électricité, énergie et chimie." : subject.id === "svt" ? "Génétique, immunologie, géologie et sciences du vivant." : subject.id === "philosophie" ? "Notions, problématiques, dissertations et argumentation." : "Vocabulary, grammar, communication et writing."}</p>
         </div>
         <div className="subject-large-card__footer"><span>{subject.id === "philosophie" ? "Notions · Dissertations · Révision" : subject.id === "anglais" ? "Lessons · Exercises · Revision" : "Cours · Exercices · Révision"}</span><span className="subject-large-card__arrow"><ArrowRight size={15} /></span></div>
