@@ -47,24 +47,32 @@
   flex: 0 0 168px !important;
   margin: 12px 14px 0 !important;
   overflow: hidden !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  display: block !important;
   border: 1px solid rgba(7,59,58,.09) !important;
   border-radius: 15px !important;
   background: linear-gradient(180deg, rgba(221,245,241,.58), rgba(255,255,255,.42)) !important;
 }
 
-.subjects-launcher-page .subject-widget-svg {
+/* Hard-pin the SVG to the illustration viewport. This prevents any global
+   svg/card rules from translating it to the right or shrinking its box. */
+.subjects-launcher-page .subject-large-card__illustration .subject-widget-svg {
+  position: absolute !important;
+  inset: 0 !important;
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  flex: 1 1 auto !important;
-  overflow: visible !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  translate: none !important;
+  rotate: none !important;
+  scale: 1 !important;
+  flex: none !important;
+  overflow: hidden !important;
 }
 
 .subjects-launcher-page .subject-large-card__copy {
