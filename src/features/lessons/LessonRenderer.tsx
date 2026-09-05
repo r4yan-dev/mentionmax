@@ -76,9 +76,28 @@ function renderBlock(block: LessonBlock, index: number) {
   return <section key={key} className={`lesson-block lesson-block--${block.type}`}><h2>{block.title}</h2>{block.text && <p><LatexText>{block.text}</LatexText></p>}</section>;
 }
 
+function renderArabicIntroCard(blocks: LessonBlock[]) {
+  const titleBlock = blocks[0];
+  const headingBlock = blocks[1];
+  const textBlock = blocks[2];
+
+  return (
+    <section className="lesson-intro-card" aria-labelledby="lesson-intro-title">
+      <div className="lesson-intro-card__title">
+        <h1 id="lesson-intro-title">{titleBlock.title || titleBlock.text}</h1>
+      </div>
+      {headingBlock?.type === "heading" && <h2>{headingBlock.title || headingBlock.text}</h2>}
+      {textBlock?.type === "text" && textBlock.text && <p><LatexText>{textBlock.text}</LatexText></p>}
+    </section>
+  );
+}
+
 export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
   const pages = lesson.blocks.filter((block) => block.type === "page").length;
   const isArabic = lesson.language === "ar";
+  const isArabicIntro = isArabic && lesson.blocks[0]?.type === "title" && lesson.blocks[1]?.type === "heading" && lesson.blocks[2]?.type === "text";
+  const blocks = isArabicIntro ? lesson.blocks.slice(3) : lesson.blocks;
+
   return (
     <article
       className="lesson-document"
@@ -86,7 +105,8 @@ export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
       dir={isArabic ? "rtl" : "ltr"}
       data-page-count={pages}
     >
-      {lesson.blocks.map(renderBlock)}
+      {isArabicIntro && renderArabicIntroCard(lesson.blocks)}
+      {blocks.map((block, index) => renderBlock(block, index + (isArabicIntro ? 3 : 0)))}
     </article>
   );
 }
