@@ -7,6 +7,11 @@ import { secondBacMathDerivationLesson } from "../../data/curriculum/secondBacMa
 import { secondBacMathProbabilityLesson } from "../../data/curriculum/secondBacMathProbabilityLesson";
 import { secondBacMathLogLesson } from "../../data/curriculum/secondBacMathLogLesson";
 import { secondBacMathComplexesLesson } from "../../data/curriculum/secondBacMathComplexesLesson";
+import { secondBacMathExponentialLesson } from "../../data/curriculum/secondBacMathExponentialLesson";
+import { secondBacMathDifferentialEquationsLesson } from "../../data/curriculum/secondBacMathDifferentialEquationsLesson";
+import { secondBacMathIntegralLesson } from "../../data/curriculum/secondBacMathIntegralLesson";
+import { secondBacMathSpaceGeometryLesson } from "../../data/curriculum/secondBacMathSpaceGeometryLesson";
+import { secondBacMathCombinatoricsLesson } from "../../data/curriculum/secondBacMathCombinatoricsLesson";
 import { secondBacPcLessonsLong } from "./pcLessonsLong";
 import { secondBacSvtLessons, secondBacEnglishLessons, secondBacPhilosophyLessons } from "../../data/curriculum/secondBacHumanLessons";
 
@@ -17,6 +22,8 @@ const dedicatedMathLessonIds = new Set([
   "2bac-maths-probabilities",
   "2bac-maths-log",
   "2bac-maths-complexes",
+  "2bac-maths-exp",
+  "2bac-maths-differential",
 ]);
 
 const lessons: LessonDocument[] = [
@@ -29,6 +36,11 @@ const lessons: LessonDocument[] = [
   secondBacMathProbabilityLesson,
   secondBacMathLogLesson,
   secondBacMathComplexesLesson,
+  secondBacMathExponentialLesson,
+  secondBacMathDifferentialEquationsLesson,
+  secondBacMathIntegralLesson,
+  secondBacMathSpaceGeometryLesson,
+  secondBacMathCombinatoricsLesson,
   secondBacMathLesson2,
   ...secondBacPcLessonsLong.slice(0, 14),
   ...secondBacSvtLessons,
