@@ -17,6 +17,7 @@ import Handnotes from "./pages/Handnotes";
 import Subjects from "./pages/Subjects";
 import SubjectsLauncher from "./pages/SubjectsLauncher";
 import Lessons from "./pages/Lessons";
+import Flashcards from "./pages/Flashcards";
 import Focus from "./pages/Focus";
 import FocusGroupDetail from "./pages/FocusGroupDetail";
 import FocusGroupNew from "./pages/FocusGroupNew";
@@ -45,6 +46,7 @@ export default function App() {
       <Route path="/matieres" element={<SubjectsLauncher />} />
       <Route path="/subjects" element={<SubjectsLauncher />} />
       <Route path="/subjects/:subjectId" element={<Subjects />} />
+      <Route path="/flashcards" element={<Flashcards />} />
       <Route path="/lecons/:subjectId" element={<Lessons />} />
       <Route path="/lecons/:subjectId/:lessonId" element={<Lessons />} />
       <Route path="/exercices" element={<Exercises />} />
