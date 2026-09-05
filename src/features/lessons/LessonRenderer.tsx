@@ -37,6 +37,8 @@ function renderBlock(block: LessonBlock, index: number) {
   const key = `${block.type}-${index}`;
 
   if (block.type === "title") return <h1 key={key}>{block.title || block.text}</h1>;
+  if (block.type === "heading") return <h2 key={key}>{block.title || block.text}</h2>;
+  if (block.type === "text") return <section key={key} className="lesson-block lesson-block--text"><p><LatexText>{block.text || ""}</LatexText></p></section>;
   if (block.type === "page") return <header key={key} className="lesson-page-break"><span>{block.title}</span><p>{block.text ? <LatexText>{block.text}</LatexText> : null}</p></header>;
 
   if (block.type === "formula") {
