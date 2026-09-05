@@ -1,0 +1,50 @@
+.lesson-document .lesson-block,
+.lesson-document .lesson-callout {
+  grid-column: span 4;
+  padding: 22px 20px 24px;
+}
+
+.lesson-document .lesson-block h2 {
+  font-size: clamp(21px, 2vw, 27px);
+  margin-bottom: 9px;
+}
+
+.lesson-document .lesson-block p,
+.lesson-document .lesson-callout p {
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.5;
+}
+
+.lesson-document .lesson-block--graph,
+.lesson-document .lesson-block--diagram,
+.lesson-document .lesson-block--comparison {
+  min-height: 250px;
+}
+
+.lesson-document .lesson-block--graph .lesson-visual,
+.lesson-document .lesson-block--diagram .lesson-visual {
+  margin-top: 8px;
+}
+
+.lesson-document .lesson-formula {
+  margin: 2px 30px 6px;
+  padding: 22px 24px 24px;
+}
+
+.lesson-document .lesson-recap {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1050px) {
+  .lesson-document .lesson-block,
+  .lesson-document .lesson-callout {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 700px) {
+  .lesson-document .lesson-block,
+  .lesson-document .lesson-callout {
+    grid-column: 1 / -1;
+  }
+}
