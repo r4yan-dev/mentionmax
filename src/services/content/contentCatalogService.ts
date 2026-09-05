@@ -5,7 +5,7 @@ import { baseSMMathExercises } from "../../data/mock/baseSMMathExercises";
 import { baseSMPCExercises } from "../../data/mock/baseSMPCExercises";
 import { base2BacHumanExercises } from "../../data/mock/base2BacHumanExercises";
 import { extended2BacExercises } from "../../data/mock/base2BacHumanExercisesExtended";
-import { base2BacSPMathExercises } from "../../data/mock/base2BacSPMathExercises";
+import { base2BacSPMathLessonExercises } from "../../data/mock/base2BacSPMathLessonExercises";
 import { base2BacSMLimitExercises } from "../../data/mock/base2BacSMLimitExercises";
 import { base2BacSMSequenceLimitLessonExercises } from "../../data/mock/base2BacSMSequenceLimitLessonExercises";
 import { base2BacSMSequencesLessonExercises } from "../../data/mock/base2BacSMSequencesLessonExercises";
@@ -40,7 +40,7 @@ const allExercises: Exercise[] = [
   ...baseSMPCExercises,
   ...base2BacHumanExercises,
   ...extended2BacExercises,
-  ...base2BacSPMathExercises,
+  ...base2BacSPMathLessonExercises,
   ...base2BacSMLimitExercises,
   ...base2BacSMSequenceLimitLessonExercises,
   ...base2BacSMSequencesLessonExercises,
