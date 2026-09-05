@@ -6,6 +6,7 @@ import "./lesson-renderer-fonts.css";
 import "./lesson-renderer-grid.css";
 import "./lesson-renderer-layout.css";
 import "./lesson-renderer-rtl.css";
+import "./philosophy-arabic.css";
 
 function VisualBlock({ type, title }: { type: "graph" | "diagram"; title?: string }) {
   if (type === "graph") {
@@ -86,6 +87,14 @@ function philosopherSticker(title: string) {
   return philosophers.find((name) => title.includes(name)) || "فيلسوف";
 }
 
+function philosophyNote(title: string) {
+  if (title.includes("خطوات") || title.includes("المنهج")) return "خطوات";
+  if (title.includes("قيمة") || title.includes("الهوية")) return "مهم";
+  if (title.includes("الحرية") || title.includes("الضرورة")) return "فكرة";
+  if (title.includes("الصراع") || title.includes("العلاقة")) return "ركّز";
+  return "احفظ";
+}
+
 function renderArabicConceptCard(heading: LessonBlock, text: LessonBlock, index: number) {
   const headingTitle = heading.title || heading.text || "";
   return (
@@ -93,6 +102,7 @@ function renderArabicConceptCard(heading: LessonBlock, text: LessonBlock, index:
       key={`arabic-concept-${index}`}
       className="lesson-block lesson-philosophy-card"
       data-philosopher={philosopherSticker(headingTitle)}
+      data-note={philosophyNote(headingTitle)}
       aria-labelledby={`philosophy-card-title-${index}`}
     >
       <h2 id={`philosophy-card-title-${index}`}>{headingTitle}</h2>
