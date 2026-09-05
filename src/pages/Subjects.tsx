@@ -11,6 +11,7 @@ import { contentCatalogService } from "../services/content/contentCatalogService
 import PathSwitcher from "../components/curriculum/PathSwitcher";
 import PeopleFeature, { type PeopleFeatureVariant } from "../components/ui/PeopleFeature";
 import "../styles/curriculum-path.css";
+import "../styles/subjects-launcher-fix.css";
 
 const subjectTypes: Record<string, SubjectType> = { maths: "math", "physique-chimie": "physics", svt: "svt", anglais: "english", philosophie: "philosophy" };
 const subjectSlug: Record<string, string> = { maths: "maths", "physique-chimie": "physique-chimie", svt: "svt", anglais: "anglais", philosophie: "philosophie" };
