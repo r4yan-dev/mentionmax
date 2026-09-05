@@ -16,50 +16,6 @@
   transform: rotate(-3deg);
 }
 
-.lesson-document[dir="rtl"] h1 {
-  margin: 0 10px 24px !important;
-  padding: 12px 0 18px !important;
-  text-align: right;
-  line-height: 1.05 !important;
-  letter-spacing: 0 !important;
-  transform: none !important;
-  scroll-margin-top: 120px;
-}
-
-.lesson-document[dir="rtl"] h1::before {
-  content: "فلسفة · ورقة الدرس";
-  margin: 0 0 12px;
-  text-align: right;
-  letter-spacing: 0;
-  direction: rtl;
-  transform: none;
-}
-
-.lesson-document[dir="rtl"] h1::after {
-  right: auto;
-  left: -8px;
-  bottom: -18px;
-  transform: rotate(-8deg);
-}
-
-.lesson-document[dir="rtl"] > .lesson-section-heading {
-  margin: 28px 0 12px;
-  padding: 10px 16px;
-  border-right: 5px solid var(--turquoise, #42c9bd);
-  border-left: 0;
-  border-radius: 10px;
-  background: rgba(221,245,241,.72);
-  color: #073b3a;
-}
-
-.lesson-document[dir="rtl"] > .lesson-section-heading h2 {
-  margin: 0;
-  font-family: "Kalam", cursive;
-  font-size: clamp(25px, 2.8vw, 34px);
-  line-height: 1.15;
-  font-weight: 700;
-}
-
 /* Title + opening explanation are one real lesson card, matching the shared maths/physics card language. */
 .lesson-document[dir="rtl"] .lesson-intro-card {
   grid-column: 1 / -1;
@@ -141,13 +97,64 @@
   text-align: right;
 }
 
-/* Keep the same multi-column card rhythm as the other lesson pages. */
+.lesson-document[dir="rtl"] h1 {
+  margin: 0 10px 24px !important;
+  padding: 12px 0 18px !important;
+  text-align: right;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+  transform: none !important;
+  scroll-margin-top: 120px;
+}
+
+.lesson-document[dir="rtl"] h1::before {
+  content: "فلسفة · ورقة الدرس";
+  margin: 0 0 12px;
+  text-align: right;
+  letter-spacing: 0;
+  direction: rtl;
+  transform: none;
+}
+
+.lesson-document[dir="rtl"] h1::after {
+  right: auto;
+  left: -8px;
+  bottom: -18px;
+  transform: rotate(-8deg);
+}
+
+.lesson-document[dir="rtl"] > .lesson-section-heading {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 17px 16px 18px;
+  border: 2px solid rgba(15,163,163,.18);
+  border-right: 5px solid var(--turquoise, #42c9bd);
+  border-left: 0;
+  border-radius: 25px 19px 28px 20px;
+  background: rgba(221,245,241,.72);
+  color: #073b3a;
+  box-shadow: 7px 9px 0 rgba(23,59,57,.045), 0 14px 28px rgba(23,59,57,.04);
+  text-align: right;
+}
+
+.lesson-document[dir="rtl"] > .lesson-section-heading h2 {
+  margin: 0;
+  font-family: "Kalam", cursive;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.2;
+  font-weight: 700;
+  text-align: right;
+}
+
 @media (min-width: 851px) {
   .lesson-document[dir="rtl"] .lesson-block,
   .lesson-document[dir="rtl"] .lesson-callout {
     display: block;
     width: auto;
     grid-column: span 1 !important;
+    align-self: start;
     margin: 0;
     padding: 17px 16px 18px !important;
     text-align: right;
@@ -161,7 +168,19 @@
   text-align: right;
 }
 
-/* Preserve the hand-placed/card feel. Only mirror decoration directions. */
+/* Text and heading cards size to their own content instead of becoming tall empty panels. */
+.lesson-document[dir="rtl"] .lesson-block--text,
+.lesson-document[dir="rtl"] > .lesson-section-heading {
+  align-self: start;
+  height: fit-content;
+  min-height: 0;
+}
+
+.lesson-document[dir="rtl"] .lesson-block--text {
+  background: rgba(255,255,255,.88);
+  text-align: right;
+}
+
 .lesson-document[dir="rtl"] .lesson-block:nth-of-type(4n + 1)::before {
   left: auto;
   right: 28px;
@@ -262,13 +281,11 @@
   left: 15px;
 }
 
-/* SVG drawings keep their own LTR coordinate system; text around them stays RTL. */
 .lesson-document[dir="rtl"] .lesson-visual {
   direction: ltr;
   margin: 12px auto 0;
 }
 
-/* Give the reader enough room below the final card even when a fixed badge is present. */
 body > a[href*="netlify"] {
   z-index: 1 !important;
 }
@@ -284,16 +301,16 @@ body > a[href*="netlify"] {
     padding-right: 14px;
   }
 
-  .lesson-document[dir="rtl"] h1 {
-    font-size: clamp(48px, 14vw, 74px);
-  }
-
   .lesson-document[dir="rtl"] .lesson-intro-card {
     padding: 16px 16px 20px;
   }
 
   .lesson-document[dir="rtl"] .lesson-intro-card h1 {
     font-size: clamp(34px, 10vw, 48px);
+  }
+
+  .lesson-document[dir="rtl"] h1 {
+    font-size: clamp(48px, 14vw, 74px);
   }
 
   .lesson-document[dir="rtl"] .lesson-block,
