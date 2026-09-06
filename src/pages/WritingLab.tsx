@@ -3,278 +3,76 @@ import { BookOpenText, Check, FileText, ImagePlus, Languages, Save, Sparkles, Tr
 import "./WritingLab.css";
 
 type WritingSubject = "philosophie" | "anglais";
-
-type Draft = {
-  id: string;
-  subject: WritingSubject;
-  title: string;
-  prompt: string;
-  text: string;
-  updatedAt: string;
-};
-
-type PhotoPage = {
-  id: string;
-  file: File;
-  url: string;
-};
+type Draft = { id: string; subject: WritingSubject; title: string; prompt: string; text: string; updatedAt: string };
+type PhotoPage = { id: string; file: File; url: string };
+type ReviewMode = "review" | "complete";
+type FeedbackItem = { type: "info" | "warning"; title: string; detail: string };
 
 const STORAGE_KEY = "mentionmax:writing-lab:v1";
 const MAX_PHOTO_SIZE_MB = 12;
 const MAX_PHOTO_SIZE_BYTES = MAX_PHOTO_SIZE_MB * 1024 * 1024;
 
 const subjectConfig: Record<WritingSubject, { label: string; language: string; dir: "ltr" | "rtl"; placeholder: string; rubric: string[] }> = {
-  philosophie: {
-    label: "Philosophie",
-    language: "العربية",
-    dir: "rtl",
-    placeholder: "اكتب مقدمتك أو الإشكالية أو التحليل أو الخاتمة…",
-    rubric: ["طرح الإشكال", "الحجاج", "المفاهيم", "المنهجية", "سلامة التعبير"],
-  },
-  anglais: {
-    label: "English",
-    language: "English",
-    dir: "ltr",
-    placeholder: "Start your introduction, argument, or paragraph…",
-    rubric: ["Task response", "Organization", "Grammar", "Vocabulary", "Coherence"],
-  },
+  philosophie: { label: "Philosophie", language: "العربية", dir: "rtl", placeholder: "اكتب مقدمتك أو الإشكالية أو التحليل أو الخاتمة…", rubric: ["طرح الإشكال", "الحجاج", "المفاهيم", "المنهجية", "سلامة التعبير"] },
+  anglais: { label: "English", language: "English", dir: "ltr", placeholder: "Start your introduction, argument, or paragraph…", rubric: ["Task response", "Organization", "Grammar", "Vocabulary", "Coherence"] },
 };
 
-function readDrafts(): Draft[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function formatSaved(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(date);
-}
-
-function countWords(text: string) {
-  return text.trim() ? text.trim().split(/\s+/).length : 0;
+function readDrafts(): Draft[] { try { const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return []; const parsed = JSON.parse(raw); return Array.isArray(parsed) ? parsed : []; } catch { return []; } }
+function formatSaved(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(date); }
+function countWords(text: string) { return text.trim() ? text.trim().split(/\s+/).length : 0; }
+function buildLocalFeedback(text: string, subject: WritingSubject): FeedbackItem[] {
+  const trimmed = text.trim(); if (!trimmed) return [{ type: "info", title: subject === "philosophie" ? "ابدأ بالكتابة" : "Start writing", detail: subject === "philosophie" ? "ستظهر الملاحظات هنا بعد كتابة النص أو إضافة نسخة من الصورة." : "Feedback will appear here after you write or add a transcription." }];
+  const feedback: FeedbackItem[] = [];
+  if (countWords(text) < 80) feedback.push({ type: "info", title: subject === "philosophie" ? "النص ما زال قصيراً" : "Text is still short", detail: subject === "philosophie" ? "أضف مزيداً من الحجج والمفاهيم والروابط قبل التقييم الكامل." : "Develop the argument with more evidence, explanation, and transitions." });
+  if (!/[.!?؟]$/.test(trimmed)) feedback.push({ type: "warning", title: subject === "philosophie" ? "راجع علامات الترقيم" : "Check punctuation", detail: subject === "philosophie" ? "تحقق من علامة الترقيم في نهاية النص." : "Check the punctuation at the end of the text." });
+  if (/\b(\p{L}{4,})\s+\1\b/iu.test(trimmed)) feedback.push({ type: "warning", title: subject === "philosophie" ? "تكرار كلمة" : "Repeated word", detail: subject === "philosophie" ? "تم العثور على كلمة مكررة مباشرة. راجع الصياغة." : "A repeated word was detected next to itself. Check the phrasing." });
+  feedback.push({ type: "info", title: subject === "philosophie" ? "التصحيح الذكي جاهز" : "AI correction ready", detail: subject === "philosophie" ? "يمكن لاحقاً استبدال هذه الفحوص البسيطة بتقييم تربوي كامل." : "These simple checks can later be replaced by full pedagogical AI feedback." });
+  return feedback;
 }
 
 export default function WritingLab() {
   const [subject, setSubject] = useState<WritingSubject>("philosophie");
-  const [title, setTitle] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [text, setText] = useState("");
-  const [transcription, setTranscription] = useState("");
-  const [photos, setPhotos] = useState<PhotoPage[]>([]);
-  const [drafts, setDrafts] = useState<Draft[]>([]);
-  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
-  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [title, setTitle] = useState(""); const [prompt, setPrompt] = useState(""); const [text, setText] = useState("");
+  const [transcription, setTranscription] = useState(""); const [photos, setPhotos] = useState<PhotoPage[]>([]); const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null); const [saved, setSaved] = useState(false); const [photoError, setPhotoError] = useState<string | null>(null);
+  const [reviewMode, setReviewMode] = useState<ReviewMode>("review"); const [showWorkspace, setShowWorkspace] = useState(false); const [completionDraft, setCompletionDraft] = useState("");
+  const [completionStyle, setCompletionStyle] = useState<"continue" | "improve" | "finish">("continue"); const [rubricScores, setRubricScores] = useState<Record<string, number>>({});
+  const config = subjectConfig[subject]; const words = useMemo(() => countWords(text), [text]); const characters = text.length;
+  const feedback = useMemo(() => buildLocalFeedback(text, subject), [text, subject]);
+  const rubricTotal = config.rubric.reduce((sum, label) => sum + (rubricScores[label] ?? 0), 0);
 
-  const config = subjectConfig[subject];
-  const words = useMemo(() => countWords(text), [text]);
-  const characters = text.length;
+  useEffect(() => setDrafts(readDrafts()), []);
+  useEffect(() => () => photos.forEach((photo) => URL.revokeObjectURL(photo.url)), [photos]);
+  useEffect(() => { if (!title && !prompt && !text) return; const timer = window.setTimeout(() => saveDraft(false), 700); return () => window.clearTimeout(timer); }, [subject, title, prompt, text]);
 
-  useEffect(() => {
-    setDrafts(readDrafts());
-  }, []);
+  function saveDraft(showFeedback = true) { if (!title.trim() && !text.trim() && !prompt.trim()) return; const now = new Date().toISOString(); const id = activeDraftId ?? crypto.randomUUID(); const next: Draft = { id, subject, title: title.trim() || "Sans titre", prompt: prompt.trim(), text, updatedAt: now }; setDrafts((current) => { const updated = [next, ...current.filter((draft) => draft.id !== id)].slice(0, 20); localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); return updated; }); setActiveDraftId(id); if (showFeedback) { setSaved(true); window.setTimeout(() => setSaved(false), 1600); } }
+  function clearWorkspace() { photos.forEach((photo) => URL.revokeObjectURL(photo.url)); setPhotos([]); setCompletionDraft(""); setShowWorkspace(false); setReviewMode("review"); setRubricScores({}); }
+  function newDraft(nextSubject: WritingSubject = subject) { clearWorkspace(); setSubject(nextSubject); setTitle(""); setPrompt(""); setText(""); setTranscription(""); setActiveDraftId(null); setSaved(false); setPhotoError(null); }
+  function openDraft(draft: Draft) { clearWorkspace(); setSubject(draft.subject); setTitle(draft.title === "Sans titre" ? "" : draft.title); setPrompt(draft.prompt); setText(draft.text); setTranscription(""); setActiveDraftId(draft.id); setSaved(false); setPhotoError(null); }
+  function deleteDraft(id: string) { const next = drafts.filter((draft) => draft.id !== id); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); setDrafts(next); if (activeDraftId === id) newDraft(subject); }
+  function addPhotos(fileList: FileList | null) { if (!fileList) return; setPhotoError(null); const incoming = Array.from(fileList); const valid = incoming.filter((file) => file.type.startsWith("image/") && file.size <= MAX_PHOTO_SIZE_BYTES); if (valid.length !== incoming.length) setPhotoError(`Chaque photo doit être une image de ${MAX_PHOTO_SIZE_MB} Mo maximum.`); if (!valid.length) return; setPhotos((current) => [...current, ...valid.map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) }))].slice(0, 12)); }
+  function removePhoto(id: string) { setPhotos((current) => { const target = current.find((photo) => photo.id === id); if (target) URL.revokeObjectURL(target.url); return current.filter((photo) => photo.id !== id); }); }
+  function useTranscription() { const cleaned = transcription.trim(); if (!cleaned) return; setText((current) => current.trim() ? `${current.trim()}\n\n${cleaned}` : cleaned); setTranscription(""); }
+  function startCompletion() { setReviewMode("complete"); setShowWorkspace(true); }
+  function openCorrection() { setReviewMode("review"); setShowWorkspace(true); }
+  function updateRubric(label: string, score: number) { setRubricScores((current) => ({ ...current, [label]: score })); }
 
-  useEffect(() => {
-    return () => photos.forEach((photo) => URL.revokeObjectURL(photo.url));
-  }, [photos]);
-
-  useEffect(() => {
-    if (!title && !prompt && !text) return;
-    const timer = window.setTimeout(() => saveDraft(false), 700);
-    return () => window.clearTimeout(timer);
-  }, [subject, title, prompt, text]);
-
-  function saveDraft(showFeedback = true) {
-    if (!title.trim() && !text.trim() && !prompt.trim()) return;
-    const now = new Date().toISOString();
-    const id = activeDraftId ?? crypto.randomUUID();
-    const next: Draft = { id, subject, title: title.trim() || "Sans titre", prompt: prompt.trim(), text, updatedAt: now };
-    setDrafts((current) => {
-      const without = current.filter((draft) => draft.id !== id);
-      const updated = [next, ...without].slice(0, 20);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-    setActiveDraftId(id);
-    if (showFeedback) {
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
-    }
-  }
-
-  function newDraft(nextSubject: WritingSubject = subject) {
-    photos.forEach((photo) => URL.revokeObjectURL(photo.url));
-    setSubject(nextSubject);
-    setTitle("");
-    setPrompt("");
-    setText("");
-    setTranscription("");
-    setPhotos([]);
-    setActiveDraftId(null);
-    setSaved(false);
-    setPhotoError(null);
-  }
-
-  function openDraft(draft: Draft) {
-    photos.forEach((photo) => URL.revokeObjectURL(photo.url));
-    setPhotos([]);
-    setSubject(draft.subject);
-    setTitle(draft.title === "Sans titre" ? "" : draft.title);
-    setPrompt(draft.prompt);
-    setText(draft.text);
-    setTranscription("");
-    setActiveDraftId(draft.id);
-    setSaved(false);
-    setPhotoError(null);
-  }
-
-  function deleteDraft(id: string) {
-    const next = drafts.filter((draft) => draft.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setDrafts(next);
-    if (activeDraftId === id) newDraft(subject);
-  }
-
-  function addPhotos(fileList: FileList | null) {
-    if (!fileList) return;
-    setPhotoError(null);
-    const incoming = Array.from(fileList);
-    const rejected = incoming.find((file) => !file.type.startsWith("image/") || file.size > MAX_PHOTO_SIZE_BYTES);
-    if (rejected) {
-      setPhotoError(`Chaque photo doit être une image de ${MAX_PHOTO_SIZE_MB} Mo maximum.`);
-    }
-    const valid = incoming.filter((file) => file.type.startsWith("image/") && file.size <= MAX_PHOTO_SIZE_BYTES);
-    if (!valid.length) return;
-    const pages = valid.map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) }));
-    setPhotos((current) => [...current, ...pages].slice(0, 12));
-  }
-
-  function removePhoto(id: string) {
-    setPhotos((current) => {
-      const target = current.find((photo) => photo.id === id);
-      if (target) URL.revokeObjectURL(target.url);
-      return current.filter((photo) => photo.id !== id);
-    });
-  }
-
-  function useTranscription() {
-    const cleaned = transcription.trim();
-    if (!cleaned) return;
-    setText((current) => current.trim() ? `${current.trim()}\n\n${cleaned}` : cleaned);
-    setTranscription("");
-  }
-
-  return (
-    <main className="writing-lab-page">
-      <header className="writing-lab-header">
-        <div>
-          <span className="writing-lab-eyebrow"><Sparkles size={14} /> WRITING LAB</span>
-          <h1>Écris sans perdre ton fil.</h1>
-          <p>Un espace dédié à la dissertation et à l’écriture en anglais. Écris, photographie tes pages, vérifie la transcription puis travaille ton texte.</p>
-        </div>
-        <button type="button" className="writing-lab-save" onClick={() => saveDraft(true)} disabled={!title.trim() && !prompt.trim() && !text.trim()}>
-          {saved ? <Check size={15} /> : <Save size={15} />}
-          {saved ? "Enregistré" : "Enregistrer"}
-        </button>
-      </header>
-
-      <div className="writing-lab-layout">
-        <aside className="writing-lab-sidebar">
-          <div className="writing-lab-sidebar__section">
-            <span className="writing-lab-label">MATIÈRE</span>
-            <div className="writing-lab-subjects">
-              {(Object.keys(subjectConfig) as WritingSubject[]).map((item) => (
-                <button key={item} type="button" className={`writing-lab-subject ${subject === item ? "active" : ""}`} onClick={() => newDraft(item)}>
-                  <span className="writing-lab-subject__icon">{item === "philosophie" ? <BookOpenText size={16} /> : <Languages size={16} />}</span>
-                  <span><strong>{subjectConfig[item].label}</strong><small>{subjectConfig[item].language}</small></span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="writing-lab-sidebar__section writing-lab-sidebar__section--drafts">
-            <div className="writing-lab-section-row"><span className="writing-lab-label">MES BROUILLONS</span><button type="button" className="writing-lab-new" onClick={() => newDraft()}><FileText size={14} /> Nouveau</button></div>
-            <div className="writing-lab-drafts">
-              {drafts.length === 0 && <div className="writing-lab-empty">Aucun brouillon enregistré.</div>}
-              {drafts.map((draft) => (
-                <button key={draft.id} type="button" className={`writing-lab-draft ${activeDraftId === draft.id ? "active" : ""}`} onClick={() => openDraft(draft)}>
-                  <span><strong>{draft.title}</strong><small>{subjectConfig[draft.subject].label} · {formatSaved(draft.updatedAt)}</small></span>
-                  <Trash2 size={14} onClick={(event) => { event.stopPropagation(); deleteDraft(draft.id); }} />
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        <section className="writing-lab-editor-card">
-          <div className="writing-lab-editor-top">
-            <div className={`writing-lab-context ${config.dir === "rtl" ? "is-rtl" : ""}`} dir={config.dir}><span>{config.label}</span><i>·</i><span>{config.language}</span></div>
-            <div className="writing-lab-tools"><span>{words} mots</span><span>{characters} caractères</span></div>
-          </div>
-
-          <input className="writing-lab-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={subject === "philosophie" ? "عنوان المقالة الفلسفية" : "Essay title"} dir={config.dir} />
-          <textarea className="writing-lab-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder={subject === "philosophie" ? "الموضوع / السؤال (اختياري)" : "Essay prompt (optional)"} rows={3} dir={config.dir} />
-
-          <div className="writing-lab-input-actions">
-            <button type="button" className="writing-lab-input-action writing-lab-input-action--primary"><FileText size={16} /> {subject === "philosophie" ? "الكتابة" : "Write"}</button>
-            <label htmlFor="writing-lab-photo" className="writing-lab-input-action">
-              <ImagePlus size={16} /> {subject === "philosophie" ? "استيراد صورة" : "Import photo"}
-              <span>OCR جاهز · Part 2</span>
-            </label>
-            <input id="writing-lab-photo" hidden type="file" accept="image/*" capture="environment" multiple onChange={(event) => { addPhotos(event.target.files); event.currentTarget.value = ""; }} />
-          </div>
-
-          {photos.length > 0 && (
-            <section className="writing-lab-photo-review" aria-label="Photos importées">
-              <div className="writing-lab-photo-review__header">
-                <div><span className="writing-lab-label">PAGES IMPORTÉES</span><strong>{photos.length} photo{photos.length > 1 ? "s" : ""}</strong></div>
-                <label htmlFor="writing-lab-photo-more" className="writing-lab-photo-add"><ImagePlus size={14} /> Ajouter</label>
-                <input id="writing-lab-photo-more" hidden type="file" accept="image/*" capture="environment" multiple onChange={(event) => { addPhotos(event.target.files); event.currentTarget.value = ""; }} />
-              </div>
-              <div className="writing-lab-photo-grid">
-                {photos.map((photo, index) => (
-                  <article key={photo.id} className="writing-lab-photo-card">
-                    <img src={photo.url} alt={`Page ${index + 1}`} />
-                    <div><span>Page {index + 1}</span><button type="button" onClick={() => removePhoto(photo.id)} aria-label={`Supprimer page ${index + 1}`}><X size={14} /></button></div>
-                  </article>
-                ))}
-              </div>
-              {photoError && <p className="writing-lab-photo-error">{photoError}</p>}
-              <div className="writing-lab-transcription">
-                <div className="writing-lab-transcription__header"><div><span className="writing-lab-label">TRANSCRIPTION</span><strong>Vérifie le texte avant de l’utiliser.</strong></div><span className="writing-lab-transcription__status">OCR IA · à connecter</span></div>
-                <textarea value={transcription} onChange={(event) => setTranscription(event.target.value)} placeholder={config.dir === "rtl" ? "La transcription apparaîtra ici. Tu pourras la corriger avant de l’ajouter à ta rédaction." : "The extracted transcription will appear here. Check it before adding it to your essay."} dir={config.dir} />
-                <div className="writing-lab-transcription__actions"><span>Le texte reste modifiable avant insertion.</span><button type="button" onClick={useTranscription} disabled={!transcription.trim()}><Check size={14} /> {config.dir === "rtl" ? "إضافة إلى المقالة" : "Ajouter au texte"}</button></div>
-              </div>
-            </section>
-          )}
-
-          <textarea className={`writing-lab-textarea ${config.dir === "rtl" ? "is-rtl" : ""}`} value={text} onChange={(event) => setText(event.target.value)} placeholder={config.placeholder} spellCheck="true" dir={config.dir} />
-
-          <div className="writing-lab-bottom">
-            <div><span>Structure prête pour</span><strong dir={config.dir}>{config.rubric.join(" · ")}</strong></div>
-            <div className="writing-lab-ai-actions">
-              <button type="button" disabled className="writing-lab-secondary"><Wand2 size={15} /> {config.dir === "rtl" ? "أكمل نصي" : "Complete my text"} <span>Part 3</span></button>
-              <button type="button" disabled className="writing-lab-primary"><Check size={15} /> {config.dir === "rtl" ? "تصحيح" : "Correct"} <span>Part 3</span></button>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <section className="writing-lab-planned">
-        <div><span className="writing-lab-eyebrow">ROADMAP</span><h2>Trois étapes, un seul espace d’écriture.</h2></div>
-        <div className="writing-lab-roadmap">
-          <article className="writing-lab-roadmap-card"><b>01</b><strong>Écrire & organiser</strong><p>Éditeur, sujets, brouillons, compteurs et sauvegarde.</p></article>
-          <article className="writing-lab-roadmap-card is-active"><b>02</b><strong>Photo → texte</strong><p>Importe une ou plusieurs pages manuscrites, vérifie la transcription et l’ajoute au brouillon.</p></article>
-          <article className="writing-lab-roadmap-card"><b>03</b><strong>Corriger & compléter</strong><p>Correction, rubric, feedback et continuation de ton début de texte.</p></article>
-        </div>
+  return <main className="writing-lab-page">
+    <header className="writing-lab-header"><div><span className="writing-lab-eyebrow"><Sparkles size={14} /> WRITING LAB</span><h1>Écris sans perdre ton fil.</h1><p>Philosophie en arabe, English en anglais. Écris, photographie tes pages, vérifie la transcription, puis travaille ton texte.</p></div><button type="button" className="writing-lab-save" onClick={() => saveDraft(true)} disabled={!title.trim() && !prompt.trim() && !text.trim()}>{saved ? <Check size={15} /> : <Save size={15} />}{saved ? "Enregistré" : "Enregistrer"}</button></header>
+    <div className="writing-lab-layout">
+      <aside className="writing-lab-sidebar"><div className="writing-lab-sidebar__section"><span className="writing-lab-label">MATIÈRE</span><div className="writing-lab-subjects">{(Object.keys(subjectConfig) as WritingSubject[]).map((item) => <button key={item} type="button" className={`writing-lab-subject ${subject === item ? "active" : ""}`} onClick={() => newDraft(item)}><span className="writing-lab-subject__icon">{item === "philosophie" ? <BookOpenText size={16} /> : <Languages size={16} />}</span><span><strong>{subjectConfig[item].label}</strong><small>{subjectConfig[item].language}</small></span></button>)}</div></div><div className="writing-lab-sidebar__section writing-lab-sidebar__section--drafts"><div className="writing-lab-section-row"><span className="writing-lab-label">MES BROUILLONS</span><button type="button" className="writing-lab-new" onClick={() => newDraft()}><FileText size={14} /> Nouveau</button></div><div className="writing-lab-drafts">{drafts.length === 0 && <div className="writing-lab-empty">Aucun brouillon enregistré.</div>}{drafts.map((draft) => <button key={draft.id} type="button" className={`writing-lab-draft ${activeDraftId === draft.id ? "active" : ""}`} onClick={() => openDraft(draft)}><span><strong>{draft.title}</strong><small>{subjectConfig[draft.subject].label} · {formatSaved(draft.updatedAt)}</small></span><Trash2 size={14} onClick={(event) => { event.stopPropagation(); deleteDraft(draft.id); }} /></button>)}</div></div></aside>
+      <section className="writing-lab-editor-card"><div className="writing-lab-editor-top"><div className={`writing-lab-context ${config.dir === "rtl" ? "is-rtl" : ""}`} dir={config.dir}><span>{config.label}</span><i>·</i><span>{config.language}</span></div><div className="writing-lab-tools"><span>{words} mots</span><span>{characters} caractères</span></div></div><input className="writing-lab-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={subject === "philosophie" ? "عنوان المقالة الفلسفية" : "Essay title"} dir={config.dir} /><textarea className="writing-lab-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder={subject === "philosophie" ? "الموضوع / السؤال (اختياري)" : "Essay prompt (optional)"} rows={3} dir={config.dir} />
+        <div className="writing-lab-input-actions"><button type="button" className="writing-lab-input-action writing-lab-input-action--primary"><FileText size={16} /> {subject === "philosophie" ? "الكتابة" : "Write"}</button><label htmlFor="writing-lab-photo" className="writing-lab-input-action"><ImagePlus size={16} /> {subject === "philosophie" ? "استيراد صورة" : "Import photo"}<span>Photo → text</span></label><input id="writing-lab-photo" hidden type="file" accept="image/*" capture="environment" multiple onChange={(event) => { addPhotos(event.target.files); event.currentTarget.value = ""; }} /></div>
+        {photos.length > 0 && <section className="writing-lab-photo-review"><div className="writing-lab-photo-review__header"><div><span className="writing-lab-label">PAGES IMPORTÉES</span><strong>{photos.length} photo{photos.length > 1 ? "s" : ""}</strong></div><label htmlFor="writing-lab-photo-more" className="writing-lab-photo-add"><ImagePlus size={14} /> Ajouter</label><input id="writing-lab-photo-more" hidden type="file" accept="image/*" capture="environment" multiple onChange={(event) => { addPhotos(event.target.files); event.currentTarget.value = ""; }} /></div><div className="writing-lab-photo-grid">{photos.map((photo, index) => <article key={photo.id} className="writing-lab-photo-card"><img src={photo.url} alt={`Page ${index + 1}`} /><div><span>Page {index + 1}</span><button type="button" onClick={() => removePhoto(photo.id)} aria-label={`Supprimer page ${index + 1}`}><X size={14} /></button></div></article>)}</div>{photoError && <p className="writing-lab-photo-error">{photoError}</p>}<div className="writing-lab-transcription"><div className="writing-lab-transcription__header"><div><span className="writing-lab-label">TRANSCRIPTION</span><strong>Vérifie le texte avant de l’utiliser.</strong></div><span className="writing-lab-transcription__status">OCR IA · à connecter</span></div><textarea value={transcription} onChange={(event) => setTranscription(event.target.value)} placeholder={config.dir === "rtl" ? "ستظهر الترجمة هنا. يمكنك تصحيحها قبل إضافتها إلى المقالة." : "The extracted transcription will appear here. Check it before adding it to your essay."} dir={config.dir} /><div className="writing-lab-transcription__actions"><span>Le texte reste modifiable avant insertion.</span><button type="button" onClick={useTranscription} disabled={!transcription.trim()}><Check size={14} /> {config.dir === "rtl" ? "إضافة إلى المقالة" : "Ajouter au texte"}</button></div></div></section>}
+        <textarea className={`writing-lab-textarea ${config.dir === "rtl" ? "is-rtl" : ""}`} value={text} onChange={(event) => setText(event.target.value)} placeholder={config.placeholder} spellCheck="true" dir={config.dir} />
+        <div className="writing-lab-bottom"><div><span>Structure prête pour</span><strong dir={config.dir}>{config.rubric.join(" · ")}</strong></div><div className="writing-lab-ai-actions"><button type="button" className="writing-lab-secondary" onClick={startCompletion} disabled={!text.trim()}><Wand2 size={15} /> {config.dir === "rtl" ? "أكمل نصي" : "Complete my text"}</button><button type="button" className="writing-lab-primary" onClick={openCorrection} disabled={!text.trim()}><Check size={15} /> {config.dir === "rtl" ? "تصحيح" : "Correct"}</button></div></div>
       </section>
-    </main>
-  );
+    </div>
+
+    {showWorkspace && <section className="writing-lab-review-card"><div className="writing-lab-review-header"><div><span className="writing-lab-eyebrow"><Sparkles size={14} /> {reviewMode === "review" ? "CORRECTION WORKSPACE" : "COMPLETION WORKSPACE"}</span><h2>{reviewMode === "review" ? (subject === "philosophie" ? "تحليل المقالة" : "Writing review") : (subject === "philosophie" ? "إكمال المقالة" : "Complete my text")}</h2><p>{reviewMode === "review" ? "Rubric, remarques et comparaison seront conservés dans cet espace." : "Choisis comment ton texte devra être continué lorsque le moteur IA sera disponible."}</p></div><div className="writing-lab-review-tabs"><button type="button" className={reviewMode === "review" ? "active" : ""} onClick={() => setReviewMode("review")}><Check size={14} /> {subject === "philosophie" ? "التصحيح" : "Correction"}</button><button type="button" className={reviewMode === "complete" ? "active" : ""} onClick={() => setReviewMode("complete")}><Wand2 size={14} /> {subject === "philosophie" ? "الإكمال" : "Complete"}</button></div></div>
+      {reviewMode === "review" ? <div className="writing-lab-review-grid"><section className="writing-lab-feedback-panel"><div className="writing-lab-panel-heading"><div><span className="writing-lab-label">FEEDBACK</span><h3>{subject === "philosophie" ? "ملاحظات أولية" : "Initial feedback"}</h3></div><span className="writing-lab-ai-badge">AI READY</span></div><div className="writing-lab-feedback-list">{feedback.map((item, index) => <article key={`${item.title}-${index}`} className={`writing-lab-feedback ${item.type}`}><span>{item.type === "warning" ? "!" : "i"}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></article>)}</div><div className="writing-lab-no-ai"><Wand2 size={16} /><div><strong>IA non configurée</strong><span>Les contrôles locaux fonctionnent maintenant. Le correcteur IA remplacera cette couche plus tard.</span></div></div></section><section className="writing-lab-rubric-panel"><div className="writing-lab-panel-heading"><div><span className="writing-lab-label">RUBRIC</span><h3>{subject === "philosophie" ? "شبكة التقييم" : "Writing rubric"}</h3></div><strong className="writing-lab-rubric-score">{rubricTotal}/{config.rubric.length * 5}</strong></div><div className="writing-lab-rubric-list">{config.rubric.map((label) => <div key={label} className="writing-lab-rubric-row"><span dir={config.dir}>{label}</span><div className="writing-lab-score-buttons">{[1,2,3,4,5].map((score) => <button key={score} type="button" className={(rubricScores[label] ?? 0) === score ? "active" : ""} onClick={() => updateRubric(label, score)}>{score}</button>)}</div></div>)}</div><div className="writing-lab-rubric-note">Évaluation manuelle pour l’instant. Les scores pourront être remplis automatiquement par l’IA.</div></section><section className="writing-lab-original-panel"><div className="writing-lab-panel-heading"><div><span className="writing-lab-label">TON TEXTE</span><h3>Version soumise</h3></div><span>{words} mots</span></div><div className="writing-lab-original-text" dir={config.dir}>{text}</div></section><section className="writing-lab-ai-diff-panel"><div className="writing-lab-panel-heading"><div><span className="writing-lab-label">CORRECTION</span><h3>Avant / après</h3></div><span className="writing-lab-ai-badge">AI READY</span></div><div className="writing-lab-diff-empty"><Wand2 size={20} /><strong>Les corrections détaillées apparaîtront ici.</strong><span>Cette zone est prête pour les erreurs, explications, reformulations et suggestions du modèle.</span></div></section></div> : <div className="writing-lab-completion-grid"><section className="writing-lab-completion-panel"><div className="writing-lab-panel-heading"><div><span className="writing-lab-label">STYLE</span><h3>{subject === "philosophie" ? "طريقة الإكمال" : "How should I continue?"}</h3></div></div><div className="writing-lab-completion-options">{(["continue","improve","finish"] as const).map((style) => <button key={style} type="button" className={completionStyle === style ? "active" : ""} onClick={() => setCompletionStyle(style)}>{style === "continue" ? (subject === "philosophie" ? "تابع من حيث توقفت" : "Continue") : style === "improve" ? (subject === "philosophie" ? "حافظ على أسلوبي" : "Match my style") : (subject === "philosophie" ? "أكمل المقالة" : "Finish the essay")}<small>{style === "continue" ? "Respect the existing direction" : style === "improve" ? "Keep vocabulary and tone" : "Complete the remaining structure"}</small></button>)}</div><label className="writing-lab-completion-label">{subject === "philosophie" ? "بداية النص" : "Your current draft"}<textarea value={text} readOnly dir={config.dir} /></label></section><section className="writing-lab-completion-panel"><div className="writing-lab-panel-heading"><div><span className="writing-lab-label">GENERATED CONTINUATION</span><h3>{subject === "philosophie" ? "النص المقترح" : "Suggested continuation"}</h3></div><span className="writing-lab-ai-badge">AI READY</span></div><textarea className="writing-lab-completion-output" value={completionDraft} onChange={(event) => setCompletionDraft(event.target.value)} placeholder={subject === "philosophie" ? "سيظهر الإكمال المقترح هنا عند توصيل نموذج الذكاء الاصطناعي." : "The AI continuation will appear here once a model is connected."} dir={config.dir} /><div className="writing-lab-no-ai"><Wand2 size={16} /><div><strong>IA non configurée</strong><span>Tu peux déjà modifier manuellement cette zone.</span></div></div></section></div>}
+    </section>}
+
+    <section className="writing-lab-planned"><div><span className="writing-lab-eyebrow">ROADMAP</span><h2>Trois étapes, un seul espace d’écriture.</h2></div><div className="writing-lab-roadmap"><article className="writing-lab-roadmap-card"><b>01</b><strong>Écrire & organiser</strong><p>Éditeur, sujets, brouillons, compteurs et sauvegarde.</p></article><article className="writing-lab-roadmap-card"><b>02</b><strong>Photo → texte</strong><p>Importe plusieurs pages manuscrites, vérifie la transcription et l’ajoute au brouillon.</p></article><article className="writing-lab-roadmap-card is-active"><b>03</b><strong>Corriger & compléter</strong><p>Rubric, feedback, avant/après et continuation sont prêts pour le moteur IA.</p></article></div></section>
+  </main>;
 }
