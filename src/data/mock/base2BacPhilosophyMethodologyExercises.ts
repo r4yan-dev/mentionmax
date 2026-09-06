@@ -3,7 +3,7 @@ import type { Exercise } from "../../types/content";
 const trackIds = ["SP", "SMA", "SMB"] as const;
 const target = (chapter: string, topic: string) => ({ trackIds, subjectId: "philosophie" as const, chapter, topic });
 
-const items: Array<Omit<Exercise, "id" | "target"> & { chapter: string; topic: string }> = [
+const items: Array<Omit<Exercise, "id" | "target" | "mode" | "source"> & { chapter: string; topic: string }> = [
   { chapter: "منهجيات – الفلسفة", topic: "المقدمة", type: "short-answer", difficulty: 1, title: "وظيفة المقدمة", statement: "ما الوظيفة الأساسية للمقدمة في الإنشاء الفلسفي؟", expectedAnswer: "تحويل الموضوع إلى قضية إشكالية وتمهيد معالجته دون تقديم جواب جاهز.", acceptedAnswers: ["تحويل الموضوع إلى قضية إشكالية", "بناء الإشكالية", "إشكالة الموضوع"], correction: "المقدمة تبني الإشكال وتؤطر الموضوع، ولا تستبق نتائج العرض.", hint: "فكر في الانتقال من السؤال إلى المشكلة.", examTip: "اجعل أسئلة المقدمة هي التي سيجيب عنها العرض فعلا.", estimatedMinutes: 2, xpValue: 8, tags: ["philosophie", "منهجيات", "مقدمة"] },
   { chapter: "منهجيات – الفلسفة", topic: "النص", type: "short-answer", difficulty: 2, title: "ثلاثة أسئلة للتحليل", statement: "اذكر الأسئلة الثلاثة التي يمكن أن توجه تحليل النص الفلسفي من الداخل.", expectedAnswer: "ماذا يقول المؤلف؟ كيف توصل إليه؟ وما الحجاج الذي اعتمده؟", correction: "هذه الأسئلة تكشف الموقف، تسلسل التفكير، والبنية الحجاجية للنص.", hint: "ماذا؟ كيف؟ وبماذا برر؟", examTip: "لا تحول التحليل إلى إعادة كتابة للنص.", estimatedMinutes: 3, xpValue: 10, tags: ["philosophie", "النص", "تحليل"] },
   { chapter: "منهجيات – الفلسفة", topic: "النص", type: "multi-step", difficulty: 3, title: "بناء مناقشة نص", statement: "اكتب تصميما من مرحلتين لمناقشة أطروحة نص فلسفي حول الحرية.", expectedAnswer: "نقد داخلي لتماسك الأطروحة وحججها، ثم نقد خارجي بمقارنتها بأطروحات تؤيدها أو تعارضها.", correction: "المناقشة الداخلية تختبر منطق الموقف وحججه، والخارجية توسع النقاش بالمواقف الفلسفية الأخرى.", hint: "داخل النص ثم خارج النص.", examTip: "اجعل الأطروحات الخارجية تخدم سؤال النص ولا تسردها منفصلة.", estimatedMinutes: 5, xpValue: 14, tags: ["philosophie", "النص", "مناقشة"] },
@@ -24,5 +24,7 @@ const items: Array<Omit<Exercise, "id" | "target"> & { chapter: string; topic: s
 export const base2BacPhilosophyMethodologyExercises: Exercise[] = items.map((item, index) => ({
   ...item,
   id: `2bac-philo-method-ex-${String(index + 1).padStart(3, "0")}`,
+  mode: "BASE" as const,
+  source: "APPROVED" as const,
   target: target(item.chapter, item.topic),
 }));
