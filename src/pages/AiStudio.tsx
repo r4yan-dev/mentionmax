@@ -79,6 +79,10 @@ function isImage(file: File) {
   return file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name);
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
+}
+
 export default function AiStudio() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [photoPages, setPhotoPages] = useState<StudioPhotoPage[]>([]);
@@ -92,6 +96,8 @@ export default function AiStudio() {
   const [result, setResult] = useState<TranscriptResult | null>(null);
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [savingToNotes, setSavingToNotes] = useState(false);
+  const [savedToNotes, setSavedToNotes] = useState(false);
 
   async function extractYoutubeTranscript() {
     const url = youtubeUrl.trim();
@@ -116,6 +122,7 @@ export default function AiStudio() {
     setFileError(null);
     setExtractedText(null);
     setCopied(false);
+    setSavedToNotes(false);
 
     const invalid = incoming.filter((file) => !isPdf(file) && !isImage(file));
     const oversized = incoming.filter((file) => file.size > MAX_FILE_SIZE_BYTES);
@@ -196,7 +203,7 @@ export default function AiStudio() {
 
   async function extractFileText() {
     if (fileBusy) return;
-    setFileBusy(true); setFileError(null); setExtractedText(null); setCopied(false);
+    setFileBusy(true); setFileError(null); setExtractedText(null); setCopied(false); setSavedToNotes(false);
     try {
       if (photoPages.length > 0) {
         const chunks: string[] = [];
@@ -246,6 +253,35 @@ export default function AiStudio() {
     catch { setFileError("Impossible de copier le texte."); }
   }
 
+  async function saveExtractionAsNote() {
+    if (!extractedText || savingToNotes || savedToNotes) return;
+    setSavingToNotes(true); setFileError(null);
+    try {
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError || !auth.user) throw new Error("Connecte-toi pour enregistrer cette extraction dans tes notes.");
+      const sourceName = selectedFile?.name ?? (photoPages.length > 0 ? `${photoPages.length} pages photo` : "Extraction IA");
+      const title = sourceName.replace(/\.[^.]+$/, "").trim() || "Extraction IA";
+      const html = extractedText.split(/\n{2,}/).map((block) => `<p>${escapeHtml(block).replace(/\n/g, "<br />")}</p>`).join("");
+      const { error } = await supabase.from("handnotes").insert({
+        user_id: auth.user.id,
+        source_type: selectedFile && isPdf(selectedFile) ? "pdf" : "text",
+        source_ref: `ai-studio:${Date.now()}:${sourceName}`,
+        title,
+        content: { version: 1, html, text: extractedText },
+        is_pinned: false,
+        folder: "notes",
+        subject_id: null,
+        chapter_id: null,
+      });
+      if (error) throw error;
+      setSavedToNotes(true);
+    } catch (error) {
+      setFileError(error instanceof Error ? error.message : "Impossible d’enregistrer cette extraction.");
+    } finally {
+      setSavingToNotes(false);
+    }
+  }
+
   const hasFileSource = Boolean(selectedFile) || photoPages.length > 0;
   const sourceLabel = selectedFile?.name ?? (photoPages.length > 0 ? `${photoPages.length} pages photo` : "Dépose un fichier ici");
 
@@ -275,7 +311,7 @@ export default function AiStudio() {
             </div>
             {fileError && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>{fileBusy ? "Extraction en cours" : "Extraction impossible"}</strong><span>{fileError}</span></div></div>}
             {photoPages.length > 0 && <div className="studio-photo-review"><div className="studio-photo-review__header"><div><span className="studio-eyebrow">PAGES À EXTRAIRE</span><strong>{photoPages.length} / {MAX_PHOTOS}</strong></div><span>Ordre d’extraction</span></div><p className="studio-photo-order-hint"><GripVertical size={13} /> Glisse les pages, ou utilise les flèches, pour définir l’ordre.</p><div className="studio-photo-grid">{photoPages.map((page, index) => <article key={page.id} className={`studio-photo-card ${draggedPageId === page.id ? "is-dragging" : ""}`} draggable onDragStart={() => setDraggedPageId(page.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedPageId) reorderPhoto(draggedPageId, page.id); setDraggedPageId(null); }} onDragEnd={() => setDraggedPageId(null)}><div className="studio-photo-card__image"><img src={page.url} alt={`Page ${index + 1}`} /><span>{index + 1}</span><GripVertical className="studio-photo-card__drag" size={14} /></div><div className="studio-photo-card__footer"><strong>Page {index + 1}</strong><div><button type="button" onClick={() => movePhoto(page.id, -1)} disabled={index === 0} aria-label={`Monter la page ${index + 1}`}><ChevronLeft size={14} /></button><button type="button" onClick={() => movePhoto(page.id, 1)} disabled={index === photoPages.length - 1} aria-label={`Descendre la page ${index + 1}`}><ChevronRight size={14} /></button><button type="button" onClick={() => removePhoto(page.id)} aria-label={`Supprimer la page ${index + 1}`}><X size={14} /></button></div></div></article>)}</div></div>}
-            {extractedText && <div className="studio-transcript"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> EXTRACTION IA</span><h3>{selectedFile?.name ?? `${photoPages.length} pages photo`}</h3><p>Texte détecté dans le document. Les scans et images passent automatiquement par la vision IA.</p></div><button type="button" className="studio-btn studio-btn--soft" onClick={() => void copyExtractedText()}><Copy size={15} /> {copied ? "Copié" : "Copier"}</button></div><pre style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 520, overflowY: "auto", padding: "18px", borderRadius: 14, background: "var(--mm-surface-subtle, #f6f8f7)", fontFamily: "inherit", lineHeight: 1.65 }}>{extractedText}</pre></div>}
+            {extractedText && <div className="studio-transcript"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> EXTRACTION IA</span><h3>{selectedFile?.name ?? `${photoPages.length} pages photo`}</h3><p>Texte détecté dans le document. Les scans et images passent automatiquement par la vision IA.</p></div><div className="studio-actions"><button type="button" className="studio-btn studio-btn--soft" onClick={() => void copyExtractedText()}><Copy size={15} /> {copied ? "Copié" : "Copier"}</button><button type="button" className="studio-btn studio-btn--primary" onClick={() => void saveExtractionAsNote()} disabled={savingToNotes || savedToNotes}>{savingToNotes ? <><LoaderCircle className="studio-spin" size={15} /> Enregistrement...</> : savedToNotes ? <><CheckCircle2 size={15} /> Enregistré dans Notes</> : <><FileText size={15} /> Enregistrer dans Notes</>}</button></div></div><pre style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 520, overflowY: "auto", padding: "18px", borderRadius: 14, background: "var(--mm-surface-subtle, #f6f8f7)", fontFamily: "inherit", lineHeight: 1.65 }}>{extractedText}</pre></div>}
           </div>
         </section>
         <aside className="studio-card"><span className="studio-eyebrow">RÉCENTS</span><h2>Ce que tu as créé</h2><p>Un historique compact pour reprendre tes ressources sans fouiller partout.</p><div className="studio-recent">{recent.map(([title, meta, badge]) => <Link to="/ai-studio/handnotes" className="studio-recent-item" key={title}><span className="studio-recent-item__icon"><FileText size={16} /></span><span><strong>{title}</strong><span>{meta}</span></span><b className="studio-badge">{badge}</b></Link>)}</div><div className="studio-note">V1 : PDF numériques, PDF scannés et images peuvent être convertis en texte avant de passer à la génération de fiches.</div><div className="studio-actions"><Link to="/ai-help" className="studio-btn studio-btn--soft"><Sparkles size={15} /> Aller au tuteur IA <ArrowRight size={14} /></Link></div></aside>
