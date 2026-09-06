@@ -14,6 +14,7 @@ import ExamReader from "./pages/ExamReader";
 import AiStudio from "./pages/AiStudio";
 import AIHelp from "./pages/AIHelp";
 import Handnotes from "./pages/Handnotes";
+import WritingLab from "./pages/WritingLab";
 import Subjects from "./pages/Subjects";
 import SubjectsLauncher from "./pages/SubjectsLauncher";
 import Lessons from "./pages/Lessons";
@@ -71,6 +72,7 @@ export default function App() {
       <Route path="/exams/:examId" element={<ExamReader />} />
       <Route path="/ai-studio" element={<AiStudio />} />
       <Route path="/ai-studio/handnotes" element={<Handnotes />} />
+      <Route path="/ai-studio/writing" element={<WritingLab />} />
       <Route path="/ai-help" element={<AIHelp />} />
       <Route path="/progression" element={<Progression />} />
       <Route path="/classement" element={<Leaderboard />} />
