@@ -31,7 +31,7 @@ export default function AIHelp() {
       setMessages((current) => [...current, { role: "assistant", text: response.data }]);
     } catch (requestError) {
       console.error(requestError);
-      setError("L’assistant n’est pas configuré. Le connecteur API pourra remplacer le fournisseur local sans modifier cette page.");
+      setError("Le tuteur Gemini n’est pas encore configuré côté serveur. Ajoute GEMINI_API_KEY aux secrets Supabase pour activer les réponses.");
     } finally {
       setBusy(false);
     }
@@ -46,9 +46,9 @@ export default function AIHelp() {
 
       <section className="ai-workspace">
         <div className="ai-chat">
-          <div className="ai-chat__bar"><div className="ai-avatar"><Bot size={18} /></div><div><strong>MentionMax AI</strong><span>Assistant pédagogique · mode local</span></div><span className="ai-status"><i /> Prêt</span></div>
+          <div className="ai-chat__bar"><div className="ai-avatar"><Bot size={18} /></div><div><strong>MentionMax AI</strong><span>Assistant pédagogique · Gemini 2.5 Flash</span></div><span className="ai-status"><i /> Connecté</span></div>
           <div className="ai-chat__body">
-            {messages.length === 0 ? <div className="ai-empty"><div className="ai-empty__icon"><Sparkles size={25} /></div><h2>Que veux-tu travailler ?</h2><p>Le connecteur est déjà séparé de l’interface. Aujourd’hui, les réponses passent par le fournisseur local.</p><div className="ai-quick">{quickActions.map((action) => <button key={action.label} onClick={() => void ask(action.label, action.task)}><Lightbulb size={15} />{action.label}</button>)}</div></div> : <div className="ai-messages">{messages.map((message, index) => <div className={`ai-message ai-message--${message.role}`} key={`${message.role}-${index}`}><span>{message.role === "assistant" ? "M" : "Toi"}</span><p>{message.text}</p></div>)}</div>}
+            {messages.length === 0 ? <div className="ai-empty"><div className="ai-empty__icon"><Sparkles size={25} /></div><h2>Que veux-tu travailler ?</h2><p>Le tuteur passe par une fonction Supabase sécurisée qui appelle Gemini sans exposer la clé dans le navigateur.</p><div className="ai-quick">{quickActions.map((action) => <button key={action.label} onClick={() => void ask(action.label, action.task)}><Lightbulb size={15} />{action.label}</button>)}</div></div> : <div className="ai-messages">{messages.map((message, index) => <div className={`ai-message ai-message--${message.role}`} key={`${message.role}-${index}`}><span>{message.role === "assistant" ? "M" : "Toi"}</span><p>{message.text}</p></div>)}</div>}
             {busy && <div className="ai-typing"><i /><i /><i /> MentionMax réfléchit…</div>}
             {error && <div className="ai-error">{error}</div>}
           </div>
