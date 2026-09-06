@@ -1,12 +1,21 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, Check, FileText, Layers3, ListChecks, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, FileText, Layers3, ListChecks, LoaderCircle, PlaySquare, RefreshCw, Sparkles } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { generateStudioResource, type StudioGenerationMode } from "../services/ai/studioGenerate";
+import { supabase } from "../lib/supabase";
 import "./AiStudioGenerator.css";
 
 type ResultRecord = Record<string, unknown>;
+type TranscriptSegment = { start: number; duration: number; text: string };
+type TranscriptResult = {
+  video: { id: string; title: string; author: string | null; thumbnail: string };
+  transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[]; source?: string };
+};
+type EducationGateResult = { allowed: boolean; title: string | null; author: string | null; reason: string | null };
 
-const modes: { id: StudioGenerationMode; title: string; text: string; icon: typeof FileText }[] = [
+type Mode = { id: StudioGenerationMode; title: string; text: string; icon: typeof FileText };
+const modes: Mode[] = [
   { id: "handnote", title: "Fiche structurée", text: "Notions, définitions, formules, exemples et points examen.", icon: FileText },
   { id: "summary", title: "Résumé", text: "Une synthèse claire, dense et directement révisable.", icon: BookOpen },
   { id: "flashcards", title: "Flashcards", text: "Questions-réponses prêtes à mémoriser.", icon: Layers3 },
@@ -18,6 +27,25 @@ function stringifyValue(value: unknown) {
   if (Array.isArray(value)) return value.map((item) => typeof item === "string" ? `• ${item}` : JSON.stringify(item)).join("\n");
   if (value && typeof value === "object") return JSON.stringify(value, null, 2);
   return String(value ?? "");
+}
+
+function formatTime(seconds: number) {
+  const total = Math.max(0, Math.floor(seconds));
+  const minutes = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
+async function getFunctionErrorMessage(error: unknown) {
+  if (FunctionsHttpError && error instanceof FunctionsHttpError) {
+    try {
+      const payload = (await error.context.json()) as { error?: string; detail?: string };
+      if (payload?.detail) return `${payload.error ?? "Impossible de traiter la vidéo."} ${payload.detail}`;
+      if (payload?.error) return payload.error;
+    } catch {}
+    return `Le service a répondu avec une erreur HTTP (${error.context?.status ?? "inconnue"}).`;
+  }
+  return error instanceof Error ? error.message : "Impossible de contacter le service YouTube.";
 }
 
 function ResultView({ result }: { result: ResultRecord }) {
@@ -35,9 +63,9 @@ function ResultView({ result }: { result: ResultRecord }) {
       <div className="generator-result__grid">
         {entries.map(([key, value]) => {
           const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase());
-          const isCards = key === "cards" || key === "questions" || key === "sections" || key === "keyPoints" || key === "formulas" || key === "definitions";
+          const isRich = ["cards", "questions", "sections", "keyPoints", "formulas", "definitions"].includes(key);
           return (
-            <section key={key} className={`generator-result__block ${isCards ? "is-rich" : ""}`}>
+            <section key={key} className={`generator-result__block ${isRich ? "is-rich" : ""}`}>
               <span className="generator-result__label">{label}</span>
               <div className="generator-result__content">
                 {Array.isArray(value) ? value.map((item, index) => (
@@ -64,12 +92,51 @@ export default function AiStudioGenerator() {
   }, [location.search]);
   const [mode, setMode] = useState<StudioGenerationMode>(initialMode);
   const [text, setText] = useState("");
+  const [sourceType, setSourceType] = useState<"text" | "youtube">("text");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [youtubeBusy, setYoutubeBusy] = useState(false);
+  const [youtubeError, setYoutubeError] = useState<string | null>(null);
+  const [youtubeResult, setYoutubeResult] = useState<TranscriptResult | null>(null);
   const [subject, setSubject] = useState("");
   const [chapter, setChapter] = useState("");
   const [track, setTrack] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ResultRecord | null>(null);
+
+  async function checkAndExtractYoutube() {
+    const url = youtubeUrl.trim();
+    if (!url || youtubeBusy) return;
+    setYoutubeBusy(true);
+    setYoutubeError(null);
+    setYoutubeResult(null);
+    setResult(null);
+    try {
+      const { data: gate, error: gateError } = await supabase.functions.invoke("youtube-education-gate", { body: { url } });
+      if (gateError) throw gateError;
+      const educationCheck = gate as EducationGateResult;
+      if (!educationCheck?.allowed) {
+        setYoutubeError(educationCheck?.reason ?? "Cette vidéo ne semble pas être éducative.");
+        return;
+      }
+      const { data, error: transcriptError } = await supabase.functions.invoke("youtube-transcript-v2", {
+        body: { url, languages: ["fr", "en", "ar"] },
+      });
+      if (transcriptError) throw transcriptError;
+      if (!data?.success) {
+        setYoutubeError(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé.");
+        return;
+      }
+      const transcript = data as TranscriptResult;
+      setYoutubeResult(transcript);
+      setText(transcript.transcript.segments.map((segment) => segment.text).join(" ").trim());
+      if (!chapter.trim() && transcript.video.title) setChapter(transcript.video.title);
+    } catch (error) {
+      setYoutubeError(await getFunctionErrorMessage(error));
+    } finally {
+      setYoutubeBusy(false);
+    }
+  }
 
   async function generate() {
     if (!text.trim() || busy) return;
@@ -114,14 +181,31 @@ export default function AiStudioGenerator() {
         </div>
 
         <div className="generator-input-area">
-          <div className="generator-section-title"><span>02</span><div><strong>Source</strong><small>Colle un texte extrait, un cours ou une partie de document.</small></div></div>
-          <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Colle ici le contenu à transformer…" />
+          <div className="generator-section-title"><span>02</span><div><strong>Source</strong><small>Colle un texte ou vérifie une vidéo YouTube éducative.</small></div></div>
+          <div className="generator-source-tabs" role="tablist" aria-label="Type de source">
+            <button type="button" className={sourceType === "text" ? "is-active" : ""} onClick={() => { setSourceType("text"); setYoutubeError(null); }}>Texte / notes</button>
+            <button type="button" className={sourceType === "youtube" ? "is-active" : ""} onClick={() => { setSourceType("youtube"); setError(null); }}>YouTube</button>
+          </div>
+
+          {sourceType === "youtube" ? (
+            <div className="generator-youtube">
+              <div className="generator-youtube__row">
+                <div className="generator-youtube__input"><PlaySquare size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void checkAndExtractYoutube(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div>
+                <button type="button" className="generator-btn" onClick={() => void checkAndExtractYoutube()} disabled={!youtubeUrl.trim() || youtubeBusy}>{youtubeBusy ? <><LoaderCircle className="generator-spin" size={16} /> Vérification…</> : <><PlaySquare size={16} /> Vérifier et extraire</>}</button>
+              </div>
+              {youtubeError && <div className="generator-error"><strong>Vidéo non exploitable</strong><span>{youtubeError}</span></div>}
+              {youtubeResult && <div className="generator-youtube__result"><div className="generator-youtube__meta"><img src={youtubeResult.video.thumbnail} alt="" /><div><strong>{youtubeResult.video.title}</strong><span>{youtubeResult.video.author ?? "YouTube"} · {youtubeResult.transcript.language} · {youtubeResult.transcript.segments.length} segments{youtubeResult.transcript.isGenerated ? " · automatique" : ""}</span></div></div><div className="generator-youtube__segments">{youtubeResult.transcript.segments.slice(0, 12).map((segment, index) => <article key={`${segment.start}-${index}`}><time>{formatTime(segment.start)}</time><p>{segment.text}</p></article>)}{youtubeResult.transcript.segments.length > 12 && <span className="generator-youtube__more">{youtubeResult.transcript.segments.length - 12} segments supplémentaires chargés dans la source.</span>}</div></div>}
+            </div>
+          ) : (
+            <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Colle ici le contenu à transformer…" />
+          )}
+
           <div className="generator-meta-grid">
             <label><span>Matière</span><input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Mathématiques" /></label>
             <label><span>Chapitre</span><input value={chapter} onChange={(event) => setChapter(event.target.value)} placeholder="Dérivation" /></label>
             <label><span>Parcours</span><select value={track} onChange={(event) => setTrack(event.target.value)}><option value="">Automatique</option><option value="SP">2BAC Sciences Physiques</option><option value="SMA">2BAC Sciences Mathématiques A</option><option value="SMB">2BAC Sciences Mathématiques B</option></select></label>
           </div>
-          <div className="generator-actions"><span>{text.trim().length.toLocaleString("fr-FR")} caractères</span><button type="button" className="generator-btn" onClick={() => void generate()} disabled={!text.trim() || busy}>{busy ? <><LoaderCircle className="generator-spin" size={16} /> Génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>
+          <div className="generator-actions"><span>{text.trim().length.toLocaleString("fr-FR")} caractères · {sourceType === "youtube" ? "source YouTube" : "source texte"}</span><button type="button" className="generator-btn" onClick={() => void generate()} disabled={!text.trim() || busy}>{busy ? <><LoaderCircle className="generator-spin" size={16} /> Génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>
           {error && <div className="generator-error"><strong>Génération impossible</strong><span>{error}</span></div>}
         </div>
       </section>
