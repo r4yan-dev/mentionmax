@@ -7,61 +7,44 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+type Segment = { start: number; duration: number; text: string };
 const youtubeIdPattern = /^[A-Za-z0-9_-]{11}$/;
-const invidiousInstances = [
-  "https://inv.nadeko.net",
-  "https://invidious.nerdvpn.de",
-  "https://yt.chocolatemoo53.com",
-];
 
-function cleanInput(input: string) {
-  return input
-    .trim()
-    .replace(/^['"`<\[]+|['"`>\]]+$/g, "")
-    .replace(/\s+/g, "");
+function cleanInput(value: string) {
+  return value.trim().replace(/^['"`<\[]+|['"`>\]]+$/g, "").trim();
 }
 
 function extractVideoId(input: string): string | null {
   const value = cleanInput(input);
   if (youtubeIdPattern.test(value)) return value;
 
-  try {
-    const normalized = value.startsWith("http://") || value.startsWith("https://")
-      ? value
-      : `https://${value}`;
-    const url = new URL(normalized);
-    const host = url.hostname.toLowerCase().replace(/^www\./, "");
-
-    if (host === "youtu.be") {
-      const id = url.pathname.split("/").filter(Boolean)[0] ?? "";
-      return youtubeIdPattern.test(id) ? id : null;
-    }
-
-    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtube-nocookie.com" || host.endsWith(".youtube-nocookie.com")) {
-      const queryId = url.searchParams.get("v") ?? "";
-      if (youtubeIdPattern.test(queryId)) return queryId;
-
-      const parts = url.pathname.split("/").filter(Boolean);
-      const section = parts[0]?.toLowerCase() ?? "";
-      if (["shorts", "embed", "live", "v"].includes(section)) {
-        const id = parts[1] ?? "";
-        if (youtubeIdPattern.test(id)) return id;
-      }
-    }
-  } catch {
-    // Fall through to regex parsing for pasted/encoded URLs.
-  }
-
   const patterns = [
-    /(?:youtube(?:-nocookie)?\.com\/watch[^\n]*[?&]v=)([A-Za-z0-9_-]{11})/i,
-    /(?:youtube(?:-nocookie)?\.com\/(?:shorts|embed|live|v)\/)([A-Za-z0-9_-]{11})/i,
-    /(?:youtu\.be\/)([A-Za-z0-9_-]{11})/i,
+    /[?&]v=([A-Za-z0-9_-]{11})(?:[&#/]|$)/i,
+    /(?:youtube(?:-nocookie)?\.com|youtu\.be)\/(?:watch\?v=|shorts\/|embed\/|live\/|v\/)?([A-Za-z0-9_-]{11})(?:[?&#/]|$)/i,
   ];
-
   for (const pattern of patterns) {
     const match = pattern.exec(value);
     if (match?.[1]) return match[1];
   }
+
+  try {
+    const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    const url = new URL(normalized);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    if (host === "youtu.be") {
+      const id = url.pathname.split("/").filter(Boolean)[0] ?? "";
+      if (youtubeIdPattern.test(id)) return id;
+    }
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtube-nocookie.com" || host.endsWith(".youtube-nocookie.com")) {
+      const v = url.searchParams.get("v") ?? "";
+      if (youtubeIdPattern.test(v)) return v;
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts.length >= 2 && ["shorts", "embed", "live", "v"].includes(parts[0]?.toLowerCase() ?? "")) {
+        const id = parts[1];
+        if (youtubeIdPattern.test(id)) return id;
+      }
+    }
+  } catch {}
 
   return null;
 }
@@ -84,260 +67,149 @@ function decodeHtml(value: string) {
     .trim();
 }
 
-function parseVtt(vtt: string) {
-  const lines = vtt.replace(/\r/g, "").split("\n");
-  const segments: { start: number; duration: number; text: string }[] = [];
+function parseVtt(body: string): Segment[] {
+  const lines = body.replace(/\r/g, "").split("\n");
+  const result: Segment[] = [];
   const toSeconds = (value: string) => {
-    const parts = value.replace(",", ".").split(":").map(Number);
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    return parts[0] * 60 + parts[1];
+    const p = value.replace(",", ".").split(":").map(Number);
+    return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
   };
+
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line.includes("-->") || !line) continue;
-    const [rawStart, rawEnd] = line.split("-->").map((x) => x.trim().split(" ")[0]);
-    const start = toSeconds(rawStart);
-    const end = toSeconds(rawEnd);
+    if (!lines[i].includes("-->")) continue;
+    const [startRaw, endRaw] = lines[i].split("-->").map((x) => x.trim().split(" ")[0]);
+    const start = toSeconds(startRaw);
+    const end = toSeconds(endRaw);
     const text: string[] = [];
     for (let j = i + 1; j < lines.length && lines[j].trim(); j++) text.push(lines[j].trim());
-    const clean = decodeHtml(text.join(" "));
-    if (clean && Number.isFinite(start) && Number.isFinite(end)) {
-      segments.push({ start, duration: Math.max(0, end - start), text: clean });
-    }
+    const cleaned = decodeHtml(text.join(" "));
+    if (cleaned && Number.isFinite(start) && Number.isFinite(end)) result.push({ start, duration: Math.max(0, end - start), text: cleaned });
   }
-  return segments;
+  return result;
 }
 
-function parseCaptionXml(xml: string) {
-  const segments: { start: number; duration: number; text: string }[] = [];
-  for (const match of xml.matchAll(/<text([^>]*)>([\s\S]*?)<\/text>/g)) {
+function parseXml(body: string): Segment[] {
+  const result: Segment[] = [];
+  for (const match of body.matchAll(/<text([^>]*)>([\s\S]*?)<\/text>/g)) {
     const attrs = match[1] ?? "";
     const content = match[2] ?? "";
-    const readAttr = (name: string) => new RegExp(`${name}="([^"]*)"`).exec(attrs)?.[1] ?? "";
-    const start = Number(readAttr("start"));
-    const duration = Number(readAttr("dur"));
+    const attr = (name: string) => new RegExp(`${name}="([^"]*)"`).exec(attrs)?.[1] ?? "";
+    const start = Number(attr("start"));
+    const duration = Number(attr("dur"));
     const text = decodeHtml(content.replace(/<br\s*\/?/gi, " "));
-    if (text && Number.isFinite(start)) {
-      segments.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
-    }
+    if (text && Number.isFinite(start)) result.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
   }
-  return segments;
+  return result;
 }
 
-function extractJsonAfterMarker(html: string, marker: string) {
-  const markerIndex = html.indexOf(marker);
-  if (markerIndex < 0) return null;
-  const start = html.indexOf("{", markerIndex + marker.length);
-  if (start < 0) return null;
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < html.length; i++) {
-    const char = html[i];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (char === "\\") escaped = true;
-      else if (char === '"') inString = false;
-      continue;
-    }
-    if (char === '"') {
-      inString = true;
-      continue;
-    }
-    if (char === "{") depth++;
-    else if (char === "}") {
-      depth--;
-      if (depth === 0) {
-        try {
-          return JSON.parse(html.slice(start, i + 1));
-        } catch {
-          return null;
-        }
-      }
-    }
+function parseJson3(body: string): Segment[] {
+  const data = JSON.parse(body);
+  const result: Segment[] = [];
+  for (const event of data?.events ?? []) {
+    if (!Array.isArray(event?.segs)) continue;
+    const text = event.segs.map((seg: any) => seg?.utf8 ?? "").join("").trim();
+    if (!text) continue;
+    const start = Number(event.tStartMs ?? 0) / 1000;
+    const duration = Number(event.dDurationMs ?? 0) / 1000;
+    if (Number.isFinite(start)) result.push({ start, duration: Number.isFinite(duration) ? duration : 0, text: decodeHtml(text) });
   }
-  return null;
+  return result;
 }
 
-async function fetchViaYoutubeTimedText(videoId: string, languages: string[]) {
-  let lastError = "YouTube timedtext failed";
-  const attempts = languages.flatMap((lang) => [
-    { lang },
-    { lang, kind: "asr" },
-  ]);
-
-  for (const attempt of attempts) {
+function parseCaptionBody(body: string, contentType = "") {
+  if (contentType.includes("json") || body.trim().startsWith("{")) {
     try {
-      const url = new URL("https://www.youtube.com/api/timedtext");
-      url.searchParams.set("v", videoId);
-      url.searchParams.set("lang", attempt.lang);
-      url.searchParams.set("fmt", "vtt");
-      if (attempt.kind) url.searchParams.set("kind", attempt.kind);
-
-      const response = await fetch(url.toString(), {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; MentionMax/1.0)",
-          "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
-        },
-      });
-
-      if (!response.ok) {
-        lastError = `YouTube timedtext HTTP ${response.status}`;
-        continue;
-      }
-
-      const body = await response.text();
-      const segments = body.includes("WEBVTT") ? parseVtt(body) : parseCaptionXml(body);
-      if (!segments.length) {
-        lastError = `Aucune piste ${attempt.lang} disponible via YouTube timedtext`;
-        continue;
-      }
-
-      return {
-        language: attempt.lang,
-        languageCode: attempt.lang,
-        isGenerated: attempt.kind === "asr",
-        segments,
-      };
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : String(error);
-    }
+      const jsonSegments = parseJson3(body);
+      if (jsonSegments.length) return jsonSegments;
+    } catch {}
   }
-
-  throw new Error(lastError);
+  return body.includes("WEBVTT") ? parseVtt(body) : parseXml(body);
 }
 
-async function fetchViaYoutubePage(videoId: string, languages: string[]) {
-  const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+async function fetchInnerTube(videoId: string, languages: string[]) {
+  const response = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
+    method: "POST",
     headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; MentionMax/1.0)",
+      "Content-Type": "application/json",
+      "User-Agent": "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+      "X-YouTube-Client-Name": "3",
+      "X-YouTube-Client-Version": "20.10.38",
       "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
+      "Origin": "https://www.youtube.com",
     },
+    body: JSON.stringify({
+      context: {
+        client: {
+          clientName: "ANDROID",
+          clientVersion: "20.10.38",
+          androidSdkVersion: 34,
+          hl: "en",
+          gl: "US",
+          userAgent: "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+        },
+      },
+      videoId,
+    }),
   });
-  if (!response.ok) throw new Error(`YouTube watch page HTTP ${response.status}`);
-  const html = await response.text();
-  const player = extractJsonAfterMarker(html, "ytInitialPlayerResponse");
-  const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-  if (!Array.isArray(tracks) || !tracks.length) {
-    throw new Error("Aucun sous-titre disponible dans la piste YouTube.");
-  }
 
-  const ranked = [...tracks].sort((a, b) => {
+  if (!response.ok) throw new Error(`YouTube InnerTube HTTP ${response.status}`);
+  const player = await response.json();
+  const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+  if (!Array.isArray(tracks) || !tracks.length) throw new Error("Aucune piste de sous-titres disponible via YouTube.");
+
+  const ranked = [...tracks].sort((a: any, b: any) => {
     const ai = languages.indexOf(a?.languageCode ?? "");
     const bi = languages.indexOf(b?.languageCode ?? "");
     return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
   });
 
-  let lastError = "Aucune piste de sous-titres exploitable.";
+  let lastError = "Aucune piste exploitable.";
   for (const track of ranked) {
-    if (!track?.baseUrl || typeof track.baseUrl !== "string") continue;
+    if (!track?.baseUrl) continue;
     try {
       const captionUrl = new URL(track.baseUrl);
-      captionUrl.searchParams.set("fmt", "vtt");
-      const captionResponse = await fetch(captionUrl.toString(), {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; MentionMax/1.0)" },
+      captionUrl.searchParams.set("fmt", "json3");
+      const captionResponse = await fetch(captionUrl, {
+        headers: {
+          "User-Agent": "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+          "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
+        },
       });
       if (!captionResponse.ok) {
         lastError = `YouTube captions HTTP ${captionResponse.status}`;
         continue;
       }
       const body = await captionResponse.text();
-      const segments = body.includes("WEBVTT") ? parseVtt(body) : parseCaptionXml(body);
-      if (!segments.length) {
-        lastError = "La piste de sous-titres est vide ou illisible.";
-        continue;
+      const segments = parseCaptionBody(body, captionResponse.headers.get("content-type") ?? "");
+      if (segments.length) {
+        return {
+          language: track?.name?.simpleText ?? track?.languageCode ?? "unknown",
+          languageCode: track?.languageCode ?? "unknown",
+          isGenerated: track?.kind === "asr",
+          segments,
+        };
       }
-      return {
-        language: track?.name?.simpleText ?? track?.languageCode ?? languages[0] ?? "unknown",
-        languageCode: track?.languageCode ?? languages[0] ?? "unknown",
-        isGenerated: track?.kind === "asr",
-        segments,
-      };
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
     }
   }
+
   throw new Error(lastError);
 }
 
-async function fetchViaInvidious(videoId: string, languages: string[]) {
-  let lastError = "Invidious fallback failed";
-  for (const instance of invidiousInstances) {
-    for (const lang of languages) {
-      try {
-        const response = await fetch(`${instance}/api/v1/captions/${videoId}?lang=${encodeURIComponent(lang)}`, {
-          headers: { "User-Agent": "MentionMax/1.0" },
-        });
-        if (!response.ok) {
-          lastError = `${instance}: HTTP ${response.status}`;
-          continue;
-        }
-        const contentType = response.headers.get("content-type") ?? "";
-        if (contentType.includes("application/json")) {
-          const data = await response.json();
-          const caption = data?.captions?.find((x: any) => x.languageCode === lang) ?? data?.captions?.[0];
-          if (!caption?.url) {
-            lastError = `${instance}: no caption URL`;
-            continue;
-          }
-          const captionResponse = await fetch(caption.url, {
-            headers: { "User-Agent": "MentionMax/1.0" },
-          });
-          if (!captionResponse.ok) {
-            lastError = `${instance}: caption HTTP ${captionResponse.status}`;
-            continue;
-          }
-          const body = await captionResponse.text();
-          const segments = body.includes("WEBVTT") ? parseVtt(body) : parseCaptionXml(body);
-          if (segments.length) {
-            return {
-              language: caption.label ?? lang,
-              languageCode: caption.languageCode ?? lang,
-              isGenerated: true,
-              segments,
-            };
-          }
-        } else {
-          const body = await response.text();
-          const segments = body.includes("WEBVTT") ? parseVtt(body) : parseCaptionXml(body);
-          if (segments.length) {
-            return { language: lang, languageCode: lang, isGenerated: true, segments };
-          }
-        }
-      } catch (error) {
-        lastError = error instanceof Error ? error.message : String(error);
-      }
-    }
-  }
-  throw new Error(lastError);
-}
-
-async function fetchTranscript(videoId: string, languages: string[]) {
+async function getTranscript(videoId: string, languages: string[]) {
   try {
-    const transcript = await new YouTubeTranscriptApi().fetch(videoId, { languages });
+    const t = await new YouTubeTranscriptApi().fetch(videoId, { languages });
     return {
-      language: transcript.language,
-      languageCode: transcript.languageCode,
-      isGenerated: transcript.isGenerated,
-      segments: transcript.snippets.map((s) => ({ start: s.start, duration: s.duration, text: s.text })),
+      language: t.language,
+      languageCode: t.languageCode,
+      isGenerated: t.isGenerated,
+      segments: t.snippets.map((s) => ({ start: s.start, duration: s.duration, text: s.text })),
     };
-  } catch (directError) {
-    console.warn("Direct YouTube transcript request failed; trying YouTube timedtext", directError);
+  } catch (error) {
+    console.warn("Package transcript extractor failed", error);
   }
-
-  try {
-    return await fetchViaYoutubeTimedText(videoId, languages);
-  } catch (timedTextError) {
-    console.warn("YouTube timedtext extraction failed; trying watch-page captions", timedTextError);
-  }
-
-  try {
-    return await fetchViaYoutubePage(videoId, languages);
-  } catch (pageError) {
-    console.warn("YouTube watch-page caption extraction failed; trying Invidious fallback", pageError);
-  }
-
-  return await fetchViaInvidious(videoId, languages);
+  return await fetchInnerTube(videoId, languages);
 }
 
 Deno.serve(async (req) => {
@@ -346,26 +218,23 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => null);
-    const url = typeof body?.url === "string" ? body.url : "";
-    const videoId = extractVideoId(url);
+    const rawUrl = typeof body?.url === "string" ? body.url : "";
+    const videoId = extractVideoId(rawUrl);
     if (!videoId) {
-      return json({
-        error: "Lien YouTube invalide.",
-        detail: "Formats acceptés : youtube.com/watch?v=..., youtu.be/..., youtube.com/shorts/..., youtube.com/embed/... ou youtube-nocookie.com/...",
-      }, 400);
+      return json({ error: "Lien YouTube invalide.", detail: "Impossible d'identifier l'ID vidéo." }, 400);
     }
 
     const requested = Array.isArray(body?.languages)
       ? body.languages.filter((x: unknown): x is string => typeof x === "string").slice(0, 8)
       : ["fr", "en", "ar"];
     const languages = requested.length ? requested : ["fr", "en", "ar"];
-    const transcript = await fetchTranscript(videoId, languages);
+    const transcript = await getTranscript(videoId, languages);
 
-    const metadataResponse = await fetch(
-      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
-      { headers: { "User-Agent": "MentionMax/1.0" } },
-    );
-    const metadata = metadataResponse.ok ? await metadataResponse.json().catch(() => null) : null;
+    let metadata: any = null;
+    try {
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, { headers: { "User-Agent": "MentionMax/1.0" } });
+      if (response.ok) metadata = await response.json();
+    } catch {}
 
     return json({
       success: true,
