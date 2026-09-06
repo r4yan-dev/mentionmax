@@ -17,6 +17,21 @@ const subjectLabels: Record<SubjectId, string> = {
 };
 const trackLabels: Record<TrackId, string> = { SP: "SPC", SMA: "SM A", SMB: "SM B" };
 
+function PhilosophyText({ children }: { children: string }) {
+  return (
+    <div
+      dir="rtl"
+      lang="ar"
+      style={{ direction: "rtl", unicodeBidi: "plaintext", width: "100%" }}
+      dangerouslySetInnerHTML={{ __html: children }}
+    />
+  );
+}
+
+function FlashcardText({ subjectId, children }: { subjectId: SubjectId; children: string }) {
+  return subjectId === "philosophie" ? <PhilosophyText>{children}</PhilosophyText> : <MathText>{children}</MathText>;
+}
+
 export default function Flashcards() {
   const [params] = useSearchParams();
   const trackId = (params.get("track") || "SP") as TrackId;
@@ -82,7 +97,7 @@ export default function Flashcards() {
                     <span className="flashcard-chapter">{current.target.chapter}</span>
                     <div className="flashcard-content">
                       <span className="flashcard-label">QUESTION</span>
-                      <div className="flashcard-text"><MathText>{current.front}</MathText></div>
+                      <div className="flashcard-text"><FlashcardText subjectId={subjectId}>{current.front}</FlashcardText></div>
                     </div>
                     <span className="flashcard-hint">Clique pour retourner</span>
                   </span>
@@ -90,7 +105,7 @@ export default function Flashcards() {
                     <span className="flashcard-chapter">{current.target.chapter}</span>
                     <div className="flashcard-content">
                       <span className="flashcard-label">RÉPONSE</span>
-                      <div className="flashcard-text"><MathText>{current.back}</MathText></div>
+                      <div className="flashcard-text"><FlashcardText subjectId={subjectId}>{current.back}</FlashcardText></div>
                     </div>
                     <span className="flashcard-hint">Clique pour revenir</span>
                   </span>
