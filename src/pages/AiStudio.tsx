@@ -10,7 +10,7 @@ const tools = [
   { to: "/ai-studio/handnotes", icon: FileText, title: "PDF → fiches", text: "Transforme un cours ou un document en fiche structurée." },
   { to: "/ai-studio/handnotes", icon: Layers3, title: "Texte → résumé", text: "Passe du texte brut à une synthèse claire pour réviser." },
   { to: "/ai-studio/handnotes", icon: ListChecks, title: "Texte → flashcards", text: "Extrais définitions, formules et idées à mémoriser." },
-  { to: "#youtube-transcript", icon: PlaySquare, title: "Vidéo → sous-titres", text: "Récupère les captions d'une vidéo YouTube via l'extracteur mobile/TV." },
+  { to: "#youtube-transcript", icon: PlaySquare, title: "Vidéo → sous-titres", text: "Uniquement pour les vidéos éducatives et de révision." },
 ];
 
 const recent = [
@@ -25,6 +25,13 @@ type TranscriptResult = {
   transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[]; source?: string };
 };
 type FunctionErrorPayload = { error?: string; detail?: string };
+
+type EducationGateResult = {
+  allowed: boolean;
+  title: string | null;
+  author: string | null;
+  reason: string | null;
+};
 
 function formatTime(seconds: number) {
   const total = Math.max(0, Math.floor(seconds));
@@ -59,6 +66,21 @@ export default function AiStudio() {
     if (!url || busy) return;
     setBusy(true); setError(null); setResult(null);
     try {
+      const { data: gate, error: gateError } = await supabase.functions.invoke("youtube-education-gate", {
+        body: { url },
+      });
+
+      if (gateError) {
+        setError(await getFunctionErrorMessage(gateError));
+        return;
+      }
+
+      const educationCheck = gate as EducationGateResult;
+      if (!educationCheck?.allowed) {
+        setError(educationCheck?.reason ?? "Cette vidéo ne semble pas être éducative.");
+        return;
+      }
+
       const { data, error: invokeError } = await supabase.functions.invoke("youtube-transcript-v2", {
         body: { url, languages: ["fr", "en", "ar"] },
       });
@@ -78,12 +100,12 @@ export default function AiStudio() {
       </header>
       <PeopleFeature variant="teacher" compact title="L’IA devient ton atelier de révision." text="Transforme tes cours en fiches, résumés, cartes et quiz sans perdre la structure du programme." action={<Link to="/ai-studio/handnotes" className="btn btn-primary"><Wand2 size={15} /> Ouvrir l’atelier</Link>} />
       <div className="studio-grid">
-        <section className="studio-card"><span className="studio-eyebrow">COMMENCER</span><h2>Choisis une transformation</h2><p>Les quatre parcours gardent la même logique : source → structure → ressource prête à réviser.</p><div className="studio-tools">{tools.map(({ to, icon: Icon, title, text }) => title.startsWith("Vidéo") ? <a key={title} href={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></a> : <Link key={title} to={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></Link>)}</div><div className="studio-drop"><FileUp size={24} /><strong>{selectedFile ?? "Dépose un fichier ici"}</strong><span>PDF, image ou texte · la sélection sera utilisée par l'atelier</span><input id="studio-file" hidden type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp" onChange={(event) => setSelectedFile(event.target.files?.[0]?.name ?? null)} /><div className="studio-actions"><label htmlFor="studio-file" className="studio-btn studio-btn--primary"><FileUp size={15} /> Importer</label><Link to="/ai-studio/handnotes" className="studio-btn studio-btn--soft"><Wand2 size={15} /> Ouvrir l'atelier</Link></div></div></section>
-        <aside className="studio-card"><span className="studio-eyebrow">RÉCENTS</span><h2>Ce que tu as créé</h2><p>Un historique compact pour reprendre tes ressources sans fouiller partout.</p><div className="studio-recent">{recent.map(([title, meta, badge]) => <Link to="/ai-studio/handnotes" className="studio-recent-item" key={title}><span className="studio-recent-item__icon"><FileText size={16} /></span><span><strong>{title}</strong><span>{meta}</span></span><b className="studio-badge">{badge}</b></Link>)}</div><div className="studio-note">V1 en test : les vidéos servent uniquement à vérifier l'extraction des sous-titres. Aucun résumé IA n'est généré ici.</div><div className="studio-actions"><Link to="/ai-help" className="studio-btn studio-btn--soft"><Sparkles size={15} /> Aller au tuteur IA <ArrowRight size={14} /></Link></div></aside>
+        <section className="studio-card"><span className="studio-eyebrow">COMMENCER</span><h2>Choisis une transformation</h2><p>Les quatre parcours gardent la même logique : source → structure → ressource prête à réviser.</p><div className="studio-tools">{tools.map(({ to, icon: Icon, title, text }) => title.startsWith("Vidéo") ? <a key={title} href={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></a> : <Link key={title} to={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></Link>)}</div><div className="studio-drop"><FileUp size={24} /><strong>{selectedFile ?? "Dépose un fichier ici"}</strong><span>PDF, image ou texte · la sélection sera utilisée par l'atelier</span><input id="studio-file" hidden type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp" onChange={(event) => setSelectedFile(event.target.files?.[0]?.name ?? null)} /><div className="studio-actions"><label htmlFor="studio-file" className="studio-btn studio-btn--primary"><FileUp size={15} /> Importer</label><Link to="/ai-studio/handnotes" className="studio-btn studio-btn--soft"><Wand2 size={15} /> Ouvrir l’atelier</Link></div></div></section>
+        <aside className="studio-card"><span className="studio-eyebrow">RÉCENTS</span><h2>Ce que tu as créé</h2><p>Un historique compact pour reprendre tes ressources sans fouiller partout.</p><div className="studio-recent">{recent.map(([title, meta, badge]) => <Link to="/ai-studio/handnotes" className="studio-recent-item" key={title}><span className="studio-recent-item__icon"><FileText size={16} /></span><span><strong>{title}</strong><span>{meta}</span></span><b className="studio-badge">{badge}</b></Link>)}</div><div className="studio-note">V1 en test : les vidéos sont limitées aux ressources éducatives et servent uniquement à vérifier l'extraction des sous-titres.</div><div className="studio-actions"><Link to="/ai-help" className="studio-btn studio-btn--soft"><Sparkles size={15} /> Aller au tuteur IA <ArrowRight size={14} /></Link></div></aside>
       </div>
       <section id="youtube-transcript" className="studio-card studio-youtube" aria-labelledby="youtube-transcript-title">
-        <div className="studio-youtube__header"><div><span className="studio-eyebrow"><PlaySquare size={14} /> TEST V1 · YOUTUBE</span><h2 id="youtube-transcript-title">Extraire les sous-titres</h2><p>Colle un lien YouTube. MentionMax tente des clients mobiles et TV avant tout accès navigateur, puis affiche le texte brut avec ses timestamps.</p></div>{result && <span className="studio-status studio-status--ok"><CheckCircle2 size={14} /> Extraction réussie</span>}</div>
-        <div className="studio-youtube__form"><div className="studio-url-input"><Link2 size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void extractYoutubeTranscript(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="studio-btn studio-btn--primary" onClick={() => void extractYoutubeTranscript()} disabled={!youtubeUrl.trim() || busy}>{busy ? <><LoaderCircle className="studio-spin" size={15} /> Extraction...</> : <><PlaySquare size={15} /> Extraire</>}</button></div>
+        <div className="studio-youtube__header"><div><span className="studio-eyebrow"><PlaySquare size={14} /> TEST V1 · YOUTUBE</span><h2 id="youtube-transcript-title">Extraire les sous-titres</h2><p>Colle un lien YouTube. MentionMax vérifie d’abord que la vidéo est éducative avant de lancer l’extraction.</p></div>{result && <span className="studio-status studio-status--ok"><CheckCircle2 size={14} /> Extraction réussie</span>}</div>
+        <div className="studio-youtube__form"><div className="studio-url-input"><Link2 size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void extractYoutubeTranscript(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="studio-btn studio-btn--primary" onClick={() => void extractYoutubeTranscript()} disabled={!youtubeUrl.trim() || busy}>{busy ? <><LoaderCircle className="studio-spin" size={15} /> Vérification...</> : <><PlaySquare size={15} /> Vérifier et extraire</>}</button></div>
         {error && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>Extraction impossible</strong><span>{error}</span></div></div>}
         {result && <div className="studio-transcript"><div className="studio-transcript__meta"><img src={result.video.thumbnail} alt="" /><div><strong>{result.video.title}</strong><span>{result.video.author ?? "YouTube"} · {result.transcript.language} ({result.transcript.languageCode}) · {result.transcript.segments.length} segments{result.transcript.isGenerated ? " · automatique" : " · créée par le créateur"}{result.transcript.source ? ` · ${result.transcript.source}` : ""}</span></div></div><div className="studio-transcript__body">{result.transcript.segments.map((segment, index) => <article className="studio-transcript__segment" key={`${segment.start}-${index}`}><time><Clock3 size={12} /> {formatTime(segment.start)}</time><p>{segment.text}</p></article>)}</div></div>}
       </section>
