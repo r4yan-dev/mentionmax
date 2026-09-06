@@ -44,30 +44,34 @@ function json(data: unknown, status = 200) {
   });
 }
 
+function decodeHtml(value: string) {
+  return value
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .trim();
+}
+
 function parseVtt(vtt: string) {
   const lines = vtt.replace(/\r/g, "").split("\n");
   const segments: { start: number; duration: number; text: string }[] = [];
+  const toSeconds = (value: string) => {
+    const parts = value.replace(",", ".").split(":").map(Number);
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return parts[0] * 60 + parts[1];
+  };
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line.includes("-->") || !line) continue;
     const [rawStart, rawEnd] = line.split("-->").map((x) => x.trim().split(" ")[0]);
-    const toSeconds = (value: string) => {
-      const parts = value.replace(",", ".").split(":").map(Number);
-      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-      return parts[0] * 60 + parts[1];
-    };
     const start = toSeconds(rawStart);
     const end = toSeconds(rawEnd);
     const text: string[] = [];
     for (let j = i + 1; j < lines.length && lines[j].trim(); j++) text.push(lines[j].trim());
-    const clean = text.join(" ")
-      .replace(/<[^>]+>/g, "")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&#39;/g, "'")
-      .replace(/&quot;/g, '"')
-      .trim();
+    const clean = decodeHtml(text.join(" "));
     if (clean && Number.isFinite(start) && Number.isFinite(end)) {
       segments.push({ start, duration: Math.max(0, end - start), text: clean });
     }
@@ -83,15 +87,7 @@ function parseCaptionXml(xml: string) {
     const readAttr = (name: string) => new RegExp(`${name}="([^"]*)"`).exec(attrs)?.[1] ?? "";
     const start = Number(readAttr("start"));
     const duration = Number(readAttr("dur"));
-    const text = content
-      .replace(/<br\s*\/?/gi, " ")
-      .replace(/<[^>]+>/g, "")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&#39;/g, "'")
-      .replace(/&quot;/g, '"')
-      .trim();
+    const text = decodeHtml(content.replace(/<br\s*\/?/gi, " "));
     if (text && Number.isFinite(start)) {
       segments.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
     }
@@ -132,6 +128,54 @@ function extractJsonAfterMarker(html: string, marker: string) {
     }
   }
   return null;
+}
+
+async function fetchViaYoutubeTimedText(videoId: string, languages: string[]) {
+  let lastError = "YouTube timedtext failed";
+  const attempts = languages.flatMap((lang) => [
+    { lang, kind: undefined },
+    { lang, kind: "asr" },
+  ]);
+
+  for (const attempt of attempts) {
+    try {
+      const url = new URL("https://www.youtube.com/api/timedtext");
+      url.searchParams.set("v", videoId);
+      url.searchParams.set("lang", attempt.lang);
+      url.searchParams.set("fmt", "vtt");
+      if (attempt.kind) url.searchParams.set("kind", attempt.kind);
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; MentionMax/1.0)",
+          "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
+        },
+      });
+
+      if (!response.ok) {
+        lastError = `YouTube timedtext HTTP ${response.status}`;
+        continue;
+      }
+
+      const body = await response.text();
+      const segments = body.includes("WEBVTT") ? parseVtt(body) : parseCaptionXml(body);
+      if (!segments.length) {
+        lastError = `Aucune piste ${attempt.lang} disponible via YouTube timedtext`;
+        continue;
+      }
+
+      return {
+        language: attempt.lang,
+        languageCode: attempt.lang,
+        isGenerated: attempt.kind === "asr",
+        segments,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  throw new Error(lastError);
 }
 
 async function fetchViaYoutubePage(videoId: string, languages: string[]) {
@@ -249,7 +293,13 @@ async function fetchTranscript(videoId: string, languages: string[]) {
       segments: transcript.snippets.map((s) => ({ start: s.start, duration: s.duration, text: s.text })),
     };
   } catch (directError) {
-    console.warn("Direct YouTube transcript request failed; trying YouTube watch-page captions", directError);
+    console.warn("Direct YouTube transcript request failed; trying YouTube timedtext", directError);
+  }
+
+  try {
+    return await fetchViaYoutubeTimedText(videoId, languages);
+  } catch (timedTextError) {
+    console.warn("YouTube timedtext extraction failed; trying watch-page captions", timedTextError);
   }
 
   try {
