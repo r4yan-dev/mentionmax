@@ -18,10 +18,11 @@ function getText(payload: any): string {
   if (Array.isArray(payload?.steps)) {
     const chunks: string[] = [];
     for (const step of payload.steps) {
+      if (step?.type !== "model_output") continue;
       if (typeof step?.text === "string") chunks.push(step.text);
       if (Array.isArray(step?.content)) {
         for (const part of step.content) {
-          if (typeof part?.text === "string") chunks.push(part.text);
+          if (part?.type === "text" && typeof part.text === "string") chunks.push(part.text);
         }
       }
     }
@@ -60,7 +61,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "image must be a valid data URL or provide mimeType" }, 400);
     }
 
-    const input = [
+    const content = [
       ...(image
         ? [{
             type: "image",
@@ -70,6 +71,11 @@ Deno.serve(async (req: Request) => {
         : []),
       ...(prompt ? [{ type: "text", text: prompt }] : []),
     ];
+
+    const input = {
+      type: "user_input",
+      content,
+    };
 
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
