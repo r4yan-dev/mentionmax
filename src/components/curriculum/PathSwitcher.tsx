@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { useAccount } from "../../context/AccountContext";
-import { pathLabels, resolveUserPath, type UserPath } from "../../data/curriculum/secondBac";
+import { pathLabels, resolveUserPath } from "../../data/curriculum/secondBac";
 import "./PathSwitcher.css";
 
 export default function PathSwitcher() {
