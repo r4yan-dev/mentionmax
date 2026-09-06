@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenText, Check, ChevronDown, FileText, ImagePlus, Languages, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { BookOpenText, Check, FileText, ImagePlus, Languages, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
 import "./WritingLab.css";
 
 type WritingSubject = "philosophie" | "anglais";
@@ -123,7 +123,7 @@ export default function WritingLab() {
         <div>
           <span className="writing-lab-eyebrow"><Sparkles size={14} /> WRITING LAB</span>
           <h1>Écris sans perdre ton fil.</h1>
-          <p>Un espace dédié à la dissertation et à l’écriture en anglais. Commence au clavier aujourd’hui, ajoute l’import photo et la correction IA dans les prochaines étapes.</p>
+          <p>Un espace dédié à la dissertation et à l’écriture en anglais. Commence au clavier, puis ajoute photo, transcription, correction et complétion dans les prochaines étapes.</p>
         </div>
         <button type="button" className="writing-lab-save" onClick={() => saveDraft(true)} disabled={!title.trim() && !prompt.trim() && !text.trim()}>
           {saved ? <Check size={15} /> : <Save size={15} />}
