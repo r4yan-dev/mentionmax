@@ -2,7 +2,7 @@
 .lesson-document[dir="rtl"] .lesson-writing-method {
   grid-column: 1 / -1 !important;
   margin: 14px 0 8px;
-  padding: 26px 28px 30px;
+  padding: 30px 30px 34px;
   background: rgba(221,245,241,.72);
   border: 2px solid rgba(15,163,163,.18);
   border-radius: 24px 17px 26px 18px;
@@ -42,18 +42,11 @@
 
 .lesson-document[dir="rtl"] .lesson-writing-method h2 {
   margin: 0 0 9px;
-  font-family: "Kalam", cursive;
-  font-size: clamp(29px, 3.1vw, 42px);
-  line-height: 1.2;
-  color: #073b3a;
-}
-
-.lesson-document[dir="rtl"] .lesson-writing-method__subtitle {
-  margin: 0 0 20px;
   font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
-  font-size: 16px;
-  line-height: 1.8;
-  color: #4b6965;
+  font-size: clamp(29px, 3.1vw, 42px);
+  line-height: 1.25;
+  font-weight: 900;
+  color: #073b3a;
 }
 
 .lesson-document[dir="rtl"] .lesson-writing-method__steps {
@@ -63,9 +56,9 @@
 }
 
 .lesson-document[dir="rtl"] .lesson-writing-method__step {
-  min-height: 235px;
-  padding: 18px 17px 19px;
-  background: rgba(255,255,255,.92);
+  min-height: 245px;
+  padding: 18px 17px 21px;
+  background: rgba(255,255,255,.94);
   border: 2px solid rgba(23,59,57,.11);
   border-radius: 18px 12px 20px 15px;
   position: relative;
@@ -91,9 +84,10 @@
 
 .lesson-document[dir="rtl"] .lesson-writing-method__step h3 {
   margin: 0 0 10px;
-  font-family: "Kalam", cursive;
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
   font-size: clamp(22px, 2vw, 28px);
-  line-height: 1.25;
+  line-height: 1.35;
+  font-weight: 900;
   color: #073b3a;
 }
 
@@ -101,7 +95,7 @@
   margin: 0;
   font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
   font-size: clamp(15px, 1.3vw, 18px);
-  line-height: 1.95;
+  line-height: 2;
   color: #315b56;
 }
 
@@ -122,22 +116,140 @@
   color: #168c83;
 }
 
+.lesson-document[dir="rtl"] .lesson-philosophy-tools {
+  grid-column: 1 / -1 !important;
+  display: grid;
+  grid-template-columns: minmax(200px, .7fr) minmax(0, 1.3fr);
+  gap: 16px;
+  align-items: center;
+  margin: 2px 0 8px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px dashed rgba(118,33,58,.24);
+  border-radius: 15px 21px 14px 18px;
+  direction: rtl;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__intro strong,
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__intro span {
+  display: block;
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__intro strong {
+  color: #76213a;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__intro span {
+  margin-top: 4px;
+  color: #6f6768;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__links {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 8px;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 7px 10px;
+  border-radius: 11px;
+  text-decoration: none;
+  background: #ddf5f1;
+  color: #073b3a;
+  border: 1px solid rgba(15,163,163,.16);
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-tools__links a:hover {
+  transform: translateY(-2px) rotate(-.4deg);
+  box-shadow: 0 8px 18px rgba(7,59,58,.08);
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card {
+  min-height: 420px !important;
+  padding-top: 24px !important;
+  padding-bottom: 24px !important;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card h2 {
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-card > p {
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-size: clamp(16px, 1.35vw, 19px);
+  line-height: 2.05;
+  color: #294f4b;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-writing-note {
+  margin-top: 22px;
+  padding: 12px 14px 13px;
+  border-top: 2px dashed rgba(15,163,163,.2);
+  background: rgba(255,241,154,.27);
+  border-radius: 11px;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-writing-note strong {
+  display: block;
+  margin-bottom: 5px;
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  color: #7a6a00;
+}
+
+.lesson-document[dir="rtl"] .lesson-philosophy-writing-note p {
+  margin: 0;
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-size: 13px;
+  line-height: 1.9;
+  color: #5f5727;
+}
+
+.lesson-document[dir="rtl"] .lesson-section-heading {
+  grid-column: 1 / -1 !important;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 14px 22px;
+  background: #ddf5f1;
+  border-right: 7px solid #0fa3a3;
+  border-radius: 13px 22px 18px 12px;
+}
+
+.lesson-document[dir="rtl"] .lesson-section-heading h2 {
+  margin: 0;
+  font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 900;
+  line-height: 1.4;
+}
+
 @media (max-width: 1050px) {
   .lesson-document[dir="rtl"] .lesson-writing-method__steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lesson-document[dir="rtl"] .lesson-philosophy-tools { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 650px) {
   .lesson-document[dir="rtl"] .lesson-writing-method { padding: 23px 16px 22px; }
   .lesson-document[dir="rtl"] .lesson-writing-method__steps { grid-template-columns: 1fr; }
   .lesson-document[dir="rtl"] .lesson-writing-method__step { min-height: 0; }
-}
-
-.lesson-document[dir="rtl"] .lesson-philosophy-card {
-  min-height: 360px !important;
-}
-
-@media (max-width: 850px) {
-  .lesson-document[dir="rtl"] .lesson-philosophy-card {
-    min-height: 300px !important;
-  }
+  .lesson-document[dir="rtl"] .lesson-philosophy-tools__links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lesson-document[dir="rtl"] .lesson-philosophy-card { min-height: 330px !important; }
 }
