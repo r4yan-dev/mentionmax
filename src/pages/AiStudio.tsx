@@ -1,6 +1,7 @@
 import { AlertCircle, ArrowRight, CheckCircle2, Clock3, FileText, FileUp, Layers3, Link2, ListChecks, LoaderCircle, PlaySquare, Sparkles, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import PeopleFeature from "../components/ui/PeopleFeature";
 import { supabase } from "../lib/supabase";
 import "./AiStudio.css";
@@ -24,6 +25,8 @@ type TranscriptResult = {
   transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[] };
 };
 
+type FunctionErrorPayload = { error?: string; detail?: string };
+
 function formatTime(seconds: number) {
   const total = Math.max(0, Math.floor(seconds));
   const hours = Math.floor(total / 3600);
@@ -32,6 +35,22 @@ function formatTime(seconds: number) {
   return hours > 0
     ? `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
     : `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
+async function getFunctionErrorMessage(error: unknown) {
+  if (error instanceof FunctionsHttpError) {
+    try {
+      const payload = (await error.context.json()) as FunctionErrorPayload;
+      if (payload?.detail) return `${payload.error ?? "Extraction impossible."} ${payload.detail}`;
+      if (payload?.error) return payload.error;
+    } catch {
+      // The relay may return a non-JSON error body.
+    }
+    return `L'extracteur a répondu avec une erreur HTTP (${error.context?.status ?? "inconnue"}).`;
+  }
+
+  if (error instanceof Error) return error.message;
+  return "Impossible de contacter l'extracteur.";
 }
 
 export default function AiStudio() {
@@ -49,24 +68,27 @@ export default function AiStudio() {
     setError(null);
     setResult(null);
 
-    const { data, error: invokeError } = await supabase.functions.invoke("youtube-transcript", {
-      body: { url, languages: ["fr", "en", "ar"] },
-    });
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke("youtube-transcript", {
+        body: { url, languages: ["fr", "en", "ar"] },
+      });
 
-    if (invokeError) {
-      setError(invokeError.message || "Impossible de contacter l'extracteur.");
+      if (invokeError) {
+        setError(await getFunctionErrorMessage(invokeError));
+        return;
+      }
+
+      if (!data?.success) {
+        setError(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé.");
+        return;
+      }
+
+      setResult(data as TranscriptResult);
+    } catch (error) {
+      setError(await getFunctionErrorMessage(error));
+    } finally {
       setBusy(false);
-      return;
     }
-
-    if (!data?.success) {
-      setError(data?.error || "Aucun sous-titre exploitable n'a été trouvé.");
-      setBusy(false);
-      return;
-    }
-
-    setResult(data as TranscriptResult);
-    setBusy(false);
   }
 
   return (
