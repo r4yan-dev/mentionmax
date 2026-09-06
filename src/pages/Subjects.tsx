@@ -57,6 +57,10 @@ export default function Subjects() {
     () => (selected ? contentCatalogService.getBaseExercises(path, selected).length : 0),
     [selected, path],
   );
+  const flashcardCount = useMemo(
+    () => (selected ? contentCatalogService.getBaseFlashcards(path, selected).length : 0),
+    [selected, path],
+  );
 
   if (!selected || !availableSubjects.some((subject) => subject.id === selected)) {
     const unavailableSvt = path === "SMB" && selected === "svt";
@@ -88,7 +92,6 @@ export default function Subjects() {
   }
 
   const subject = subjectCatalog[selected];
-  const showSpcMathsFlashcards = path === "SP" && selected === "maths";
 
   return (
     <main className="section container">
@@ -106,20 +109,20 @@ export default function Subjects() {
       <PageHeader
         eyebrow="Cours · exercices · révision"
         title={<>Prépare la <span className="accent-word">{subject.name}.</span></>}
-        description="Un espace organisé autour des chapitres, des leçons et des exercices du Bac."
+        description="Un espace organisé autour des chapitres, des leçons, des cartes et des exercices du Bac."
       />
 
       <PeopleFeature
         variant={peopleVariantForSubject(selected)}
         compact
         title={`Maîtrise ${subject.name}, chapitre après chapitre.`}
-        text={`Cours, ${exerciseCount} exercices et notes réunis dans un parcours pensé pour le ${pathLabels[path]}.`}
+        text={`Cours, ${exerciseCount} exercices, ${flashcardCount} cartes et tes notes réunis dans un parcours pensé pour le ${pathLabels[path]}.`}
       />
 
       <div className="subjects-actions">
         <Link to={`/lecons/${selected}`} className="btn btn-primary"><BookOpen size={15} /> Voir les cours</Link>
         <Link to={`/exercices?subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><PenLine size={15} /> {exerciseCount} exercices</Link>
-        {showSpcMathsFlashcards && <Link to="/flashcards?track=SP&subject=maths" className="btn btn-secondary"><Layers3 size={15} /> Flashcards</Link>}
+        <Link to={`/flashcards?track=${path}&subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><Layers3 size={15} /> {flashcardCount} flashcards</Link>
         <Link to={`/ai-studio/handnotes?subject=${encodeURIComponent(selected)}`} className="btn btn-secondary"><FileText size={15} /> Mes notes</Link>
       </div>
 
@@ -142,7 +145,7 @@ export default function Subjects() {
                 </div>
                 <h3 className="subjects-lesson-card__title">{item.title}</h3>
                 <p className="subjects-lesson-card__description">
-                  {item.blocks.find((block) => block.type === "intro")?.text ?? "Explore ce chapitre et consolide les notions essentielles du programme."}
+                  {item.blocks.find((block) => block.type === "intro")?.text ?? "Cours structuré, méthode Bac et entraînement ciblé."}
                 </p>
                 <span className="text-brand subjects-lesson-card__link">Étudier <ArrowRight size={13} /></span>
               </Link>
