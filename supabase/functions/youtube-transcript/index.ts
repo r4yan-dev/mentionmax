@@ -2,11 +2,11 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 type Segment = { start: number; duration: number; text: string };
 
-type CaptionTrack = {
-  baseUrl?: string;
-  languageCode?: string;
-  kind?: string;
-  name?: { simpleText?: string };
+type PlayerClient = {
+  name: string;
+  version: string;
+  userAgent: string;
+  extra?: Record<string, unknown>;
 };
 
 const corsHeaders = {
@@ -16,44 +16,56 @@ const corsHeaders = {
 };
 
 const youtubeIdPattern = /^[A-Za-z0-9_-]{11}$/;
-const playerUrl = "https://www.youtube.com/youtubei/v1/player";
-const clients = [
+
+// Public InnerTube client key used by YouTube clients. We do not fetch the
+// YouTube watch page, avoiding the server-side "confirm you're not a robot"
+// challenge that blocks datacenter requests.
+const INNER_TUBE_API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
+
+const clients: PlayerClient[] = [
   {
     name: "ANDROID",
-    version: "20.10.38",
-    sdk: 34,
-    userAgent: "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
-    headerName: "3",
+    version: "20.01.38",
+    userAgent: "com.google.android.youtube/20.01.38 (Linux; U; Android 14) gzip",
+    extra: { androidSdkVersion: 35 },
+  },
+  {
+    name: "IOS",
+    version: "20.10.4",
+    userAgent: "com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_5 like Mac OS X)",
+  },
+  {
+    name: "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
+    version: "2.0",
+    userAgent: "Mozilla/5.0 (SMART-TV; LINUX; Tizen 6.0) AppleWebKit/537.36",
   },
   {
     name: "WEB",
-    version: "2.20240926.01.00",
-    sdk: undefined,
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36",
-    headerName: "1",
+    version: "2.20260828.01.00",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
   },
 ];
 
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
-function cleanInput(value: string) {
-  return value.trim().replace(/^['"`<\[]+|['"`>\]]+$/g, "").trim();
+function cleanInput(input: string) {
+  return input
+    .trim()
+    .replace(/^['"`<\[]+|['"`>\]]+$/g, "")
+    .trim();
 }
 
 function extractVideoId(input: string): string | null {
   const value = cleanInput(input);
   if (youtubeIdPattern.test(value)) return value;
 
-  const query = /[?&]v=([A-Za-z0-9_-]{11})(?:[&#/\s]|$)/i.exec(value);
-  if (query?.[1]) return query[1];
+  const patterns = [
+    /[?&]v=([A-Za-z0-9_-]{11})(?:[&#/]|$)/i,
+    /(?:youtube(?:-nocookie)?\.com|youtu\.be)\/(?:watch\?v=|shorts\/|embed\/|live\/|v\/)?([A-Za-z0-9_-]{11})(?:[?&#/]|$)/i,
+  ];
 
-  const path = /(?:youtube(?:-nocookie)?\.com|youtu\.be)\/(?:watch\?v=|shorts\/|embed\/|live\/|v\/)?([A-Za-z0-9_-]{11})(?:[?&#/\s]|$)/i.exec(value);
-  if (path?.[1]) return path[1];
+  for (const pattern of patterns) {
+    const match = pattern.exec(value);
+    if (match?.[1]) return match[1];
+  }
 
   try {
     const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
@@ -68,13 +80,20 @@ function extractVideoId(input: string): string | null {
       if (youtubeIdPattern.test(v)) return v;
       const parts = url.pathname.split("/").filter(Boolean);
       if (parts.length >= 2 && ["shorts", "embed", "live", "v"].includes((parts[0] ?? "").toLowerCase())) {
-        const id = parts[1];
+        const id = parts[1] ?? "";
         if (youtubeIdPattern.test(id)) return id;
       }
     }
   } catch {}
 
   return null;
+}
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
 function decodeHtml(value: string) {
@@ -85,34 +104,35 @@ function decodeHtml(value: string) {
     .replace(/&gt;/g, ">")
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
-    .replace(/&#x27;/gi, "'")
     .trim();
 }
 
 function parseVtt(body: string): Segment[] {
   const lines = body.replace(/\r/g, "").split("\n");
-  const result: Segment[] = [];
+  const segments: Segment[] = [];
   const toSeconds = (value: string) => {
-    const parts = value.replace(",", ".").split(":").map(Number);
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    return parts[0] * 60 + parts[1];
+    const p = value.replace(",", ".").split(":").map(Number);
+    if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2];
+    return p[0] * 60 + p[1];
   };
+
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line.includes("-->")) continue;
-    const [startRaw, endRaw] = line.split("-->").map((x) => x.trim().split(" ")[0]);
+    if (!lines[i].includes("-->")) continue;
+    const [startRaw, endRaw] = lines[i].split("-->").map((x) => x.trim().split(" ")[0]);
     const start = toSeconds(startRaw);
     const end = toSeconds(endRaw);
     const text: string[] = [];
     for (let j = i + 1; j < lines.length && lines[j].trim(); j++) text.push(lines[j].trim());
     const cleaned = decodeHtml(text.join(" "));
-    if (cleaned && Number.isFinite(start) && Number.isFinite(end)) result.push({ start, duration: Math.max(0, end - start), text: cleaned });
+    if (cleaned && Number.isFinite(start) && Number.isFinite(end)) {
+      segments.push({ start, duration: Math.max(0, end - start), text: cleaned });
+    }
   }
-  return result;
+  return segments;
 }
 
 function parseXml(body: string): Segment[] {
-  const result: Segment[] = [];
+  const segments: Segment[] = [];
   for (const match of body.matchAll(/<text([^>]*)>([\s\S]*?)<\/text>/g)) {
     const attrs = match[1] ?? "";
     const content = match[2] ?? "";
@@ -120,159 +140,141 @@ function parseXml(body: string): Segment[] {
     const start = Number(attr("start"));
     const duration = Number(attr("dur"));
     const text = decodeHtml(content.replace(/<br\s*\/?/gi, " "));
-    if (text && Number.isFinite(start)) result.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
+    if (text && Number.isFinite(start)) {
+      segments.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
+    }
   }
-  return result;
+  return segments;
 }
 
 function parseJson3(body: string): Segment[] {
   const data = JSON.parse(body);
-  const result: Segment[] = [];
+  const segments: Segment[] = [];
   for (const event of data?.events ?? []) {
     if (!Array.isArray(event?.segs)) continue;
     const text = event.segs.map((seg: { utf8?: string }) => seg?.utf8 ?? "").join("").trim();
     if (!text) continue;
     const start = Number(event.tStartMs ?? 0) / 1000;
     const duration = Number(event.dDurationMs ?? 0) / 1000;
-    if (Number.isFinite(start)) result.push({ start, duration: Number.isFinite(duration) ? duration : 0, text: decodeHtml(text) });
+    if (Number.isFinite(start)) segments.push({ start, duration: Number.isFinite(duration) ? duration : 0, text: decodeHtml(text) });
   }
-  return result;
+  return segments;
 }
 
-function parseCaptionBody(body: string, contentType = "") {
-  if (contentType.includes("json") || body.trim().startsWith("{")) {
+function parseCaptionBody(body: string, contentType: string) {
+  if (contentType.includes("json") || body.trimStart().startsWith("{")) {
     try {
-      const parsed = parseJson3(body);
-      if (parsed.length) return parsed;
+      const jsonSegments = parseJson3(body);
+      if (jsonSegments.length) return jsonSegments;
     } catch {}
   }
   return body.includes("WEBVTT") ? parseVtt(body) : parseXml(body);
 }
 
-function extractApiKey(html: string) {
-  const patterns = [
-    /["']INNERTUBE_API_KEY["']\s*:\s*["']([^"']+)["']/,
-    /ytcfg\.set\(\s*({[\s\S]*?})\s*\)\s*;/,
-  ];
-  const direct = patterns[0].exec(html)?.[1];
-  if (direct) return direct;
-  const config = patterns[1].exec(html)?.[1];
-  if (config) {
-    try {
-      const parsed = JSON.parse(config);
-      return parsed?.INNERTUBE_API_KEY ?? null;
-    } catch {}
-  }
-  return null;
-}
-
-async function getApiKey(videoId: string) {
-  const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36",
-      "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
-      "Accept": "text/html,application/xhtml+xml",
-    },
+function rankTracks(tracks: any[], languages: string[]) {
+  return [...tracks].sort((a, b) => {
+    const al = String(a?.languageCode ?? "").toLowerCase();
+    const bl = String(b?.languageCode ?? "").toLowerCase();
+    const ai = languages.findIndex((lang) => al === lang.toLowerCase());
+    const bi = languages.findIndex((lang) => bl === lang.toLowerCase());
+    const aScore = ai < 0 ? 999 : ai;
+    const bScore = bi < 0 ? 999 : bi;
+    if (aScore !== bScore) return aScore - bScore;
+    return a?.kind === "asr" ? 1 : -1;
   });
-  if (!response.ok) throw new Error(`YouTube watch page HTTP ${response.status}`);
-  const html = await response.text();
-  return extractApiKey(html);
 }
 
-function pickTrack(tracks: CaptionTrack[], languages: string[]) {
-  const rank = (track: CaptionTrack) => {
-    const langIndex = languages.indexOf(track.languageCode ?? "");
-    const languageScore = langIndex < 0 ? 1000 : langIndex * 10;
-    const generatedScore = track.kind === "asr" ? 1 : 0;
-    return languageScore + generatedScore;
-  };
-  return [...tracks].sort((a, b) => rank(a) - rank(b))[0] ?? null;
-}
-
-async function fetchPlayer(videoId: string, languages: string[]) {
-  let apiKey: string | null = null;
-  try {
-    apiKey = await getApiKey(videoId);
-  } catch (error) {
-    console.warn("Unable to read YouTube API key from watch page", error);
-  }
-
-  let lastError = "YouTube player request failed";
-  for (const client of clients) {
-    try {
-      const endpoint = new URL(playerUrl);
-      if (apiKey) endpoint.searchParams.set("key", apiKey);
-      endpoint.searchParams.set("prettyPrint", "false");
-
-      const clientContext: Record<string, unknown> = {
+async function fetchPlayer(videoId: string, client: PlayerClient) {
+  const endpoint = `https://www.youtube.com/youtubei/v1/player?key=${encodeURIComponent(INNER_TUBE_API_KEY)}&prettyPrint=false`;
+  const payload = {
+    context: {
+      client: {
         clientName: client.name,
         clientVersion: client.version,
-        hl: languages[0] ?? "en",
-        gl: "US",
         userAgent: client.userAgent,
-      };
-      if (client.sdk) clientContext.androidSdkVersion = client.sdk;
+        ...(client.extra ?? {}),
+        hl: "en",
+        gl: "US",
+      },
+    },
+    videoId,
+    contentCheckOk: true,
+    racyCheckOk: true,
+  };
 
-      const response = await fetch(endpoint.toString(), {
-        method: "POST",
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": client.userAgent,
+      "Origin": "https://www.youtube.com",
+      "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) throw new Error(`${client.name} player HTTP ${response.status}`);
+  return await response.json();
+}
+
+async function fetchCaptionTrack(track: any): Promise<Segment[]> {
+  const rawBaseUrl = typeof track?.baseUrl === "string" ? track.baseUrl : "";
+  if (!rawBaseUrl) return [];
+
+  const formats = ["json3", "vtt", "xml"];
+  let lastError = "Caption track unavailable";
+
+  for (const fmt of formats) {
+    try {
+      const captionUrl = new URL(rawBaseUrl);
+      // YouTube may return an URL that already contains a format parameter.
+      for (const key of ["fmt", "xorb", "xosf", "xosp", "tlang"]) captionUrl.searchParams.delete(key);
+      captionUrl.searchParams.set("fmt", fmt);
+      const response = await fetch(captionUrl.toString(), {
         headers: {
-          "Content-Type": "application/json",
-          "User-Agent": client.userAgent,
-          "X-YouTube-Client-Name": client.headerName,
-          "X-YouTube-Client-Version": client.version,
-          "Origin": "https://www.youtube.com",
-          "Referer": "https://www.youtube.com/",
+          "User-Agent": "Mozilla/5.0 (compatible; MentionMax/1.0)",
           "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
         },
-        body: JSON.stringify({ context: { client: clientContext }, videoId }),
       });
-
       if (!response.ok) {
-        lastError = `YouTube ${client.name} player HTTP ${response.status}`;
+        lastError = `Captions HTTP ${response.status}`;
+        continue;
+      }
+      const body = await response.text();
+      const segments = parseCaptionBody(body, response.headers.get("content-type") ?? "");
+      if (segments.length) return segments;
+      lastError = `Empty ${fmt} caption response`;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  throw new Error(lastError);
+}
+
+async function getTranscript(videoId: string, languages: string[]) {
+  let lastError = "Aucune piste de sous-titres exploitable.";
+
+  for (const client of clients) {
+    try {
+      const player = await fetchPlayer(videoId, client);
+      const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+      if (!Array.isArray(tracks) || !tracks.length) {
+        lastError = `${client.name}: aucune piste de sous-titres`;
         continue;
       }
 
-      const player = await response.json();
-      const status = player?.playabilityStatus?.status;
-      if (status && status !== "OK") {
-        lastError = player?.playabilityStatus?.reason ?? `YouTube playability status: ${status}`;
-      }
-
-      const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks as CaptionTrack[] | undefined;
-      if (!Array.isArray(tracks) || tracks.length === 0) continue;
-
-      const track = pickTrack(tracks, languages);
-      if (!track?.baseUrl) continue;
-
-      let captionUrl = new URL(track.baseUrl);
-      const original = captionUrl.toString();
-      const variants = [original, (() => {
-        const copy = new URL(original);
-        copy.searchParams.delete("fmt");
-        copy.searchParams.delete("tlang");
-        return copy.toString();
-      })()];
-
-      for (const url of variants) {
+      const ranked = rankTracks(tracks, languages);
+      for (const track of ranked) {
         try {
-          const captionResponse = await fetch(url, {
-            headers: {
-              "User-Agent": client.userAgent,
-              "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
-            },
-          });
-          if (!captionResponse.ok) {
-            lastError = `YouTube captions HTTP ${captionResponse.status}`;
-            continue;
-          }
-          const body = await captionResponse.text();
-          const segments = parseCaptionBody(body, captionResponse.headers.get("content-type") ?? "");
+          const segments = await fetchCaptionTrack(track);
           if (segments.length) {
             return {
-              language: track.name?.simpleText ?? track.languageCode ?? languages[0] ?? "unknown",
-              languageCode: track.languageCode ?? languages[0] ?? "unknown",
-              isGenerated: track.kind === "asr",
+              language: track?.name?.simpleText ?? track?.languageCode ?? languages[0] ?? "unknown",
+              languageCode: track?.languageCode ?? "unknown",
+              isGenerated: track?.kind === "asr",
               segments,
+              source: client.name,
             };
           }
         } catch (error) {
@@ -283,6 +285,7 @@ async function fetchPlayer(videoId: string, languages: string[]) {
       lastError = error instanceof Error ? error.message : String(error);
     }
   }
+
   throw new Error(lastError);
 }
 
@@ -301,13 +304,14 @@ Deno.serve(async (req) => {
       : ["fr", "en", "ar"];
     const languages = requested.length ? requested : ["fr", "en", "ar"];
 
-    const transcript = await fetchPlayer(videoId, languages);
+    const transcript = await getTranscript(videoId, languages);
 
-    let metadata: Record<string, unknown> | null = null;
+    let metadata: any = null;
     try {
-      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, {
-        headers: { "User-Agent": "MentionMax/1.0" },
-      });
+      const response = await fetch(
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&format=json`,
+        { headers: { "User-Agent": "Mozilla/5.0" } },
+      );
       if (response.ok) metadata = await response.json();
     } catch {}
 
