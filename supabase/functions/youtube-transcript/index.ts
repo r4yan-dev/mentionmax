@@ -14,26 +14,55 @@ const invidiousInstances = [
   "https://yt.chocolatemoo53.com",
 ];
 
+function cleanInput(input: string) {
+  return input
+    .trim()
+    .replace(/^['"`<\[]+|['"`>\]]+$/g, "")
+    .replace(/\s+/g, "");
+}
+
 function extractVideoId(input: string): string | null {
-  const value = input.trim();
+  const value = cleanInput(input);
   if (youtubeIdPattern.test(value)) return value;
+
   try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase();
+    const normalized = value.startsWith("http://") || value.startsWith("https://")
+      ? value
+      : `https://${value}`;
+    const url = new URL(normalized);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+
     if (host === "youtu.be") {
-      const id = url.pathname.slice(1).split("/")[0];
+      const id = url.pathname.split("/").filter(Boolean)[0] ?? "";
       return youtubeIdPattern.test(id) ? id : null;
     }
-    if (host === "youtube.com" || host.endsWith(".youtube.com")) {
-      const queryId = url.searchParams.get("v");
-      if (queryId && youtubeIdPattern.test(queryId)) return queryId;
+
+    if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtube-nocookie.com" || host.endsWith(".youtube-nocookie.com")) {
+      const queryId = url.searchParams.get("v") ?? "";
+      if (youtubeIdPattern.test(queryId)) return queryId;
+
       const parts = url.pathname.split("/").filter(Boolean);
-      const candidate = parts[1] ?? parts[0];
-      if (["shorts", "embed", "live"].includes(parts[0] ?? "") && youtubeIdPattern.test(candidate)) return candidate;
+      const section = parts[0]?.toLowerCase() ?? "";
+      if (["shorts", "embed", "live", "v"].includes(section)) {
+        const id = parts[1] ?? "";
+        if (youtubeIdPattern.test(id)) return id;
+      }
     }
   } catch {
-    return null;
+    // Fall through to regex parsing for pasted/encoded URLs.
   }
+
+  const patterns = [
+    /(?:youtube(?:-nocookie)?\.com\/watch[^\n]*[?&]v=)([A-Za-z0-9_-]{11})/i,
+    /(?:youtube(?:-nocookie)?\.com\/(?:shorts|embed|live|v)\/)([A-Za-z0-9_-]{11})/i,
+    /(?:youtu\.be\/)([A-Za-z0-9_-]{11})/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = pattern.exec(value);
+    if (match?.[1]) return match[1];
+  }
+
   return null;
 }
 
@@ -133,7 +162,7 @@ function extractJsonAfterMarker(html: string, marker: string) {
 async function fetchViaYoutubeTimedText(videoId: string, languages: string[]) {
   let lastError = "YouTube timedtext failed";
   const attempts = languages.flatMap((lang) => [
-    { lang, kind: undefined },
+    { lang },
     { lang, kind: "asr" },
   ]);
 
@@ -320,7 +349,10 @@ Deno.serve(async (req) => {
     const url = typeof body?.url === "string" ? body.url : "";
     const videoId = extractVideoId(url);
     if (!videoId) {
-      return json({ error: "Lien YouTube invalide. Utilise une URL YouTube classique, Shorts, Live ou youtu.be." }, 400);
+      return json({
+        error: "Lien YouTube invalide.",
+        detail: "Formats acceptés : youtube.com/watch?v=..., youtu.be/..., youtube.com/shorts/..., youtube.com/embed/... ou youtube-nocookie.com/...",
+      }, 400);
     }
 
     const requested = Array.isArray(body?.languages)
