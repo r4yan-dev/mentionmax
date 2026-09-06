@@ -146,10 +146,7 @@ function parseTableLines(lines: string[]): string[][] | null {
     .map(splitTableRow)
     .filter((cells) => cells.length > 1);
 
-  if (normalized.length < 2) return null;
-
-  const separatorIndex = normalized.findIndex((_, index) => index === 1 && isTableSeparator(lines[1]));
-  if (separatorIndex !== 1) return null;
+  if (normalized.length < 2 || !isTableSeparator(lines[1])) return null;
 
   const header = normalized[0];
   const body = normalized.slice(2).map((row) => {
@@ -159,6 +156,13 @@ function parseTableLines(lines: string[]): string[][] | null {
   });
 
   return [header, ...body];
+}
+
+function parseOneLineTable(line: string): string[][] | null {
+  if (!/:---/.test(line) || (line.match(/\|/g) ?? []).length < 8) return null;
+
+  const normalized = line.replace(/\\\|/g, "|").replace(/\|\s*\|/g, "\n");
+  return parseTableLines(normalized.split("\n"));
 }
 
 function parseBlocks(markdown: string): Block[] {
@@ -195,6 +199,13 @@ function parseBlocks(markdown: string): Block[] {
       }
       if (i < lines.length) i += 1;
       blocks.push({ type: "math", content: math.join("\n") });
+      continue;
+    }
+
+    const oneLineTable = parseOneLineTable(line);
+    if (oneLineTable) {
+      blocks.push({ type: "table", rows: oneLineTable });
+      i += 1;
       continue;
     }
 
@@ -282,16 +293,12 @@ export default function MarkdownContent({ content }: { content: string }) {
           return (
             <div className="ai-markdown__table-wrap" key={key}>
               <table>
-                <thead>
-                  <tr>{header.map((cell, cellIndex) => <th key={`${key}-h-${cellIndex}`}>{renderInline(cell)}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {rows.slice(1).map((row, rowIndex) => (
-                    <tr key={`${key}-r-${rowIndex}`}>
-                      {row.map((cell, cellIndex) => <td key={`${key}-${rowIndex}-${cellIndex}`}>{renderInline(cell)}</td>)}
-                    </tr>
-                  ))}
-                </tbody>
+                <thead><tr>{header.map((cell, cellIndex) => <th key={`${key}-h-${cellIndex}`}>{renderInline(cell)}</th>)}</tr></thead>
+                <tbody>{rows.slice(1).map((row, rowIndex) => (
+                  <tr key={`${key}-r-${rowIndex}`}>
+                    {row.map((cell, cellIndex) => <td key={`${key}-${rowIndex}-${cellIndex}`}>{renderInline(cell)}</td>)}
+                  </tr>
+                ))}</tbody>
               </table>
             </div>
           );
