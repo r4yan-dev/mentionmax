@@ -1,4 +1,5 @@
 import { BookOpen, FileText, Layers3, PenLine } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import { LatexText } from "../../components/ui/LatexText";
 import type { LessonBlock, LessonDocument } from "../../types/academic";
@@ -97,6 +98,18 @@ function philosophyNote(title: string) {
   return "احفظ";
 }
 
+function philosophyWritingPrompt(title: string) {
+  if (title.includes("تأطير")) return "في الكتابة: ابدأ بتحديد المجزوءة والمحور، ثم انتقل من السياق العام إلى الإشكال دون القفز مباشرة إلى الجواب.";
+  if (title.includes("الإشكال")) return "في الكتابة: صغ الإشكال في سؤال مركزي، ثم اجعله يتفرع إلى أسئلة ستقود مراحل التحليل والمناقشة.";
+  if (title.includes("صاحب النص")) return "في الكتابة: قدّم الفيلسوف فقط بالقدر الذي يساعد على فهم الموقف، وتجنب السيرة الطويلة التي لا تخدم الموضوع.";
+  if (title.includes("المفاهيم")) return "في الكتابة: لا تذكر المفهوم كتعريف معزول؛ اشرح دلالته داخل الأطروحة وبيّن علاقته بباقي المفاهيم.";
+  if (title.includes("الأطروحة")) return "في الكتابة: صغ الأطروحة في جملة دقيقة تبدأ مثلًا بـ: يدافع صاحب النص عن... ثم اربطها مباشرة بالإشكال.";
+  if (title.includes("الحجاج")) return "في الكتابة: سمِّ الحجة أو الآلية الحجاجية وبيّن وظيفتها: هل تفسر؟ تقارن؟ تنفي؟ تستنتج؟";
+  if (title.includes("قيمة")) return "في الكتابة: اجعل التقييم حجاجيا، فاذكر ما يضيفه الموقف إلى فهم الإشكال وما يكشف حدوده.";
+  if (title.includes("خلاصة") || title.includes("تركيب")) return "في الكتابة: اجمع ما أثبته التحليل وما كشفته المناقشة، ثم أجب عن الإشكال دون تكرار الفقرات السابقة.";
+  return "في الكتابة: حوّل هذه الفكرة إلى جملة تؤدي وظيفة واضحة في جوابك، ثم اربطها بالفقرة الموالية بانتقال منطقي.";
+}
+
 function renderArabicConceptCard(heading: LessonBlock, text: LessonBlock, index: number) {
   const headingTitle = heading.title || heading.text || "";
   return (
@@ -109,6 +122,10 @@ function renderArabicConceptCard(heading: LessonBlock, text: LessonBlock, index:
     >
       <h2 id={`philosophy-card-title-${index}`}>{headingTitle}</h2>
       <p><LatexText>{text.text || ""}</LatexText></p>
+      <div className="lesson-philosophy-writing-note">
+        <strong>وظيفتها في الإنشاء</strong>
+        <p>{philosophyWritingPrompt(headingTitle)}</p>
+      </div>
     </section>
   );
 }
@@ -137,34 +154,13 @@ function renderPhilosophyWritingGuide() {
         في امتحان البكالوريا لا تكفي معرفة موقف الفيلسوف. القيمة الحقيقية للمعرفة تظهر حين توظّفها لبناء جواب متدرج، واضح، ومقنع. اكتب انطلاقا من الإشكال، واجعل كل فقرة تؤدي وظيفة محددة في الإجابة.
       </p>
       <div className="lesson-writing-method__steps">
-        <article className="lesson-writing-method__step">
-          <span className="lesson-writing-method__number">01</span>
-          <h3>المقدمة</h3>
-          <p>أطّر المفهوم داخل مجزوئته ومحوره، وحدد التوتر الذي يجعل الموضوع إشكاليا، ثم صغ أسئلة دقيقة تقود القارئ إلى ما ستعالجه في العرض.</p>
-        </article>
-        <article className="lesson-writing-method__step">
-          <span className="lesson-writing-method__number">02</span>
-          <h3>التحليل</h3>
-          <p>استخرج الأطروحة، واشرح المفاهيم المركزية، ثم بيّن كيف تتساند الأفكار والحجج. لا تكتف بذكر الفيلسوف، بل وضّح وظيفة موقفه داخل الجواب.</p>
-        </article>
-        <article className="lesson-writing-method__step">
-          <span className="lesson-writing-method__number">03</span>
-          <h3>المناقشة</h3>
-          <p>ضع الموقف في حوار مع تصور يؤيده وآخر يعارضه، وبيّن نقطة القوة والحدود. المناقشة ليست لائحة أسماء، بل انتقال منطقي من موقف إلى آخر.</p>
-        </article>
-        <article className="lesson-writing-method__step">
-          <span className="lesson-writing-method__number">04</span>
-          <h3>الخاتمة</h3>
-          <p>ركّب ما انتهى إليه التحليل والمناقشة، وأجب عن الإشكال بوضوح. يمكن فتح أفق جديد فقط عندما يكون مرتبطا بالموضوع ولا يتحول إلى سؤال مجاني.</p>
-        </article>
+        <article className="lesson-writing-method__step"><span className="lesson-writing-method__number">01</span><h3>المقدمة</h3><p>أطّر المفهوم داخل مجزوئته ومحوره، وحدد التوتر الذي يجعل الموضوع إشكاليا، ثم صغ أسئلة دقيقة تقود القارئ إلى ما ستعالجه في العرض.</p></article>
+        <article className="lesson-writing-method__step"><span className="lesson-writing-method__number">02</span><h3>التحليل</h3><p>استخرج الأطروحة، واشرح المفاهيم المركزية، ثم بيّن كيف تتساند الأفكار والحجج. لا تكتف بذكر الفيلسوف، بل وضّح وظيفة موقفه داخل الجواب.</p></article>
+        <article className="lesson-writing-method__step"><span className="lesson-writing-method__number">03</span><h3>المناقشة</h3><p>ضع الموقف في حوار مع تصور يؤيده وآخر يعارضه، وبيّن نقطة القوة والحدود. المناقشة ليست لائحة أسماء، بل انتقال منطقي من موقف إلى آخر.</p></article>
+        <article className="lesson-writing-method__step"><span className="lesson-writing-method__number">04</span><h3>الخاتمة</h3><p>ركّب ما انتهى إليه التحليل والمناقشة، وأجب عن الإشكال بوضوح. يمكن فتح أفق جديد فقط عندما يكون مرتبطا بالموضوع ولا يتحول إلى سؤال مجاني.</p></article>
       </div>
       <div className="lesson-writing-method__phrases" aria-label="روابط حجاجية مفيدة">
-        <span className="lesson-writing-method__phrase">من هذا المنطلق</span>
-        <span className="lesson-writing-method__phrase">غير أن</span>
-        <span className="lesson-writing-method__phrase">في المقابل</span>
-        <span className="lesson-writing-method__phrase">بناء على ذلك</span>
-        <span className="lesson-writing-method__phrase">وعليه</span>
-        <span className="lesson-writing-method__phrase">وهكذا</span>
+        <span className="lesson-writing-method__phrase">من هذا المنطلق</span><span className="lesson-writing-method__phrase">غير أن</span><span className="lesson-writing-method__phrase">في المقابل</span><span className="lesson-writing-method__phrase">بناء على ذلك</span><span className="lesson-writing-method__phrase">وعليه</span><span className="lesson-writing-method__phrase">وهكذا</span>
       </div>
     </aside>
   );
@@ -173,15 +169,12 @@ function renderPhilosophyWritingGuide() {
 function renderPhilosophyTools() {
   return (
     <aside className="lesson-philosophy-tools" dir="rtl" aria-label="موارد الفلسفة">
-      <div className="lesson-philosophy-tools__intro">
-        <strong>تابع المراجعة</strong>
-        <span>تعلّم الفكرة، ثم استعملها في الكتابة والتدريب.</span>
-      </div>
+      <div className="lesson-philosophy-tools__intro"><strong>تابع المراجعة</strong><span>تعلّم الفكرة، ثم استعملها في الكتابة والتدريب.</span></div>
       <div className="lesson-philosophy-tools__links">
-        <a href="/flashcards?subject=philosophie"><Layers3 size={15} /> بطاقات المراجعة</a>
-        <a href="/exercices?subject=philosophie"><PenLine size={15} /> التمارين</a>
-        <a href="/ai-studio/handnotes?subject=philosophie"><FileText size={15} /> ملاحظاتي</a>
-        <a href="/lecons/philosophie"><BookOpen size={15} /> كل دروس الفلسفة</a>
+        <Link to="/flashcards?subject=philosophie"><Layers3 size={15} /> بطاقات المراجعة</Link>
+        <Link to="/exercices?subject=philosophie"><PenLine size={15} /> التمارين</Link>
+        <Link to="/ai-studio/handnotes?subject=philosophie"><FileText size={15} /> ملاحظاتي</Link>
+        <Link to="/lecons/philosophie"><BookOpen size={15} /> كل دروس الفلسفة</Link>
       </div>
     </aside>
   );
@@ -216,16 +209,10 @@ export default function LessonRenderer({ lesson }: { lesson: LessonDocument }) {
   const blocks = isArabicIntro ? lesson.blocks.slice(3) : lesson.blocks;
 
   return (
-    <article
-      className="lesson-document"
-      lang={lesson.language}
-      dir={isArabic ? "rtl" : "ltr"}
-      data-page-count={pages}
-      data-subject={lesson.subjectId}
-    >
+    <article className="lesson-document" lang={lesson.language} dir={isArabic ? "rtl" : "ltr"} data-page-count={pages} data-subject={lesson.subjectId}>
       {isArabicIntro && renderArabicIntroCard(lesson.blocks)}
-      {isPhilosophy && isArabic && renderPhilosophyWritingGuide()}
-      {isPhilosophy && isArabic && renderPhilosophyTools()}
+      {isPhilosophy && renderPhilosophyWritingGuide()}
+      {isPhilosophy && renderPhilosophyTools()}
       {isArabic ? renderArabicBlocks(blocks) : blocks.map((block, index) => renderBlock(block, index))}
     </article>
   );
