@@ -1,5 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { YouTubeTranscriptApi } from "npm:@hallelx/youtube-transcript@0.2.0";
+
+type Segment = { start: number; duration: number; text: string };
+
+type CaptionTrack = {
+  baseUrl?: string;
+  languageCode?: string;
+  kind?: string;
+  name?: { simpleText?: string };
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,8 +15,31 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-type Segment = { start: number; duration: number; text: string };
 const youtubeIdPattern = /^[A-Za-z0-9_-]{11}$/;
+const playerUrl = "https://www.youtube.com/youtubei/v1/player";
+const clients = [
+  {
+    name: "ANDROID",
+    version: "20.10.38",
+    sdk: 34,
+    userAgent: "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
+    headerName: "3",
+  },
+  {
+    name: "WEB",
+    version: "2.20240926.01.00",
+    sdk: undefined,
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36",
+    headerName: "1",
+  },
+];
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 function cleanInput(value: string) {
   return value.trim().replace(/^['"`<\[]+|['"`>\]]+$/g, "").trim();
@@ -18,14 +49,11 @@ function extractVideoId(input: string): string | null {
   const value = cleanInput(input);
   if (youtubeIdPattern.test(value)) return value;
 
-  const patterns = [
-    /[?&]v=([A-Za-z0-9_-]{11})(?:[&#/]|$)/i,
-    /(?:youtube(?:-nocookie)?\.com|youtu\.be)\/(?:watch\?v=|shorts\/|embed\/|live\/|v\/)?([A-Za-z0-9_-]{11})(?:[?&#/]|$)/i,
-  ];
-  for (const pattern of patterns) {
-    const match = pattern.exec(value);
-    if (match?.[1]) return match[1];
-  }
+  const query = /[?&]v=([A-Za-z0-9_-]{11})(?:[&#/\s]|$)/i.exec(value);
+  if (query?.[1]) return query[1];
+
+  const path = /(?:youtube(?:-nocookie)?\.com|youtu\.be)\/(?:watch\?v=|shorts\/|embed\/|live\/|v\/)?([A-Za-z0-9_-]{11})(?:[?&#/\s]|$)/i.exec(value);
+  if (path?.[1]) return path[1];
 
   try {
     const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
@@ -39,7 +67,7 @@ function extractVideoId(input: string): string | null {
       const v = url.searchParams.get("v") ?? "";
       if (youtubeIdPattern.test(v)) return v;
       const parts = url.pathname.split("/").filter(Boolean);
-      if (parts.length >= 2 && ["shorts", "embed", "live", "v"].includes(parts[0]?.toLowerCase() ?? "")) {
+      if (parts.length >= 2 && ["shorts", "embed", "live", "v"].includes((parts[0] ?? "").toLowerCase())) {
         const id = parts[1];
         if (youtubeIdPattern.test(id)) return id;
       }
@@ -47,13 +75,6 @@ function extractVideoId(input: string): string | null {
   } catch {}
 
   return null;
-}
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
 }
 
 function decodeHtml(value: string) {
@@ -64,6 +85,7 @@ function decodeHtml(value: string) {
     .replace(/&gt;/g, ">")
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
+    .replace(/&#x27;/gi, "'")
     .trim();
 }
 
@@ -71,20 +93,20 @@ function parseVtt(body: string): Segment[] {
   const lines = body.replace(/\r/g, "").split("\n");
   const result: Segment[] = [];
   const toSeconds = (value: string) => {
-    const p = value.replace(",", ".").split(":").map(Number);
-    return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
+    const parts = value.replace(",", ".").split(":").map(Number);
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return parts[0] * 60 + parts[1];
   };
   for (let i = 0; i < lines.length; i++) {
-    if (!lines[i].includes("-->")) continue;
-    const [startRaw, endRaw] = lines[i].split("-->").map((x) => x.trim().split(" ")[0]);
+    const line = lines[i].trim();
+    if (!line.includes("-->")) continue;
+    const [startRaw, endRaw] = line.split("-->").map((x) => x.trim().split(" ")[0]);
     const start = toSeconds(startRaw);
     const end = toSeconds(endRaw);
     const text: string[] = [];
     for (let j = i + 1; j < lines.length && lines[j].trim(); j++) text.push(lines[j].trim());
     const cleaned = decodeHtml(text.join(" "));
-    if (cleaned && Number.isFinite(start) && Number.isFinite(end)) {
-      result.push({ start, duration: Math.max(0, end - start), text: cleaned });
-    }
+    if (cleaned && Number.isFinite(start) && Number.isFinite(end)) result.push({ start, duration: Math.max(0, end - start), text: cleaned });
   }
   return result;
 }
@@ -98,9 +120,7 @@ function parseXml(body: string): Segment[] {
     const start = Number(attr("start"));
     const duration = Number(attr("dur"));
     const text = decodeHtml(content.replace(/<br\s*\/?/gi, " "));
-    if (text && Number.isFinite(start)) {
-      result.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
-    }
+    if (text && Number.isFinite(start)) result.push({ start, duration: Number.isFinite(duration) ? duration : 0, text });
   }
   return result;
 }
@@ -110,7 +130,7 @@ function parseJson3(body: string): Segment[] {
   const result: Segment[] = [];
   for (const event of data?.events ?? []) {
     if (!Array.isArray(event?.segs)) continue;
-    const text = event.segs.map((seg: any) => seg?.utf8 ?? "").join("").trim();
+    const text = event.segs.map((seg: { utf8?: string }) => seg?.utf8 ?? "").join("").trim();
     if (!text) continue;
     const start = Number(event.tStartMs ?? 0) / 1000;
     const duration = Number(event.dDurationMs ?? 0) / 1000;
@@ -120,80 +140,91 @@ function parseJson3(body: string): Segment[] {
 }
 
 function parseCaptionBody(body: string, contentType = "") {
-  const trimmed = body.trim();
-  if (contentType.includes("json") || trimmed.startsWith("{")) {
+  if (contentType.includes("json") || body.trim().startsWith("{")) {
     try {
-      const jsonSegments = parseJson3(body);
-      if (jsonSegments.length) return jsonSegments;
+      const parsed = parseJson3(body);
+      if (parsed.length) return parsed;
     } catch {}
   }
-  if (body.includes("WEBVTT")) return parseVtt(body);
-  return parseXml(body);
+  return body.includes("WEBVTT") ? parseVtt(body) : parseXml(body);
 }
 
-async function getInnerTubeKey(videoId: string) {
+function extractApiKey(html: string) {
+  const patterns = [
+    /["']INNERTUBE_API_KEY["']\s*:\s*["']([^"']+)["']/,
+    /ytcfg\.set\(\s*({[\s\S]*?})\s*\)\s*;/,
+  ];
+  const direct = patterns[0].exec(html)?.[1];
+  if (direct) return direct;
+  const config = patterns[1].exec(html)?.[1];
+  if (config) {
+    try {
+      const parsed = JSON.parse(config);
+      return parsed?.INNERTUBE_API_KEY ?? null;
+    } catch {}
+  }
+  return null;
+}
+
+async function getApiKey(videoId: string) {
   const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36",
       "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
+      "Accept": "text/html,application/xhtml+xml",
     },
   });
   if (!response.ok) throw new Error(`YouTube watch page HTTP ${response.status}`);
   const html = await response.text();
-  const match = /"INNERTUBE_API_KEY":"([^"]+)"/.exec(html);
-  if (!match?.[1]) throw new Error("INNERTUBE_API_KEY introuvable dans YouTube.");
-  return match[1];
+  return extractApiKey(html);
 }
 
-const clients = [
-  {
-    name: "ANDROID",
-    version: "20.10.38",
-    userAgent: "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip",
-    sdk: 34,
-  },
-  {
-    name: "IOS",
-    version: "20.10.38",
-    userAgent: "com.google.ios.youtube/20.10.38 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
-  },
-  {
-    name: "WEB",
-    version: "2.20260114.01.00",
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
-  },
-] as const;
+function pickTrack(tracks: CaptionTrack[], languages: string[]) {
+  const rank = (track: CaptionTrack) => {
+    const langIndex = languages.indexOf(track.languageCode ?? "");
+    const languageScore = langIndex < 0 ? 1000 : langIndex * 10;
+    const generatedScore = track.kind === "asr" ? 1 : 0;
+    return languageScore + generatedScore;
+  };
+  return [...tracks].sort((a, b) => rank(a) - rank(b))[0] ?? null;
+}
 
-async function fetchInnerTube(videoId: string, languages: string[]) {
-  const key = await getInnerTubeKey(videoId);
-  let lastError = "Aucune piste de sous-titres exploitable.";
+async function fetchPlayer(videoId: string, languages: string[]) {
+  let apiKey: string | null = null;
+  try {
+    apiKey = await getApiKey(videoId);
+  } catch (error) {
+    console.warn("Unable to read YouTube API key from watch page", error);
+  }
 
+  let lastError = "YouTube player request failed";
   for (const client of clients) {
     try {
-      const payload = {
-        context: {
-          client: {
-            clientName: client.name,
-            clientVersion: client.version,
-            ...(client.sdk ? { androidSdkVersion: client.sdk } : {}),
-            hl: "en",
-            gl: "US",
-            userAgent: client.userAgent,
-          },
-        },
-        videoId,
-        contentCheckOk: true,
-        racyCheckOk: true,
-      };
+      const endpoint = new URL(playerUrl);
+      if (apiKey) endpoint.searchParams.set("key", apiKey);
+      endpoint.searchParams.set("prettyPrint", "false");
 
-      const response = await fetch(`https://www.youtube.com/youtubei/v1/player?key=${encodeURIComponent(key)}&prettyPrint=false`, {
+      const clientContext: Record<string, unknown> = {
+        clientName: client.name,
+        clientVersion: client.version,
+        hl: languages[0] ?? "en",
+        gl: "US",
+        userAgent: client.userAgent,
+      };
+      if (client.sdk) clientContext.androidSdkVersion = client.sdk;
+
+      const response = await fetch(endpoint.toString(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "User-Agent": client.userAgent,
+          "X-YouTube-Client-Name": client.headerName,
+          "X-YouTube-Client-Version": client.version,
           "Origin": "https://www.youtube.com",
+          "Referer": "https://www.youtube.com/",
+          "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ context: { client: clientContext }, videoId }),
       });
 
       if (!response.ok) {
@@ -202,53 +233,48 @@ async function fetchInnerTube(videoId: string, languages: string[]) {
       }
 
       const player = await response.json();
-      const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-      if (!Array.isArray(tracks) || !tracks.length) {
-        lastError = `Aucune piste de sous-titres avec le client ${client.name}.`;
-        continue;
+      const status = player?.playabilityStatus?.status;
+      if (status && status !== "OK") {
+        lastError = player?.playabilityStatus?.reason ?? `YouTube playability status: ${status}`;
       }
 
-      const ranked = [...tracks].sort((a: any, b: any) => {
-        const ai = languages.indexOf(a?.languageCode ?? "");
-        const bi = languages.indexOf(b?.languageCode ?? "");
-        const ar = ai < 0 ? 999 : ai;
-        const br = bi < 0 ? 999 : bi;
-        if (a?.kind === "asr" && b?.kind !== "asr") return 1;
-        if (a?.kind !== "asr" && b?.kind === "asr") return -1;
-        return ar - br;
-      });
+      const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks as CaptionTrack[] | undefined;
+      if (!Array.isArray(tracks) || tracks.length === 0) continue;
 
-      for (const track of ranked) {
-        if (!track?.baseUrl || typeof track.baseUrl !== "string") continue;
+      const track = pickTrack(tracks, languages);
+      if (!track?.baseUrl) continue;
+
+      let captionUrl = new URL(track.baseUrl);
+      const original = captionUrl.toString();
+      const variants = [original, (() => {
+        const copy = new URL(original);
+        copy.searchParams.delete("fmt");
+        copy.searchParams.delete("tlang");
+        return copy.toString();
+      })()];
+
+      for (const url of variants) {
         try {
-          const captionUrl = new URL(track.baseUrl);
-          for (const keyName of ["fmt", "tlang"]) captionUrl.searchParams.delete(keyName);
-          captionUrl.searchParams.set("fmt", "json3");
-
-          const captionResponse = await fetch(captionUrl.toString(), {
+          const captionResponse = await fetch(url, {
             headers: {
               "User-Agent": client.userAgent,
               "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8,ar;q=0.7",
             },
           });
           if (!captionResponse.ok) {
-            lastError = `YouTube captions ${client.name} HTTP ${captionResponse.status}`;
+            lastError = `YouTube captions HTTP ${captionResponse.status}`;
             continue;
           }
-
           const body = await captionResponse.text();
           const segments = parseCaptionBody(body, captionResponse.headers.get("content-type") ?? "");
-          if (!segments.length) {
-            lastError = `Piste ${track?.languageCode ?? "unknown"} vide avec ${client.name}.`;
-            continue;
+          if (segments.length) {
+            return {
+              language: track.name?.simpleText ?? track.languageCode ?? languages[0] ?? "unknown",
+              languageCode: track.languageCode ?? languages[0] ?? "unknown",
+              isGenerated: track.kind === "asr",
+              segments,
+            };
           }
-
-          return {
-            language: track?.name?.simpleText ?? track?.languageCode ?? "unknown",
-            languageCode: track?.languageCode ?? "unknown",
-            isGenerated: track?.kind === "asr",
-            segments,
-          };
         } catch (error) {
           lastError = error instanceof Error ? error.message : String(error);
         }
@@ -257,23 +283,7 @@ async function fetchInnerTube(videoId: string, languages: string[]) {
       lastError = error instanceof Error ? error.message : String(error);
     }
   }
-
   throw new Error(lastError);
-}
-
-async function getTranscript(videoId: string, languages: string[]) {
-  try {
-    const t = await new YouTubeTranscriptApi().fetch(videoId, { languages });
-    return {
-      language: t.language,
-      languageCode: t.languageCode,
-      isGenerated: t.isGenerated,
-      segments: t.snippets.map((s) => ({ start: s.start, duration: s.duration, text: s.text })),
-    };
-  } catch (error) {
-    console.warn("Package transcript extractor failed", error);
-  }
-  return await fetchInnerTube(videoId, languages);
 }
 
 Deno.serve(async (req) => {
@@ -284,19 +294,20 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => null);
     const rawUrl = typeof body?.url === "string" ? body.url : "";
     const videoId = extractVideoId(rawUrl);
-    if (!videoId) {
-      return json({ error: "Lien YouTube invalide.", detail: "Impossible d'identifier l'ID vidéo." }, 400);
-    }
+    if (!videoId) return json({ error: "Lien YouTube invalide.", detail: "Impossible d'identifier l'ID vidéo." }, 400);
 
     const requested = Array.isArray(body?.languages)
       ? body.languages.filter((x: unknown): x is string => typeof x === "string").slice(0, 8)
       : ["fr", "en", "ar"];
     const languages = requested.length ? requested : ["fr", "en", "ar"];
-    const transcript = await getTranscript(videoId, languages);
 
-    let metadata: any = null;
+    const transcript = await fetchPlayer(videoId, languages);
+
+    let metadata: Record<string, unknown> | null = null;
     try {
-      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, { headers: { "User-Agent": "MentionMax/1.0" } });
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, {
+        headers: { "User-Agent": "MentionMax/1.0" },
+      });
       if (response.ok) metadata = await response.json();
     } catch {}
 
