@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import "./MarkdownContent.css";
 
-type Block = { type: string; content?: string; items?: string[]; rows?: string[][] };
+type Block = { type: string; content?: string; items?: string[]; rows?: string[][]; ordered?: boolean };
 
 type KaTeX = {
   renderToString: (tex: string, options?: { displayMode?: boolean; throwOnError?: boolean; strict?: boolean }) => string;
@@ -85,7 +85,9 @@ type InlinePattern = {
 
 function renderInline(text: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  let rest = text.replace(/\\\|/g, "|");
+  let rest = text
+    .replace(/\\\|/g, "|")
+    .replace(/\\<br\s*\/?\s*>/gi, "<br>");
   let key = 0;
 
   const patterns: InlinePattern[] = [
@@ -133,6 +135,8 @@ function cleanTableCell(cell: string): string {
   return cell
     .replace(/\\\|/g, "|")
     .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/\\<br\s*\/?\s*>/gi, "\n")
+    .replace(/\u00a0/g, " ")
     .trim();
 }
 
@@ -171,76 +175,22 @@ function parseTableLines(lines: string[]): string[][] | null {
   return [header, ...body];
 }
 
-function parseCompactTable(text: string): { rows: string[][]; consumed: string; rest: string } | null {
-  const normalized = text.replace(/\\\|/g, "|").replace(/\u00a0/g, " ");
-  const separatorMatch = normalized.match(/\|\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)+\s*\|/);
-  if (!separatorMatch || separatorMatch.index === undefined) return null;
-
-  const prefix = normalized.slice(0, separatorMatch.index);
-  const headerEnd = prefix.lastIndexOf("|");
-  if (headerEnd < 0) return null;
-
-  const headerText = prefix.slice(0, headerEnd + 1).trim();
-  const header = splitTableRow(headerText);
-  const separator = separatorMatch[0];
-  const separatorCells = splitTableRow(separator);
-  if (header.length < 2 || separatorCells.length !== header.length) return null;
-
-  const rows: string[][] = [header];
-  let cursor = separatorMatch.index + separator.length;
-
-  while (cursor < normalized.length) {
-    const remaining = normalized.slice(cursor).replace(/^\s+/, "");
-    cursor += normalized.slice(cursor).length - remaining.length;
-    if (!remaining.startsWith("|")) break;
-
-    const rowMatch = remaining.match(/^\|([^|]*)\|/);
-    if (!rowMatch) break;
-
-    const rowStart = remaining;
-    const cells: string[] = [];
-    let scan = 0;
-    let closed = false;
-
-    while (cells.length < header.length) {
-      const cellMatch = rowStart.slice(scan).match(/^\|([^|]*)/);
-      if (!cellMatch) break;
-      cells.push(cleanTableCell(cellMatch[1]));
-      scan += cellMatch[0].length;
-      if (scan < rowStart.length && rowStart[scan] === "|") {
-        scan += 1;
-        if (cells.length === header.length) closed = true;
-      } else {
-        break;
-      }
-    }
-
-    if (cells.length !== header.length || !closed) break;
-    rows.push(cells);
-    cursor += scan;
-
-    const afterRow = normalized.slice(cursor);
-    const boundary = afterRow.match(/^\s*\|\s*/);
-    if (boundary) {
-      cursor += boundary[0].length;
-      continue;
-    }
-    break;
-  }
-
-  if (rows.length < 2) return null;
-
-  const consumed = normalized.slice(0, cursor);
-  return { rows, consumed, rest: normalized.slice(cursor) };
+function normalizeCompactTables(markdown: string): string {
+  return markdown
+    .replace(/\\\|/g, "|")
+    .replace(/\\<br\s*\/?>/gi, "<br>")
+    .replace(/\u00a0/g, " ")
+    .replace(/\|\s*\|/g, "\n|");
 }
 
 function parseBlocks(markdown: string): Block[] {
-  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const normalizedMarkdown = normalizeCompactTables(markdown);
+  const lines = normalizedMarkdown.replace(/\r\n?/g, "\n").split("\n");
   const blocks: Block[] = [];
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i].replace(/\u00a0/g, " ");
+    const line = lines[i];
     if (!line.trim()) {
       i += 1;
       continue;
@@ -268,14 +218,6 @@ function parseBlocks(markdown: string): Block[] {
       }
       if (i < lines.length) i += 1;
       blocks.push({ type: "math", content: math.join("\n") });
-      continue;
-    }
-
-    const compact = parseCompactTable(line);
-    if (compact) {
-      blocks.push({ type: "table", rows: compact.rows });
-      if (compact.rest.trim()) lines[i] = compact.rest.trim();
-      else i += 1;
       continue;
     }
 
