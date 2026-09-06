@@ -15,16 +15,18 @@ type Draft = {
 
 const STORAGE_KEY = "mentionmax:writing-lab:v1";
 
-const subjectConfig: Record<WritingSubject, { label: string; language: string; placeholder: string; rubric: string[] }> = {
+const subjectConfig: Record<WritingSubject, { label: string; language: string; dir: "ltr" | "rtl"; placeholder: string; rubric: string[] }> = {
   philosophie: {
     label: "Philosophie",
-    language: "Français",
-    placeholder: "Commence ton introduction, ta problématique ou ton développement…",
-    rubric: ["Problématique", "Argumentation", "Concepts", "Structure", "Expression"],
+    language: "العربية",
+    dir: "rtl",
+    placeholder: "ابدأ مقدمتك، اطرح الإشكال أو اكتب حجتك…",
+    rubric: ["طرح الإشكال", "الحجاج", "المفاهيم", "المنهجية", "سلامة التعبير"],
   },
   anglais: {
     label: "English",
     language: "English",
+    dir: "ltr",
     placeholder: "Start your introduction, argument, or paragraph…",
     rubric: ["Task response", "Organization", "Grammar", "Vocabulary", "Coherence"],
   },
@@ -123,7 +125,7 @@ export default function WritingLab() {
         <div>
           <span className="writing-lab-eyebrow"><Sparkles size={14} /> WRITING LAB</span>
           <h1>Écris sans perdre ton fil.</h1>
-          <p>Un espace dédié à la dissertation et à l’écriture en anglais. Commence au clavier, puis ajoute photo, transcription, correction et complétion dans les prochaines étapes.</p>
+          <p>Un espace dédié à la dissertation en arabe et à l’écriture en anglais. Commence au clavier, puis ajoute photo, transcription, correction et complétion dans les prochaines étapes.</p>
         </div>
         <button type="button" className="writing-lab-save" onClick={() => saveDraft(true)} disabled={!title.trim() && !prompt.trim() && !text.trim()}>
           {saved ? <Check size={15} /> : <Save size={15} />}
@@ -159,23 +161,23 @@ export default function WritingLab() {
           </div>
         </aside>
 
-        <section className="writing-lab-editor-card">
+        <section className="writing-lab-editor-card" dir={config.dir}>
           <div className="writing-lab-editor-top">
             <div className="writing-lab-context"><span>{config.label}</span><i>·</i><span>{config.language}</span></div>
-            <div className="writing-lab-tools"><span>{words} mots</span><span>{characters} caractères</span></div>
+            <div className="writing-lab-tools"><span>{words} {subject === "philosophie" ? "كلمة" : "words"}</span><span>{characters} {subject === "philosophie" ? "حرف" : "characters"}</span></div>
           </div>
 
-          <input className="writing-lab-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={subject === "philosophie" ? "Titre de la dissertation" : "Essay title"} />
-          <textarea className="writing-lab-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Sujet / consigne (facultatif)" rows={3} />
+          <input className="writing-lab-title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={subject === "philosophie" ? "عنوان المقالة" : "Essay title"} dir={config.dir} />
+          <textarea className="writing-lab-prompt" value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder={subject === "philosophie" ? "الموضوع / المطلوب (اختياري)" : "Subject / prompt (optional)"} rows={3} dir={config.dir} />
 
-          <div className="writing-lab-input-actions">
-            <button type="button" className="writing-lab-input-action writing-lab-input-action--primary"><FileText size={16} /> Écrire</button>
+          <div className="writing-lab-input-actions" dir="ltr">
+            <button type="button" className="writing-lab-input-action writing-lab-input-action--primary"><FileText size={16} /> {subject === "philosophie" ? "الكتابة" : "Write"}</button>
             <button type="button" className="writing-lab-input-action" disabled><ImagePlus size={16} /> Importer une photo <span>Bientôt · Part 2</span></button>
           </div>
 
-          <textarea className="writing-lab-textarea" value={text} onChange={(event) => setText(event.target.value)} placeholder={config.placeholder} spellCheck="true" />
+          <textarea className="writing-lab-textarea" value={text} onChange={(event) => setText(event.target.value)} placeholder={config.placeholder} spellCheck="true" dir={config.dir} />
 
-          <div className="writing-lab-bottom">
+          <div className="writing-lab-bottom" dir="ltr">
             <div><span>Structure prête pour</span><strong>{config.rubric.join(" · ")}</strong></div>
             <div className="writing-lab-ai-actions">
               <button type="button" disabled className="writing-lab-secondary"><Wand2 size={15} /> Compléter mon texte <span>Part 3</span></button>
