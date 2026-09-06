@@ -1,7 +1,7 @@
 import { aiService } from "./aiService";
-import { mockAIProvider } from "./mockAIProvider";
+import { geminiProvider } from "./geminiProvider";
 
-aiService.setProvider(mockAIProvider);
+aiService.setProvider(geminiProvider);
 
 export { aiService } from "./aiService";
 export type { AIProvider, AIRequest, AIResponse, AIProviderName } from "./aiService";
