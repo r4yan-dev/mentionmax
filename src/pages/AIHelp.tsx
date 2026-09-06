@@ -31,7 +31,7 @@ export default function AIHelp() {
       setMessages((current) => [...current, { role: "assistant", text: response.data }]);
     } catch (requestError) {
       console.error(requestError);
-      setError("Le tuteur Gemini n’est pas encore configuré côté serveur. Ajoute GEMINI_API_KEY aux secrets Supabase pour activer les réponses.");
+      setError(requestError instanceof Error ? requestError.message : "Le tuteur IA est momentanément indisponible.");
     } finally {
       setBusy(false);
     }
