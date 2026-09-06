@@ -85,10 +85,11 @@ type InlinePattern = {
 
 function renderInline(text: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  let rest = text;
+  let rest = text.replace(/\\\|/g, "|");
   let key = 0;
 
   const patterns: InlinePattern[] = [
+    { regex: /<br\s*\/?\s*>/i, render: (_, id) => <br key={id} /> },
     { regex: /\$\$([\s\S]+?)\$\$/, render: (m, id) => <MathExpression key={id} value={m[1]} /> },
     { regex: /\$([^$\n]+?)\$/, render: (m, id) => <MathExpression key={id} value={m[1]} /> },
     { regex: /`([^`]+)`/, render: (m, id) => <code key={id}>{m[1]}</code> },
@@ -128,8 +129,20 @@ function renderInline(text: string): ReactNode[] {
   return nodes;
 }
 
+function cleanTableCell(cell: string): string {
+  return cell
+    .replace(/\\\|/g, "|")
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .trim();
+}
+
 function splitTableRow(line: string): string[] {
-  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split(/(?<!\\)\|/)
+    .map(cleanTableCell);
 }
 
 function isTableSeparator(line: string): boolean {
@@ -140,29 +153,85 @@ function isTableSeparator(line: string): boolean {
 function parseTableLines(lines: string[]): string[][] | null {
   if (lines.length < 2) return null;
 
-  const normalized = lines
-    .map((line) => line.trim())
-    .filter(Boolean)
+  const normalized = lines.map((line) => line.trim()).filter(Boolean);
+  if (normalized.length < 2 || !isTableSeparator(normalized[1])) return null;
+
+  const header = splitTableRow(normalized[0]);
+  if (header.length < 2) return null;
+
+  const body = normalized.slice(2)
     .map(splitTableRow)
-    .filter((cells) => cells.length > 1);
-
-  if (normalized.length < 2 || !isTableSeparator(lines[1])) return null;
-
-  const header = normalized[0];
-  const body = normalized.slice(2).map((row) => {
-    const padded = [...row];
-    while (padded.length < header.length) padded.push("");
-    return padded.slice(0, header.length);
-  });
+    .filter((row) => row.length > 0)
+    .map((row) => {
+      const padded = [...row];
+      while (padded.length < header.length) padded.push("");
+      return padded.slice(0, header.length);
+    });
 
   return [header, ...body];
 }
 
-function parseOneLineTable(line: string): string[][] | null {
-  if (!/:---/.test(line) || (line.match(/\|/g) ?? []).length < 8) return null;
+function parseCompactTable(text: string): { rows: string[][]; consumed: string; rest: string } | null {
+  const normalized = text.replace(/\\\|/g, "|").replace(/\u00a0/g, " ");
+  const separatorMatch = normalized.match(/\|\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)+\s*\|/);
+  if (!separatorMatch || separatorMatch.index === undefined) return null;
 
-  const normalized = line.replace(/\\\|/g, "|").replace(/\|\s*\|/g, "\n");
-  return parseTableLines(normalized.split("\n"));
+  const prefix = normalized.slice(0, separatorMatch.index);
+  const headerEnd = prefix.lastIndexOf("|");
+  if (headerEnd < 0) return null;
+
+  const headerText = prefix.slice(0, headerEnd + 1).trim();
+  const header = splitTableRow(headerText);
+  const separator = separatorMatch[0];
+  const separatorCells = splitTableRow(separator);
+  if (header.length < 2 || separatorCells.length !== header.length) return null;
+
+  const rows: string[][] = [header];
+  let cursor = separatorMatch.index + separator.length;
+
+  while (cursor < normalized.length) {
+    const remaining = normalized.slice(cursor).replace(/^\s+/, "");
+    cursor += normalized.slice(cursor).length - remaining.length;
+    if (!remaining.startsWith("|")) break;
+
+    const rowMatch = remaining.match(/^\|([^|]*)\|/);
+    if (!rowMatch) break;
+
+    const rowStart = remaining;
+    const cells: string[] = [];
+    let scan = 0;
+    let closed = false;
+
+    while (cells.length < header.length) {
+      const cellMatch = rowStart.slice(scan).match(/^\|([^|]*)/);
+      if (!cellMatch) break;
+      cells.push(cleanTableCell(cellMatch[1]));
+      scan += cellMatch[0].length;
+      if (scan < rowStart.length && rowStart[scan] === "|") {
+        scan += 1;
+        if (cells.length === header.length) closed = true;
+      } else {
+        break;
+      }
+    }
+
+    if (cells.length !== header.length || !closed) break;
+    rows.push(cells);
+    cursor += scan;
+
+    const afterRow = normalized.slice(cursor);
+    const boundary = afterRow.match(/^\s*\|\s*/);
+    if (boundary) {
+      cursor += boundary[0].length;
+      continue;
+    }
+    break;
+  }
+
+  if (rows.length < 2) return null;
+
+  const consumed = normalized.slice(0, cursor);
+  return { rows, consumed, rest: normalized.slice(cursor) };
 }
 
 function parseBlocks(markdown: string): Block[] {
@@ -171,7 +240,7 @@ function parseBlocks(markdown: string): Block[] {
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i];
+    const line = lines[i].replace(/\u00a0/g, " ");
     if (!line.trim()) {
       i += 1;
       continue;
@@ -202,10 +271,11 @@ function parseBlocks(markdown: string): Block[] {
       continue;
     }
 
-    const oneLineTable = parseOneLineTable(line);
-    if (oneLineTable) {
-      blocks.push({ type: "table", rows: oneLineTable });
-      i += 1;
+    const compact = parseCompactTable(line);
+    if (compact) {
+      blocks.push({ type: "table", rows: compact.rows });
+      if (compact.rest.trim()) lines[i] = compact.rest.trim();
+      else i += 1;
       continue;
     }
 
@@ -247,11 +317,10 @@ function parseBlocks(markdown: string): Block[] {
       continue;
     }
 
-    const tableStart = line.trim().startsWith("|") || line.includes("|");
-    if (tableStart && i + 1 < lines.length) {
-      const candidate: string[] = [lines[i], lines[i + 1]];
-      let j = i + 2;
-      while (j < lines.length && lines[j].trim() && (lines[j].includes("|") || lines[j].trim().startsWith("|"))) {
+    if (line.includes("|")) {
+      const candidate: string[] = [line];
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() && lines[j].includes("|")) {
         candidate.push(lines[j]);
         j += 1;
       }
@@ -266,7 +335,7 @@ function parseBlocks(markdown: string): Block[] {
     const paragraph: string[] = [line];
     i += 1;
     while (i < lines.length && lines[i].trim()) {
-      if (/^\s*(#{1,6})\s+/.test(lines[i]) || /^\s*>/.test(lines[i]) || /^\s*(?:[-*+]\s+|\d+[.)]\s+)/.test(lines[i]) || /^\s*(?:\*\s*\*\s*\*|-{3,}|_{3,})\s*$/.test(lines[i]) || /^\s*```/.test(lines[i]) || /^\s*\$\$\s*$/.test(lines[i])) break;
+      if (/^\s*(#{1,6})\s+/.test(lines[i]) || /^\s*>/.test(lines[i]) || /^\s*(?:[-*+]\s+|\d+[.)]\s+)/.test(lines[i]) || /^\s*(?:\*\s*\*\s*\*|-{3,}|_{3,})\s*$/.test(lines[i]) || /^\s*```/.test(lines[i]) || /^\s*\$\$\s*$/.test(lines[i]) || lines[i].includes("|")) break;
       paragraph.push(lines[i]);
       i += 1;
     }
