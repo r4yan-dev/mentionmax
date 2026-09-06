@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import "./MarkdownContent.css";
 
-type Block = { type: string; content?: string; items?: string[]; ordered?: boolean };
+type Block = { type: string; content?: string; items?: string[]; rows?: string[][] };
 
 type KaTeX = {
   renderToString: (tex: string, options?: { displayMode?: boolean; throwOnError?: boolean; strict?: boolean }) => string;
@@ -128,6 +128,39 @@ function renderInline(text: string): ReactNode[] {
   return nodes;
 }
 
+function splitTableRow(line: string): string[] {
+  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+}
+
+function isTableSeparator(line: string): boolean {
+  const cells = splitTableRow(line);
+  return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function parseTableLines(lines: string[]): string[][] | null {
+  if (lines.length < 2) return null;
+
+  const normalized = lines
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map(splitTableRow)
+    .filter((cells) => cells.length > 1);
+
+  if (normalized.length < 2) return null;
+
+  const separatorIndex = normalized.findIndex((_, index) => index === 1 && isTableSeparator(lines[1]));
+  if (separatorIndex !== 1) return null;
+
+  const header = normalized[0];
+  const body = normalized.slice(2).map((row) => {
+    const padded = [...row];
+    while (padded.length < header.length) padded.push("");
+    return padded.slice(0, header.length);
+  });
+
+  return [header, ...body];
+}
+
 function parseBlocks(markdown: string): Block[] {
   const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
   const blocks: Block[] = [];
@@ -203,6 +236,22 @@ function parseBlocks(markdown: string): Block[] {
       continue;
     }
 
+    const tableStart = line.trim().startsWith("|") || line.includes("|");
+    if (tableStart && i + 1 < lines.length) {
+      const candidate: string[] = [lines[i], lines[i + 1]];
+      let j = i + 2;
+      while (j < lines.length && lines[j].trim() && (lines[j].includes("|") || lines[j].trim().startsWith("|"))) {
+        candidate.push(lines[j]);
+        j += 1;
+      }
+      const rows = parseTableLines(candidate);
+      if (rows) {
+        blocks.push({ type: "table", rows });
+        i = j;
+        continue;
+      }
+    }
+
     const paragraph: string[] = [line];
     i += 1;
     while (i < lines.length && lines[i].trim()) {
@@ -227,6 +276,26 @@ export default function MarkdownContent({ content }: { content: string }) {
         if (block.type === "math") return <MathExpression key={key} value={block.content ?? ""} display />;
         if (block.type === "code") return <pre key={key}><code>{block.content}</code></pre>;
         if (block.type === "blockquote") return <blockquote key={key}>{renderInline(block.content ?? "")}</blockquote>;
+        if (block.type === "table") {
+          const rows = block.rows ?? [];
+          const header = rows[0] ?? [];
+          return (
+            <div className="ai-markdown__table-wrap" key={key}>
+              <table>
+                <thead>
+                  <tr>{header.map((cell, cellIndex) => <th key={`${key}-h-${cellIndex}`}>{renderInline(cell)}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {rows.slice(1).map((row, rowIndex) => (
+                    <tr key={`${key}-r-${rowIndex}`}>
+                      {row.map((cell, cellIndex) => <td key={`${key}-${rowIndex}-${cellIndex}`}>{renderInline(cell)}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
         if (block.type === "list") {
           const List = block.ordered ? "ol" : "ul";
           return <List key={key}>{(block.items ?? []).map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInline(item)}</li>)}</List>;
