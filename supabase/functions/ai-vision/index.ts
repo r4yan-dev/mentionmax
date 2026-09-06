@@ -19,12 +19,12 @@ function getText(payload: any): string {
     const chunks: string[] = [];
     for (const step of payload.steps) {
       if (step?.type !== "model_output") continue;
-      if (typeof step?.text === "string") chunks.push(step.text);
       if (Array.isArray(step?.content)) {
         for (const part of step.content) {
           if (part?.type === "text" && typeof part.text === "string") chunks.push(part.text);
         }
       }
+      if (typeof step?.text === "string") chunks.push(step.text);
     }
     if (chunks.length) return chunks.join("\n").trim();
   }
@@ -50,67 +50,45 @@ Deno.serve(async (req: Request) => {
     const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
     const image = typeof body?.image === "string" ? body.image : "";
     const mimeType = typeof body?.mimeType === "string" ? body.mimeType : "";
-
     if (!prompt && !image) return json({ error: "prompt or image is required" }, 400);
 
     const parsed = image ? extractDataUrl(image) : null;
     const resolvedMimeType = parsed?.mimeType ?? mimeType;
     const resolvedImageData = parsed?.data ?? image;
-
     if (image && (!resolvedMimeType || !resolvedImageData)) {
       return json({ error: "image must be a valid data URL or provide mimeType" }, 400);
     }
 
-    const content = [
-      ...(image
-        ? [{
-            type: "image",
-            mime_type: resolvedMimeType,
-            data: resolvedImageData,
-          }]
-        : []),
+    const input = [
+      ...(image ? [{ type: "image", mime_type: resolvedMimeType, data: resolvedImageData }] : []),
       ...(prompt ? [{ type: "text", text: prompt }] : []),
     ];
-
-    const input = {
-      type: "user_input",
-      content,
-    };
 
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
+        "Api-Revision": "2026-05-20",
       },
       body: JSON.stringify({
         model: MODEL,
         input,
         store: false,
-        generation_config: {
-          max_output_tokens: 1600,
-          thinking_level: "low",
-        },
+        generation_config: { max_output_tokens: 1600, thinking_level: "low" },
       }),
+      signal: AbortSignal.timeout(100_000),
     });
 
-    const payload = await response.json();
+    const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      return json({
-        error: "Gemini request failed",
-        status: response.status,
-        details: payload?.error?.message ?? payload,
-      }, 502);
+      return json({ error: "Gemini request failed", status: response.status, details: payload?.error?.message ?? payload }, 502);
     }
 
     const text = getText(payload);
     if (!text) return json({ error: "Gemini returned no text", raw: payload }, 502);
-
     return json({ text, model: MODEL });
   } catch (error) {
-    return json({
-      error: "Invalid request",
-      details: error instanceof Error ? error.message : String(error),
-    }, 400);
+    return json({ error: "Invalid request", details: error instanceof Error ? error.message : String(error) }, 400);
   }
 });
