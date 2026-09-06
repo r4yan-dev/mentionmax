@@ -8,6 +8,7 @@ import "./AiStudio.css";
 
 const MAX_FILE_SIZE_MB = 25;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const FILE_EXTRACTION_TIMEOUT_MS = 105_000;
 const tools = [
   { to: "/ai-studio/handnotes", icon: FileText, title: "PDF → fiches", text: "Transforme un cours ou un document en fiche structurée." },
   { to: "/ai-studio/handnotes", icon: Layers3, title: "Texte → résumé", text: "Passe du texte brut à une synthèse claire pour réviser." },
@@ -39,7 +40,7 @@ function formatTime(seconds: number) {
 }
 
 async function getFunctionErrorMessage(error: unknown) {
-  if (error instanceof FunctionsHttpError) {
+  if (FunctionsHttpError && error instanceof FunctionsHttpError) {
     try {
       const payload = (await error.context.json()) as FunctionErrorPayload;
       if (payload?.detail) return `${payload.error ?? "Extraction impossible."} ${payload.detail}`;
@@ -49,6 +50,20 @@ async function getFunctionErrorMessage(error: unknown) {
   }
   if (error instanceof Error) return error.message;
   return "Impossible de contacter l'extracteur.";
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  let timer: number | null = null;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
 }
 
 async function fileToDataUrl(file: File) {
@@ -95,15 +110,20 @@ export default function AiStudio() {
       const allowed = selectedFile.type === "application/pdf" || selectedFile.type.startsWith("image/") || /\.(pdf|png|jpe?g|webp)$/i.test(selectedFile.name);
       if (!allowed) { setFileError("Format non pris en charge. Utilise un PDF, PNG, JPG ou WebP."); return; }
       if (selectedFile.size > MAX_FILE_SIZE_BYTES) { setFileError(`Fichier trop volumineux. La limite est de ${MAX_FILE_SIZE_MB} Mo.`); return; }
+      setFileError("Lecture du fichier…");
       const dataUrl = await fileToDataUrl(selectedFile);
-      const { data, error: invokeError } = await supabase.functions.invoke("pdf-text-extractor", {
-        body: { fileName: selectedFile.name, mimeType: selectedFile.type, data: dataUrl },
-      });
+      setFileError("Envoi à l’extracteur IA…");
+      const { data, error: invokeError } = await withTimeout(
+        supabase.functions.invoke("pdf-text-extractor", { body: { fileName: selectedFile.name, mimeType: selectedFile.type, data: dataUrl } }),
+        FILE_EXTRACTION_TIMEOUT_MS,
+        "L’extraction prend trop de temps. Essaie un PDF plus court ou découpe le document en plusieurs parties.",
+      );
       if (invokeError) { setFileError(await getFunctionErrorMessage(invokeError)); return; }
       if (!data?.success) { setFileError(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun texte lisible n'a été trouvé."); return; }
       const extraction = data as PdfExtractionResult;
+      setFileError(null);
       setExtractedText(extraction.text);
-    } catch (error) { setFileError(error instanceof Error ? error.message : "Impossible de lire ce fichier."); }
+    } catch (error) { setFileError(await getFunctionErrorMessage(error)); }
     finally { setFileBusy(false); }
   }
 
@@ -121,7 +141,7 @@ export default function AiStudio() {
       </header>
       <PeopleFeature variant="teacher" compact title="L’IA devient ton atelier de révision." text="Transforme tes cours en fiches, résumés, cartes et quiz sans perdre la structure du programme." action={<Link to="/ai-studio/handnotes" className="btn btn-primary"><Wand2 size={15} /> Ouvrir l’atelier</Link>} />
       <div className="studio-grid">
-        <section className="studio-card"><span className="studio-eyebrow">COMMENCER</span><h2>Choisis une transformation</h2><p>Les quatre parcours gardent la même logique : source → structure → ressource prête à réviser.</p><div className="studio-tools">{tools.map(({ to, icon: Icon, title, text }) => title.startsWith("Vidéo") ? <a key={title} href={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></a> : <Link key={title} to={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></Link>)}</div><div className="studio-drop"><FileUp size={24} /><strong>{selectedFile?.name ?? "Dépose un fichier ici"}</strong><span>PDF numérique, PDF scanné ou image · OCR IA automatique · max. {MAX_FILE_SIZE_MB} Mo</span><input id="studio-file" hidden type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" onChange={(event) => { const file = event.target.files?.[0] ?? null; setSelectedFile(file); setFileError(null); setExtractedText(null); setCopied(false); }} /><div className="studio-actions"><label htmlFor="studio-file" className="studio-btn studio-btn--primary"><FileUp size={15} /> Importer</label><button type="button" className="studio-btn studio-btn--soft" onClick={() => void extractFileText()} disabled={!selectedFile || fileBusy}>{fileBusy ? <><LoaderCircle className="studio-spin" size={15} /> Extraction IA...</> : <><FileText size={15} /> Extraire le texte</>}</button><Link to="/ai-studio/handnotes" className="studio-btn studio-btn--soft"><Wand2 size={15} /> Ouvrir l’atelier</Link></div>{fileError && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>Extraction impossible</strong><span>{fileError}</span></div></div>}{extractedText && <div className="studio-transcript"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> EXTRACTION IA</span><h3>{selectedFile?.name}</h3><p>Texte détecté dans le document. Les scans et images passent automatiquement par la vision IA.</p></div><button type="button" className="studio-btn studio-btn--soft" onClick={() => void copyExtractedText()}><Copy size={15} /> {copied ? "Copié" : "Copier"}</button></div><pre style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 520, overflowY: "auto", padding: "18px", borderRadius: 14, background: "var(--mm-surface-subtle, #f6f8f7)", fontFamily: "inherit", lineHeight: 1.65 }}>{extractedText}</pre></div>}</div></section>
+        <section className="studio-card"><span className="studio-eyebrow">COMMENCER</span><h2>Choisis une transformation</h2><p>Les quatre parcours gardent la même logique : source → structure → ressource prête à réviser.</p><div className="studio-tools">{tools.map(({ to, icon: Icon, title, text }) => title.startsWith("Vidéo") ? <a key={title} href={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></a> : <Link key={title} to={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></Link>)}</div><div className="studio-drop"><FileUp size={24} /><strong>{selectedFile?.name ?? "Dépose un fichier ici"}</strong><span>PDF numérique, PDF scanné ou image · OCR IA automatique · max. {MAX_FILE_SIZE_MB} Mo</span><input id="studio-file" hidden type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" onChange={(event) => { const file = event.target.files?.[0] ?? null; setSelectedFile(file); setFileError(null); setExtractedText(null); setCopied(false); }} /><div className="studio-actions"><label htmlFor="studio-file" className="studio-btn studio-btn--primary"><FileUp size={15} /> Importer</label><button type="button" className="studio-btn studio-btn--soft" onClick={() => void extractFileText()} disabled={!selectedFile || fileBusy}>{fileBusy ? <><LoaderCircle className="studio-spin" size={15} /> Extraction IA...</> : <><FileText size={15} /> Extraire le texte</>}</button><Link to="/ai-studio/handnotes" className="studio-btn studio-btn--soft"><Wand2 size={15} /> Ouvrir l’atelier</Link></div>{fileError && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>{fileBusy ? "Extraction en cours" : "Extraction impossible"}</strong><span>{fileError}</span></div></div>}{extractedText && <div className="studio-transcript"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> EXTRACTION IA</span><h3>{selectedFile?.name}</h3><p>Texte détecté dans le document. Les scans et images passent automatiquement par la vision IA.</p></div><button type="button" className="studio-btn studio-btn--soft" onClick={() => void copyExtractedText()}><Copy size={15} /> {copied ? "Copié" : "Copier"}</button></div><pre style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 520, overflowY: "auto", padding: "18px", borderRadius: 14, background: "var(--mm-surface-subtle, #f6f8f7)", fontFamily: "inherit", lineHeight: 1.65 }}>{extractedText}</pre></div>}</div></section>
         <aside className="studio-card"><span className="studio-eyebrow">RÉCENTS</span><h2>Ce que tu as créé</h2><p>Un historique compact pour reprendre tes ressources sans fouiller partout.</p><div className="studio-recent">{recent.map(([title, meta, badge]) => <Link to="/ai-studio/handnotes" className="studio-recent-item" key={title}><span className="studio-recent-item__icon"><FileText size={16} /></span><span><strong>{title}</strong><span>{meta}</span></span><b className="studio-badge">{badge}</b></Link>)}</div><div className="studio-note">V1 : PDF numériques, PDF scannés et images peuvent être convertis en texte avant de passer à la génération de fiches.</div><div className="studio-actions"><Link to="/ai-help" className="studio-btn studio-btn--soft"><Sparkles size={15} /> Aller au tuteur IA <ArrowRight size={14} /></Link></div></aside>
       </div>
       <section id="youtube-transcript" className="studio-card studio-youtube" aria-labelledby="youtube-transcript-title">
