@@ -1,7 +1,7 @@
-import { Fragment, ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import "./MarkdownContent.css";
 
-type Block = { type: string; content?: string; items?: string[]; ordered?: boolean; language?: string };
+type Block = { type: string; content?: string; items?: string[]; ordered?: boolean };
 
 type KaTeX = {
   renderToString: (tex: string, options?: { displayMode?: boolean; throwOnError?: boolean; strict?: boolean }) => string;
@@ -77,38 +77,40 @@ function MathExpression({ value, display = false }: { value: string; display?: b
   return <code className={display ? "ai-markdown__math-fallback ai-markdown__math-fallback--block" : "ai-markdown__math-fallback"}>{display ? `$$${source}$$` : `$${source}$`}</code>;
 }
 
-function inline(text: string): ReactNode[] {
+type InlinePattern = {
+  regex: RegExp;
+  render: (match: RegExpMatchArray, key: number) => ReactNode;
+};
+
+function renderInline(text: string): ReactNode[] {
   const nodes: ReactNode[] = [];
   let rest = text;
   let key = 0;
 
-  const patterns: Array<{ regex: RegExp; render: (match: RegExpMatchArray, id: number) => ReactNode }> = [
-    { regex: /^\$\$([\s\S]+?)\$\$/, render: (m, id) => <MathExpression key={id} value={m[1]} /> },
-    { regex: /^\$([^$\n]+?)\$/, render: (m, id) => <MathExpression key={id} value={m[1]} /> },
-    { regex: /^`([^`]+)`/, render: (m, id) => <code key={id}>{m[1]}</code> },
-    { regex: /^!\[([^\]]*)\]\(([^)]+)\)/, render: (m, id) => <img key={id} src={m[2]} alt={m[1]} loading="lazy" /> },
-    { regex: /^\[([^\]]+)\]\((https?:\/\/[^)]+)\)/, render: (m, id) => <a key={id} href={m[2]} target="_blank" rel="noreferrer">{inline(m[1])}</a> },
-    { regex: /^\*\*([^*\n]+|[^\n]+?\*?[^\n]*?)\*\*/, render: (m, id) => <strong key={id}>{inline(m[1])}</strong> },
-    { regex: /^__([^_\n]+|[^\n]+?_[^\n]*?)__/, render: (m, id) => <strong key={id}>{inline(m[1])}</strong> },
-    { regex: /^~~([^~\n]+)~~/, render: (m, id) => <del key={id}>{inline(m[1])}</del> },
-    { regex: /^\*([^*\n]+)\*/, render: (m, id) => <em key={id}>{inline(m[1])}</em> },
-    { regex: /^_([^_\n]+)_/, render: (m, id) => <em key={id}>{inline(m[1])}</em> },
+  const patterns: InlinePattern[] = [
+    { regex: /\$\$([\s\S]+?)\$\$/, render: (m, id) => <MathExpression key={id} value={m[1]} /> },
+    { regex: /\$([^$\n]+?)\$/, render: (m, id) => <MathExpression key={id} value={m[1]} /> },
+    { regex: /`([^`]+)`/, render: (m, id) => <code key={id}>{m[1]}</code> },
+    { regex: /!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/, render: (m, id) => <img key={id} src={m[2]} alt={m[1]} loading="lazy" /> },
+    { regex: /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/, render: (m, id) => <a key={id} href={m[2]} target="_blank" rel="noreferrer">{renderInline(m[1])}</a> },
+    { regex: /\*\*([\s\S]+?)\*\*/, render: (m, id) => <strong key={id}>{renderInline(m[1])}</strong> },
+    { regex: /__([\s\S]+?)__/, render: (m, id) => <strong key={id}>{renderInline(m[1])}</strong> },
+    { regex: /~~([^~\n]+)~~/, render: (m, id) => <del key={id}>{renderInline(m[1])}</del> },
+    { regex: /\*([^*\n]+)\*/, render: (m, id) => <em key={id}>{renderInline(m[1])}</em> },
+    { regex: /_([^_\n]+)_/, render: (m, id) => <em key={id}>{renderInline(m[1])}</em> },
   ];
 
   while (rest) {
     let bestIndex = Infinity;
     let bestMatch: RegExpMatchArray | null = null;
-    let bestRender: ((match: RegExpMatchArray, id: number) => ReactNode) | null = null;
+    let bestRender: InlinePattern["render"] | null = null;
 
     for (const pattern of patterns) {
-      const index = rest.search(pattern.regex);
-      if (index >= 0 && index < bestIndex) {
-        const match = rest.match(pattern.regex);
-        if (match) {
-          bestIndex = index;
-          bestMatch = match;
-          bestRender = pattern.render;
-        }
+      const match = rest.match(pattern.regex);
+      if (match && match.index !== undefined && match.index < bestIndex) {
+        bestIndex = match.index;
+        bestMatch = match;
+        bestRender = pattern.render;
       }
     }
 
@@ -139,7 +141,6 @@ function parseBlocks(markdown: string): Block[] {
 
     const fence = line.match(/^\s*```(.*)$/);
     if (fence) {
-      const language = fence[1].trim();
       const code: string[] = [];
       i += 1;
       while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) {
@@ -147,7 +148,7 @@ function parseBlocks(markdown: string): Block[] {
         i += 1;
       }
       if (i < lines.length) i += 1;
-      blocks.push({ type: "code", content: code.join("\n"), language });
+      blocks.push({ type: "code", content: code.join("\n") });
       continue;
     }
 
@@ -204,7 +205,7 @@ function parseBlocks(markdown: string): Block[] {
     const paragraph: string[] = [line];
     i += 1;
     while (i < lines.length && lines[i].trim()) {
-      if (/^\s*(#{1,6})\s+/.test(lines[i]) || /^\s*>/.test(lines[i]) || /^\s*(?:[-*+]\s+|\d+[.)]\s+)/.test(lines[i]) || /^\s*(?:\*\s*\*\s*\*|-{3,}|_{3,})\s*$/.test(lines[i]) || /^\s*```/.test(lines[i])) break;
+      if (/^\s*(#{1,6})\s+/.test(lines[i]) || /^\s*>/.test(lines[i]) || /^\s*(?:[-*+]\s+|\d+[.)]\s+)/.test(lines[i]) || /^\s*(?:\*\s*\*\s*\*|-{3,}|_{3,})\s*$/.test(lines[i]) || /^\s*```/.test(lines[i]) || /^\s*\$\$\s*$/.test(lines[i])) break;
       paragraph.push(lines[i]);
       i += 1;
     }
@@ -224,14 +225,16 @@ export default function MarkdownContent({ content }: { content: string }) {
         if (block.type === "hr") return <hr key={key} />;
         if (block.type === "math") return <MathExpression key={key} value={block.content ?? ""} display />;
         if (block.type === "code") return <pre key={key}><code>{block.content}</code></pre>;
-        if (block.type === "blockquote") return <blockquote key={key}>{inline(block.content ?? "")}</blockquote>;
+        if (block.type === "blockquote") return <blockquote key={key}>{renderInline(block.content ?? "")}</blockquote>;
         if (block.type === "list") {
           const List = block.ordered ? "ol" : "ul";
-          return <List key={key}>{(block.items ?? []).map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{inline(item)}</li>)}</List>;
+          return <List key={key}>{(block.items ?? []).map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInline(item)}</li>)}</List>;
         }
-        const Heading = block.type as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-        if (/^h[1-6]$/.test(block.type)) return <Heading key={key}>{inline(block.content ?? "")}</Heading>;
-        return <p key={key}>{inline(block.content ?? "")}</p>;
+        if (/^h[1-6]$/.test(block.type)) {
+          const Heading = block.type as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+          return <Heading key={key}>{renderInline(block.content ?? "")}</Heading>;
+        }
+        return <p key={key}>{renderInline(block.content ?? "")}</p>;
       })}
     </div>
   );
