@@ -3,16 +3,28 @@ import { ArrowLeft, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { contentCatalogService } from "../services/content/contentCatalogService";
 import { MathText } from "../components/ui/MathText";
+import type { SubjectId, TrackId } from "../types/academic";
 import type { Flashcard } from "../types/content";
 import "./Flashcards.css";
 
 const chapters = (cards: Flashcard[]) => Array.from(new Set(cards.map((card) => card.target.chapter)));
+const subjectLabels: Record<SubjectId, string> = {
+  maths: "Mathématiques",
+  "physique-chimie": "Physique-Chimie",
+  svt: "SVT",
+  anglais: "Anglais",
+  philosophie: "Philosophie",
+};
+const trackLabels: Record<TrackId, string> = { SP: "SPC", SMA: "SM A", SMB: "SM B" };
 
 export default function Flashcards() {
   const [params] = useSearchParams();
-  const trackId = params.get("track") || "SP";
-  const subjectId = params.get("subject") || "maths";
-  const allCards = useMemo(() => contentCatalogService.getBaseFlashcards(trackId as "SP" | "SMA" | "SMB", subjectId as "maths" | "physique-chimie" | "svt" | "anglais" | "philosophie"), [trackId, subjectId]);
+  const trackId = (params.get("track") || "SP") as TrackId;
+  const subjectId = (params.get("subject") || "maths") as SubjectId;
+  const allCards = useMemo(
+    () => contentCatalogService.getBaseFlashcards(trackId, subjectId),
+    [trackId, subjectId],
+  );
   const chapterList = useMemo(() => chapters(allCards), [allCards]);
   const [selectedChapter, setSelectedChapter] = useState("all");
   const [index, setIndex] = useState(0);
@@ -20,6 +32,7 @@ export default function Flashcards() {
 
   const cards = selectedChapter === "all" ? allCards : allCards.filter((card) => card.target.chapter === selectedChapter);
   const current = cards[index];
+  const subjectLabel = subjectLabels[subjectId] ?? "Matière";
 
   const reset = () => {
     setIndex(0);
@@ -39,15 +52,15 @@ export default function Flashcards() {
   return (
     <main className="flashcards-page container section">
       <div className="flashcards-topbar">
-        <Link to="/subjects/maths" className="flashcards-back"><ArrowLeft size={17} /> Mathématiques</Link>
-        <span className="flashcards-badge">2BAC SPC · FLASHCARDS</span>
+        <Link to={`/subjects/${subjectId}`} className="flashcards-back"><ArrowLeft size={17} /> {subjectLabel}</Link>
+        <span className="flashcards-badge">2BAC {trackLabels[trackId]} · FLASHCARDS</span>
       </div>
 
       <header className="flashcards-header">
         <div>
           <p className="flashcards-eyebrow">Révision active</p>
-          <h1>Flashcards de mathématiques</h1>
-          <p>Maîtrise les définitions, formules et méthodes du programme SPC.</p>
+          <h1>Flashcards de {subjectLabel.toLowerCase()}</h1>
+          <p>Réactive les définitions, concepts, méthodes et idées essentielles du programme.</p>
         </div>
         <div className="flashcards-count"><strong>{cards.length}</strong><span>cartes</span></div>
       </header>
