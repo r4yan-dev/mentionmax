@@ -28,7 +28,7 @@ const tools = [
   { to: "/ai-studio/handnotes", icon: Layers3, title: "Texte → résumé", text: "Passe du texte brut à une synthèse claire pour réviser." },
   { to: "/ai-studio/handnotes", icon: ListChecks, title: "Texte → flashcards", text: "Extrais définitions, formules et idées à mémoriser." },
   { to: "/ai-studio/writing", icon: ImagePlus, title: "Writing Lab", text: "Rédige une dissertation ou un essay, avec photo manuscrite et correction à venir." },
-  { to: "#youtube-transcript", icon: PlaySquare, title: "Vidéo → résumé", text: "Transforme une vidéo éducative en synthèse de révision." },
+  { to: "#youtube-transcript", icon: PlaySquare, title: "VIDÉO → RÉSUMÉ", text: "Transforme une vidéo éducative en synthèse de révision." },
 ];
 
 const recent = [
@@ -260,13 +260,13 @@ export default function AiStudio() {
       const { data, error: invokeError } = await withTimeout(
         supabase.functions.invoke("pdf-text-extractor", { body: { fileName: selectedFile.name, mimeType: selectedFile.type, data: dataUrl } }),
         FILE_EXTRACTION_TIMEOUT_MS,
-        "L’extraction prend trop de temps. Essaie un PDF plus court ou découpe le document en plusieurs parties.",
+        "L’extraction prend trop de temps. Essaie un fichier plus léger.",
       );
       if (invokeError) { setFileError(await getFunctionErrorMessage(invokeError)); return; }
       if (!data?.success) { setFileError(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun texte lisible n'a été trouvé."); return; }
       const extraction = data as PdfExtractionResult;
       setFileError(null);
-      setExtractedText(extraction.text);
+      setExtractedText(extraction.text.trim());
     } catch (caught) {
       setFileError(await getFunctionErrorMessage(caught));
     } finally {
@@ -276,77 +276,137 @@ export default function AiStudio() {
 
   async function copyExtractedText() {
     if (!extractedText) return;
-    try { await navigator.clipboard.writeText(extractedText); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }
-    catch { setFileError("Impossible de copier le texte."); }
+    await navigator.clipboard.writeText(extractedText);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
   }
 
-  async function saveExtractionAsNote() {
-    if (!extractedText || savingToNotes || savedToNotes) return;
-    setSavingToNotes(true); setFileError(null);
+  async function saveExtractedTextToNotes() {
+    if (!extractedText || savingToNotes) return;
+    setSavingToNotes(true);
     try {
-      const { data: auth, error: authError } = await supabase.auth.getUser();
-      if (authError || !auth.user) throw new Error("Connecte-toi pour enregistrer cette extraction dans tes notes.");
-      const sourceName = selectedFile?.name ?? (photoPages.length > 0 ? `${photoPages.length} pages photo` : "Extraction IA");
-      const title = sourceName.replace(/\.[^.]+$/, "").trim() || "Extraction IA";
-      const html = extractedText.split(/\n{2,}/).map((block) => `<p>${escapeHtml(block).replace(/\n/g, "<br />")}</p>`).join("");
-      const { error } = await supabase.from("handnotes").insert({
-        user_id: auth.user.id,
-        source_type: selectedFile && isPdf(selectedFile) ? "pdf" : "text",
-        source_ref: `ai-studio:${Date.now()}:${sourceName}`,
-        title,
-        content: { version: 1, html, text: extractedText },
-        is_pinned: false,
-        folder: "notes",
-        subject_id: null,
-        chapter_id: null,
-      });
-      if (error) throw error;
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      if (!userId) throw new Error("Connecte-toi pour enregistrer le texte dans tes notes.");
+      const { error: noteError } = await supabase.from("notes").insert({ user_id: userId, title: selectedFile?.name ?? "Texte extrait", content: extractedText });
+      if (noteError) throw noteError;
       setSavedToNotes(true);
     } catch (caught) {
-      setFileError(caught instanceof Error ? caught.message : "Impossible d’enregistrer cette extraction.");
+      setFileError(await getFunctionErrorMessage(caught));
     } finally {
       setSavingToNotes(false);
     }
   }
 
-  const hasFileSource = Boolean(selectedFile) || photoPages.length > 0;
-  const sourceLabel = selectedFile?.name ?? (photoPages.length > 0 ? `${photoPages.length} pages photo` : "Dépose un fichier ici");
-
   return (
-    <main className="studio-page">
-      <header className="studio-header">
-        <div><span className="studio-eyebrow"><Sparkles size={14} /> AI Studio</span><h1>Fabrique tes propres ressources de révision.</h1><p>Un atelier séparé du tuteur. Tu apportes un cours, un texte ou une ressource, puis MentionMax la transforme en matériel de révision exploitable.</p></div>
-        <div className="studio-credits"><span>CRÉATIONS</span><strong>12</strong></div>
-      </header>
-      <PeopleFeature variant="teacher" compact title="L’IA devient ton atelier de révision." text="Transforme tes cours en fiches, résumés, cartes et quiz sans perdre la structure du programme." action={<Link to="/ai-studio/handnotes" className="btn btn-primary"><Wand2 size={15} /> Ouvrir l’atelier</Link>} />
-      <div className="studio-grid">
-        <section className="studio-card">
-          <span className="studio-eyebrow">COMMENCER</span>
-          <h2>Choisis une transformation</h2>
-          <p>Les parcours gardent la même logique : source → structure → ressource prête à réviser.</p>
-          <div className="studio-tools">{tools.map(({ to, icon: Icon, title, text }) => title.startsWith("Vidéo") ? <a key={title} href={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></a> : <Link key={title} to={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></Link>)}</div>
-          <div className={`studio-drop ${dropActive ? "is-drag-active" : ""}`} onDragOver={(event) => { event.preventDefault(); setDropActive(true); }} onDragLeave={() => setDropActive(false)} onDrop={(event) => { event.preventDefault(); setDropActive(false); addFiles(event.dataTransfer.files); }}>
-            <FileUp size={24} /><strong>{sourceLabel}</strong><span>PDF numérique, PDF scanné ou 1 à {MAX_PHOTOS} pages photo · max. {MAX_FILE_SIZE_MB} Mo par fichier</span>
-            <input id="studio-file" hidden type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ""; }} />
-            <div className="studio-actions">
-              <label htmlFor="studio-file" className="studio-btn studio-btn--primary"><FileUp size={15} /> {photoPages.length > 0 ? "Ajouter des pages" : "Importer"}</label>
-              {photoPages.length > 0 && <button type="button" className="studio-btn studio-btn--soft" onClick={clearPhotos}><X size={15} /> Vider les pages</button>}
-              <button type="button" className="studio-btn studio-btn--soft" onClick={() => void extractFileText()} disabled={!hasFileSource || fileBusy}>{fileBusy ? <><LoaderCircle className="studio-spin" size={15} /> Extraction IA...</> : <><FileText size={15} /> {photoPages.length > 0 ? `Extraire les ${photoPages.length} pages` : "Extraire le texte"}</>}</button>
-              <Link to="/ai-studio/handnotes" className="studio-btn studio-btn--soft"><Wand2 size={15} /> Ouvrir l’atelier</Link>
-            </div>
-            {fileError && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>{fileBusy ? "Extraction en cours" : "Extraction impossible"}</strong><span>{fileError}</span></div></div>}
-            {photoPages.length > 0 && <div className="studio-photo-review"><div className="studio-photo-review__header"><div><span className="studio-eyebrow">PAGES À EXTRAIRE</span><strong>{photoPages.length} / {MAX_PHOTOS}</strong></div><span>Ordre d’extraction</span></div><p className="studio-photo-order-hint"><GripVertical size={13} /> Glisse les pages, ou utilise les flèches, pour définir l’ordre.</p><div className="studio-photo-grid">{photoPages.map((page, index) => <article key={page.id} className={`studio-photo-card ${draggedPageId === page.id ? "is-dragging" : ""}`} draggable onDragStart={() => setDraggedPageId(page.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedPageId) reorderPhoto(draggedPageId, page.id); setDraggedPageId(null); }} onDragEnd={() => setDraggedPageId(null)}><div className="studio-photo-card__image"><img src={page.url} alt={`Page ${index + 1}`} /><span>{index + 1}</span><GripVertical className="studio-photo-card__drag" size={14} /></div><div className="studio-photo-card__footer"><strong>Page {index + 1}</strong><div><button type="button" onClick={() => movePhoto(page.id, -1)} disabled={index === 0} aria-label={`Monter la page ${index + 1}`}><ChevronLeft size={14} /></button><button type="button" onClick={() => movePhoto(page.id, 1)} disabled={index === photoPages.length - 1} aria-label={`Descendre la page ${index + 1}`}><ChevronRight size={14} /></button><button type="button" onClick={() => removePhoto(page.id)} aria-label={`Supprimer la page ${index + 1}`}><X size={14} /></button></div></div></article>)}</div></div>}
-            {extractedText && <div className="studio-transcript"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> EXTRACTION IA</span><h3>{selectedFile?.name ?? `${photoPages.length} pages photo`}</h3><p>Texte détecté dans le document. Les scans et images passent automatiquement par la vision IA.</p></div><div className="studio-actions"><button type="button" className="studio-btn studio-btn--soft" onClick={() => void copyExtractedText()}><Copy size={15} /> {copied ? "Copié" : "Copier"}</button><button type="button" className="studio-btn studio-btn--primary" onClick={() => void saveExtractionAsNote()} disabled={savingToNotes || savedToNotes}>{savingToNotes ? <><LoaderCircle className="studio-spin" size={15} /> Enregistrement...</> : savedToNotes ? <><CheckCircle2 size={15} /> Enregistré dans Notes</> : <><FileText size={15} /> Enregistrer dans Notes</>}</button></div></div><pre style={{ margin: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: 520, overflowY: "auto", padding: "18px", borderRadius: 14, background: "var(--mm-surface-subtle, #f6f8f7)", fontFamily: "inherit", lineHeight: 1.65 }}>{extractedText}</pre></div>}
+    <main className="ai-studio-page">
+      <section className="studio-tools">
+        <div className="studio-section-heading">
+          <div>
+            <span className="studio-eyebrow"><Sparkles size={14} /> AI STUDIO</span>
+            <h1>Crée des ressources de révision avec l’IA.</h1>
+            <p>Transforme tes cours, textes, photos et vidéos en contenus exploitables pour réviser plus vite.</p>
           </div>
-        </section>
-        <aside className="studio-card"><span className="studio-eyebrow">RÉCENTS</span><h2>Ce que tu as créé</h2><p>Un historique compact pour reprendre tes ressources sans fouiller partout.</p><div className="studio-recent">{recent.map(([title, meta, badge]) => <Link to="/ai-studio/handnotes" className="studio-recent-item" key={title}><span className="studio-recent-item__icon"><FileText size={16} /></span><span><strong>{title}</strong><span>{meta}</span></span><b className="studio-badge">{badge}</b></Link>)}</div><div className="studio-note">V1 : PDF numériques, PDF scannés et images peuvent être convertis en texte avant de passer à la génération de fiches.</div><div className="studio-actions"><Link to="/ai-help" className="studio-btn studio-btn--soft"><Sparkles size={15} /> Aller au tuteur IA <ArrowRight size={14} /></Link></div></aside>
-      </div>
-      <section id="youtube-transcript" className="studio-card studio-youtube" aria-labelledby="youtube-transcript-title">
-        <div className="studio-youtube__header"><div><span className="studio-eyebrow"><Sparkles size={14} /> AI STUDIO · YOUTUBE</span><h2 id="youtube-transcript-title">Créer un résumé de la vidéo</h2><p>Colle un lien YouTube éducatif. MentionMax vérifie la vidéo, récupère le transcript, puis génère automatiquement une synthèse de révision.</p></div>{summary && <span className="studio-status studio-status--ok"><CheckCircle2 size={14} /> Résumé prêt</span>}</div>
-        <div className="studio-youtube__form"><div className="studio-url-input"><Link2 size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void createYoutubeSummary(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="studio-btn studio-btn--primary" onClick={() => void createYoutubeSummary()} disabled={!youtubeUrl.trim() || busy}>{busy ? <><LoaderCircle className="studio-spin" size={15} /> Vérification + résumé...</> : <><Sparkles size={15} /> Faire le résumé</>}</button></div>
-        {error && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>Résumé impossible</strong><span>{error}</span></div></div>}
-        {result && <div className="studio-transcript"><div className="studio-transcript__meta"><img src={result.video.thumbnail} alt="" /><div><strong>{result.video.title}</strong><span>{result.video.author ?? "YouTube"} · {result.transcript.language} ({result.transcript.languageCode}) · {result.transcript.segments.length} segments{result.transcript.isGenerated ? " · automatique" : " · créée par le créateur"}</span></div></div></div>}
-        {summary && <div className="studio-transcript studio-youtube-summary"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> RÉSUMÉ IA</span><h3>{typeof summary.title === "string" ? summary.title : "Résumé de la vidéo"}</h3><p>Généré à partir du transcript de la vidéo, sans inventer de contenu absent.</p></div></div><div className="studio-youtube-summary__body">{Object.entries(summary).filter(([key]) => key !== "title").map(([key, value]) => <section key={key}><span>{key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase())}</span><div>{formatSummaryValue(value).split("\n").map((line, index) => line.trim() ? <p key={`${key}-${index}`}>{line}</p> : <br key={`${key}-${index}`} />)}</div></section>)}</div></div>}
+        </div>
+        <div className="studio-tool-grid">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            const content = (
+              <>
+                <div className="studio-tool-icon"><Icon size={20} /></div>
+                <div className="studio-tool-copy">
+                  <strong>{tool.title}</strong>
+                  <span>{tool.text}</span>
+                </div>
+                <ArrowRight size={17} className="studio-tool-arrow" />
+              </>
+            );
+            return tool.to.startsWith("#") ? <a key={tool.title} href={tool.to} className="studio-tool-card">{content}</a> : <Link key={tool.title} to={tool.to} className="studio-tool-card">{content}</Link>;
+          })}
+        </div>
+      </section>
+
+      <section className="studio-upload-section">
+        <div className="studio-section-heading">
+          <div>
+            <span className="studio-eyebrow"><FileUp size={14} /> DOCUMENTS</span>
+            <h2>Dépose un fichier ici</h2>
+            <p>PDF numérique, PDF scanné ou image · OCR IA automatique · max. 25 Mo</p>
+          </div>
+        </div>
+        <div className={`studio-dropzone ${dropActive ? "is-active" : ""}`}
+          onDragOver={(event) => { event.preventDefault(); setDropActive(true); }}
+          onDragLeave={() => setDropActive(false)}
+          onDrop={(event) => { event.preventDefault(); setDropActive(false); addFiles(event.dataTransfer.files); }}>
+          <input id="studio-file-input" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" multiple onChange={(event) => addFiles(event.target.files)} hidden />
+          <label htmlFor="studio-file-input" className="studio-upload-actions"><span className="studio-primary-button">Importer</span></label>
+          <button className="studio-secondary-button" type="button" onClick={extractFileText} disabled={fileBusy || (!selectedFile && photoPages.length === 0)}>{fileBusy ? "Extraction…" : "Extraire le texte"}</button>
+        </div>
+        {fileError && <div className="studio-inline-error"><AlertCircle size={16} /> {fileError}</div>}
+        {photoPages.length > 0 && (
+          <div className="studio-photo-pages">
+            <div className="studio-photo-pages__header">
+              <div><strong>{photoPages.length}/{MAX_PHOTOS} pages</strong><span>Réorganise les pages avant extraction.</span></div>
+              <button type="button" className="studio-text-button" onClick={clearPhotos}>Tout retirer</button>
+            </div>
+            <div className="studio-photo-grid">
+              {photoPages.map((page, index) => (
+                <article key={page.id} className="studio-photo-card" draggable
+                  onDragStart={() => setDraggedPageId(page.id)}
+                  onDragEnd={() => setDraggedPageId(null)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => { event.preventDefault(); reorderPhoto(draggedPageId ?? "", page.id); setDraggedPageId(null); }}>
+                  <div className="studio-photo-card__top"><span><GripVertical size={14} /> Page {index + 1}</span><button type="button" onClick={() => removePhoto(page.id)}><X size={14} /></button></div>
+                  <img src={page.url} alt={`Page ${index + 1}`} />
+                  <div className="studio-photo-card__controls">
+                    <button type="button" onClick={() => movePhoto(page.id, -1)} disabled={index === 0}><ChevronLeft size={15} /></button>
+                    <button type="button" onClick={() => movePhoto(page.id, 1)} disabled={index === photoPages.length - 1}><ChevronRight size={15} /></button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+        {extractedText && (
+          <div className="studio-extraction-result">
+            <div className="studio-result-header"><strong>Texte extrait</strong><div><button type="button" onClick={copyExtractedText}>{copied ? <><CheckCircle2 size={15} /> Copié</> : <><Copy size={15} /> Copier</>}</button><button type="button" onClick={saveExtractedTextToNotes} disabled={savingToNotes}>{savedToNotes ? <><CheckCircle2 size={15} /> Enregistré</> : <><FileText size={15} /> Ouvrir l’atelier</>}</button></div></div>
+            <pre>{escapeHtml(extractedText)}</pre>
+          </div>
+        )}
+      </section>
+
+      <section id="youtube-transcript" className="studio-youtube-section">
+        <div className="studio-youtube__header">
+          <div>
+            <span className="studio-eyebrow"><Sparkles size={14} /> AI STUDIO · YOUTUBE</span>
+            <h2 id="youtube-transcript-title">Créer un résumé de la vidéo</h2>
+            <p>Colle un lien YouTube éducatif. MentionMax vérifie la vidéo, récupère le transcript, puis génère automatiquement une synthèse de révision.</p>
+          </div>
+          {summary && <span className="studio-status-pill"><CheckCircle2 size={15} /> Résumé prêt</span>}
+        </div>
+        <div className="studio-youtube__form">
+          <label htmlFor="youtube-url">Lien YouTube</label>
+          <div className="studio-youtube__input-row">
+            <div className="studio-url-input"><Link2 size={17} /><input id="youtube-url" type="url" value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} placeholder="https://www.youtube.com/watch?v=..." /></div>
+            <button type="button" className="studio-primary-button" onClick={createYoutubeSummary} disabled={!youtubeUrl.trim() || busy}>{busy ? "Vérification + résumé..." : "Faire le résumé"}</button>
+          </div>
+          {error && <div className="studio-inline-error"><AlertCircle size={16} /> {error}</div>}
+        </div>
+        {result && (
+          <div className="studio-youtube-result">
+            <div className="studio-video-card"><img src={result.video.thumbnail} alt="" /><div><strong>{result.video.title}</strong><span>{result.video.author ?? "YouTube"} · {result.transcript.language}</span></div></div>
+            {summary ? (
+              <div className="studio-summary-card">
+                <div className="studio-result-header"><strong>RÉSUMÉ IA</strong><span><Wand2 size={15} /> Synthèse générée</span></div>
+                <div className="studio-summary-content">
+                  {Object.entries(summary).map(([key, value]) => <div key={key} className="studio-summary-block"><span>{key.replace(/_/g, " ")}</span><p>{formatSummaryValue(value)}</p></div>)}
+                </div>
+              </div>
+            ) : (
+              <div className="studio-loading-state"><LoaderCircle size={18} className="spin" /> Génération de la synthèse…</div>
+            )}
+          </div>
+        )}
       </section>
     </main>
   );
