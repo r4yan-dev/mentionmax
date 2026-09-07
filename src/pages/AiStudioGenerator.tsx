@@ -8,13 +8,10 @@ import "./AiStudioGenerator.css";
 
 type ResultRecord = Record<string, unknown>;
 type TranscriptSegment = { start: number; duration: number; text: string };
-type TranscriptResult = {
-  video: { id: string; title: string; author: string | null; thumbnail: string };
-  transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[]; source?: string };
-};
+type TranscriptResult = { video: { id: string; title: string; author: string | null; thumbnail: string }; transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[]; source?: string } };
 type EducationGateResult = { allowed: boolean; title: string | null; author: string | null; reason: string | null };
-
 type Mode = { id: StudioGenerationMode; title: string; text: string; icon: typeof FileText };
+
 const modes: Mode[] = [
   { id: "handnote", title: "Fiche structurée", text: "Notions, définitions, formules, exemples et points examen.", icon: FileText },
   { id: "summary", title: "Résumé", text: "Une synthèse claire, dense et directement révisable.", icon: BookOpen },
@@ -31,9 +28,7 @@ function stringifyValue(value: unknown) {
 
 function formatTime(seconds: number) {
   const total = Math.max(0, Math.floor(seconds));
-  const minutes = Math.floor(total / 60);
-  const secs = total % 60;
-  return `${minutes}:${String(secs).padStart(2, "0")}`;
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }
 
 async function getFunctionErrorMessage(error: unknown) {
@@ -49,50 +44,25 @@ async function getFunctionErrorMessage(error: unknown) {
 }
 
 function ResultView({ result }: { result: ResultRecord }) {
-  const title = typeof result.title === "string" ? result.title : "Ressource générée";
+  const title = typeof result.title === "string" ? result.title : "Résumé généré";
   const entries = Object.entries(result).filter(([key]) => key !== "title");
-
-  return (
-    <div className="generator-result">
-      <div className="generator-result__head">
-        <div>
-          <span className="generator-eyebrow"><Check size={14} /> GÉNÉRATION TERMINÉE</span>
-          <h2>{title}</h2>
-        </div>
-      </div>
-      <div className="generator-result__grid">
-        {entries.map(([key, value]) => {
-          const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase());
-          const isRich = ["cards", "questions", "sections", "keyPoints", "formulas", "definitions"].includes(key);
-          return (
-            <section key={key} className={`generator-result__block ${isRich ? "is-rich" : ""}`}>
-              <span className="generator-result__label">{label}</span>
-              <div className="generator-result__content">
-                {Array.isArray(value) ? value.map((item, index) => (
-                  <article className="generator-result__item" key={`${key}-${index}`}>
-                    {typeof item === "object" && item !== null ? Object.entries(item as Record<string, unknown>).map(([itemKey, itemValue]) => (
-                      <div key={itemKey}><strong>{itemKey.replace(/([A-Z])/g, " $1")}</strong><p>{stringifyValue(itemValue)}</p></div>
-                    )) : <p>{stringifyValue(item)}</p>}
-                  </article>
-                )) : <p>{stringifyValue(value)}</p>}
-              </div>
-            </section>
-          );
-        })}
-      </div>
-    </div>
-  );
+  return <div className="generator-result">
+    <div className="generator-result__head"><div><span className="generator-eyebrow"><Check size={14} /> GÉNÉRATION TERMINÉE</span><h2>{title}</h2></div></div>
+    <div className="generator-result__grid">{entries.map(([key, value]) => {
+      const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase());
+      const rich = ["cards", "questions", "sections", "keyPoints", "formulas", "definitions"].includes(key);
+      return <section key={key} className={`generator-result__block ${rich ? "is-rich" : ""}`}><span className="generator-result__label">{label}</span><div className="generator-result__content">{Array.isArray(value) ? value.map((item, index) => <article className="generator-result__item" key={`${key}-${index}`}>{item && typeof item === "object" ? Object.entries(item as Record<string, unknown>).map(([itemKey, itemValue]) => <div key={itemKey}><strong>{itemKey.replace(/([A-Z])/g, " $1")}</strong><p>{stringifyValue(itemValue)}</p></div>) : <p>{stringifyValue(item)}</p>}</article>) : <p>{stringifyValue(value)}</p>}</div></section>;
+    })}</div>
+  </div>;
 }
 
 export default function AiStudioGenerator() {
   const location = useLocation();
-  const initialMode = useMemo<StudioGenerationMode>(() => {
-    const requested = new URLSearchParams(location.search).get("mode") as StudioGenerationMode | null;
-    return modes.some((mode) => mode.id === requested) ? requested! : "handnote";
-  }, [location.search]);
+  const requestedMode = new URLSearchParams(location.search).get("mode") as StudioGenerationMode | null;
+  const initialMode = useMemo<StudioGenerationMode>(() => modes.some((item) => item.id === requestedMode) ? requestedMode! : "handnote", [requestedMode]);
   const [mode, setMode] = useState<StudioGenerationMode>(initialMode);
   const [text, setText] = useState("");
-  const [sourceType, setSourceType] = useState<"text" | "youtube">("text");
+  const [sourceType, setSourceType] = useState<"text" | "youtube">("youtube");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [youtubeBusy, setYoutubeBusy] = useState(false);
   const [youtubeError, setYoutubeError] = useState<string | null>(null);
@@ -104,11 +74,21 @@ export default function AiStudioGenerator() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ResultRecord | null>(null);
 
-  async function checkAndExtractYoutube() {
+  async function generateSummary(source: TranscriptResult) {
+    const transcriptText = source.transcript.segments.map((segment) => segment.text).join(" ").trim();
+    if (!transcriptText) throw new Error("Aucun texte exploitable n'a été extrait de cette vidéo.");
+    setMode("summary");
+    setText(transcriptText);
+    const next = await generateStudioResource<ResultRecord>({ mode: "summary", text: transcriptText, subject, chapter: chapter.trim() || source.video.title, track });
+    setResult(next);
+  }
+
+  async function checkAndSummarizeYoutube() {
     const url = youtubeUrl.trim();
     if (!url || youtubeBusy) return;
     setYoutubeBusy(true);
     setYoutubeError(null);
+    setError(null);
     setYoutubeResult(null);
     setResult(null);
     try {
@@ -116,23 +96,17 @@ export default function AiStudioGenerator() {
       if (gateError) throw gateError;
       const educationCheck = gate as EducationGateResult;
       if (!educationCheck?.allowed) {
-        setYoutubeError(educationCheck?.reason ?? "Cette vidéo ne semble pas être éducative.");
+        setYoutubeError(educationCheck?.reason ?? "Cette vidéo ne semble pas être une ressource éducative.");
         return;
       }
-      const { data, error: transcriptError } = await supabase.functions.invoke("youtube-transcript-v2", {
-        body: { url, languages: ["fr", "en", "ar"] },
-      });
+      const { data, error: transcriptError } = await supabase.functions.invoke("youtube-transcript-v2", { body: { url, languages: ["fr", "en", "ar"] } });
       if (transcriptError) throw transcriptError;
-      if (!data?.success) {
-        setYoutubeError(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé.");
-        return;
-      }
+      if (!data?.success) throw new Error(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé.");
       const transcript = data as TranscriptResult;
       setYoutubeResult(transcript);
-      setText(transcript.transcript.segments.map((segment) => segment.text).join(" ").trim());
-      if (!chapter.trim() && transcript.video.title) setChapter(transcript.video.title);
-    } catch (error) {
-      setYoutubeError(await getFunctionErrorMessage(error));
+      await generateSummary(transcript);
+    } catch (caught) {
+      setYoutubeError(await getFunctionErrorMessage(caught));
     } finally {
       setYoutubeBusy(false);
     }
@@ -144,78 +118,22 @@ export default function AiStudioGenerator() {
     setError(null);
     setResult(null);
     try {
-      const next = await generateStudioResource<ResultRecord>({ mode, text, subject, chapter, track });
-      setResult(next);
-    } catch (generationError) {
-      setError(generationError instanceof Error ? generationError.message : "La génération IA a échoué.");
+      setResult(await generateStudioResource<ResultRecord>({ mode, text, subject, chapter, track }));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "La génération IA a échoué.");
     } finally {
       setBusy(false);
     }
   }
 
   const selectedMode = modes.find((item) => item.id === mode)!;
-
-  return (
-    <main className="generator-page">
-      <header className="generator-header">
-        <div>
-          <Link to="/ai-studio" className="generator-back"><ArrowLeft size={16} /> AI Studio</Link>
-          <span className="generator-eyebrow"><Sparkles size={14} /> ATELIER DE GÉNÉRATION</span>
-          <h1>Transforme ton cours en ressource de révision.</h1>
-          <p>Choisis le résultat, ajoute ton contenu source et laisse le moteur pédagogique structurer le document.</p>
-        </div>
-        <div className="generator-status"><span>MODÈLE</span><strong>Gemini 3.6 Flash</strong></div>
-      </header>
-
-      <section className="generator-shell">
-        <div className="generator-modes">
-          <div className="generator-section-title"><span>01</span><div><strong>Choisir le résultat</strong><small>Le même contenu peut produire plusieurs formats.</small></div></div>
-          <div className="generator-mode-grid">
-            {modes.map(({ id, title, text: description, icon: Icon }) => (
-              <button type="button" className={`generator-mode ${mode === id ? "is-active" : ""}`} key={id} onClick={() => { setMode(id); setResult(null); setError(null); }}>
-                <span className="generator-mode__icon"><Icon size={18} /></span>
-                <span><strong>{title}</strong><small>{description}</small></span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="generator-input-area">
-          <div className="generator-section-title"><span>02</span><div><strong>Source</strong><small>Colle un texte ou vérifie une vidéo YouTube éducative.</small></div></div>
-          <div className="generator-source-tabs" role="tablist" aria-label="Type de source">
-            <button type="button" className={sourceType === "text" ? "is-active" : ""} onClick={() => { setSourceType("text"); setYoutubeError(null); }}>Texte / notes</button>
-            <button type="button" className={sourceType === "youtube" ? "is-active" : ""} onClick={() => { setSourceType("youtube"); setError(null); }}>YouTube</button>
-          </div>
-
-          {sourceType === "youtube" ? (
-            <div className="generator-youtube">
-              <div className="generator-youtube__row">
-                <div className="generator-youtube__input"><PlaySquare size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void checkAndExtractYoutube(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div>
-                <button type="button" className="generator-btn" onClick={() => void checkAndExtractYoutube()} disabled={!youtubeUrl.trim() || youtubeBusy}>{youtubeBusy ? <><LoaderCircle className="generator-spin" size={16} /> Vérification…</> : <><PlaySquare size={16} /> Vérifier et extraire</>}</button>
-              </div>
-              {youtubeError && <div className="generator-error"><strong>Vidéo non exploitable</strong><span>{youtubeError}</span></div>}
-              {youtubeResult && <div className="generator-youtube__result"><div className="generator-youtube__meta"><img src={youtubeResult.video.thumbnail} alt="" /><div><strong>{youtubeResult.video.title}</strong><span>{youtubeResult.video.author ?? "YouTube"} · {youtubeResult.transcript.language} · {youtubeResult.transcript.segments.length} segments{youtubeResult.transcript.isGenerated ? " · automatique" : ""}</span></div></div><div className="generator-youtube__segments">{youtubeResult.transcript.segments.slice(0, 12).map((segment, index) => <article key={`${segment.start}-${index}`}><time>{formatTime(segment.start)}</time><p>{segment.text}</p></article>)}{youtubeResult.transcript.segments.length > 12 && <span className="generator-youtube__more">{youtubeResult.transcript.segments.length - 12} segments supplémentaires chargés dans la source.</span>}</div></div>}
-            </div>
-          ) : (
-            <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Colle ici le contenu à transformer…" />
-          )}
-
-          <div className="generator-meta-grid">
-            <label><span>Matière</span><input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Mathématiques" /></label>
-            <label><span>Chapitre</span><input value={chapter} onChange={(event) => setChapter(event.target.value)} placeholder="Dérivation" /></label>
-            <label><span>Parcours</span><select value={track} onChange={(event) => setTrack(event.target.value)}><option value="">Automatique</option><option value="SP">2BAC Sciences Physiques</option><option value="SMA">2BAC Sciences Mathématiques A</option><option value="SMB">2BAC Sciences Mathématiques B</option></select></label>
-          </div>
-          <div className="generator-actions"><span>{text.trim().length.toLocaleString("fr-FR")} caractères · {sourceType === "youtube" ? "source YouTube" : "source texte"}</span><button type="button" className="generator-btn" onClick={() => void generate()} disabled={!text.trim() || busy}>{busy ? <><LoaderCircle className="generator-spin" size={16} /> Génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>
-          {error && <div className="generator-error"><strong>Génération impossible</strong><span>{error}</span></div>}
-        </div>
-      </section>
-
-      {result && (
-        <section className="generator-output">
-          <div className="generator-output__toolbar"><div><span className="generator-eyebrow">03 · APERÇU</span><strong>Résultat généré</strong></div><button type="button" className="generator-btn generator-btn--secondary" onClick={() => void generate()} disabled={busy}><RefreshCw size={15} /> Régénérer</button></div>
-          <ResultView result={result} />
-        </section>
-      )}
-    </main>
-  );
+  return <main className="generator-page">
+    <header className="generator-header"><div><Link to="/ai-studio" className="generator-back"><ArrowLeft size={16} /> AI Studio</Link><span className="generator-eyebrow"><Sparkles size={14} /> AI STUDIO · YOUTUBE</span><h1>Transforme une vidéo en résumé de révision.</h1><p>Colle une vidéo éducative, récupère son transcript et génère automatiquement une synthèse exploitable pour le bac.</p></div><div className="generator-status"><span>MODÈLE</span><strong>Gemini Flash-Lite</strong></div></header>
+    <section className="generator-shell"><div className="generator-modes"><div className="generator-section-title"><span>01</span><div><strong>Format de sortie</strong><small>Le résumé est automatique pour YouTube.</small></div></div><div className="generator-mode-grid">{modes.map(({ id, title, text: description, icon: Icon }) => <button type="button" className={`generator-mode ${mode === id ? "is-active" : ""}`} key={id} onClick={() => { setMode(id); setResult(null); setError(null); }}><span className="generator-mode__icon"><Icon size={18} /></span><span><strong>{title}</strong><small>{description}</small></span></button>)}</div></div>
+      <div className="generator-input-area"><div className="generator-section-title"><span>02</span><div><strong>Source</strong><small>Utilise YouTube pour créer directement un résumé.</small></div></div><div className="generator-source-tabs" role="tablist" aria-label="Type de source"><button type="button" className={sourceType === "text" ? "is-active" : ""} onClick={() => setSourceType("text")}>Texte / notes</button><button type="button" className={sourceType === "youtube" ? "is-active" : ""} onClick={() => setSourceType("youtube")}>YouTube</button></div>
+        {sourceType === "youtube" ? <div className="generator-youtube"><div className="generator-youtube__row"><div className="generator-youtube__input"><PlaySquare size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void checkAndSummarizeYoutube(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="generator-btn" onClick={() => void checkAndSummarizeYoutube()} disabled={!youtubeUrl.trim() || youtubeBusy}>{youtubeBusy ? <><LoaderCircle className="generator-spin" size={16} /> Vérification + résumé…</> : <><Sparkles size={16} /> Vérifier et faire le résumé</>}</button></div>{youtubeError && <div className="generator-error"><strong>Vidéo non exploitable</strong><span>{youtubeError}</span></div>}{youtubeResult && <div className="generator-youtube__result"><div className="generator-youtube__meta"><img src={youtubeResult.video.thumbnail} alt="" /><div><strong>{youtubeResult.video.title}</strong><span>{youtubeResult.video.author ?? "YouTube"} · {youtubeResult.transcript.language} · {youtubeResult.transcript.segments.length} segments{youtubeResult.transcript.isGenerated ? " · automatique" : ""}</span></div></div><div className="generator-youtube__segments">{youtubeResult.transcript.segments.slice(0, 10).map((segment, index) => <article key={`${segment.start}-${index}`}><time>{formatTime(segment.start)}</time><p>{segment.text}</p></article>)}{youtubeResult.transcript.segments.length > 10 && <span className="generator-youtube__more">{youtubeResult.transcript.segments.length - 10} segments supplémentaires utilisés pour le résumé.</span>}</div></div>}</div> : <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Colle ici le contenu à transformer…" />}
+        <div className="generator-meta-grid"><label><span>Matière</span><input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Mathématiques" /></label><label><span>Chapitre</span><input value={chapter} onChange={(event) => setChapter(event.target.value)} placeholder="Dérivation" /></label><label><span>Parcours</span><select value={track} onChange={(event) => setTrack(event.target.value)}><option value="">Automatique</option><option value="SP">2BAC Sciences Physiques</option><option value="SMA">2BAC Sciences Mathématiques A</option><option value="SMB">2BAC Sciences Mathématiques B</option></select></label></div>
+        <div className="generator-actions"><span>{text.trim().length.toLocaleString("fr-FR")} caractères · {sourceType === "youtube" ? "source YouTube" : "source texte"}</span><button type="button" className="generator-btn" onClick={() => void generate()} disabled={!text.trim() || busy}>{busy ? <><LoaderCircle className="generator-spin" size={16} /> Génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>{error && <div className="generator-error"><strong>Génération impossible</strong><span>{error}</span></div>}</div></section>
+    {result && <section className="generator-output"><div className="generator-output__toolbar"><div><span className="generator-eyebrow">03 · RÉSUMÉ</span><strong>Résumé de la vidéo</strong></div><button type="button" className="generator-btn generator-btn--secondary" onClick={() => void generate()} disabled={busy}><RefreshCw size={15} /> Régénérer</button></div><ResultView result={result} /></section>}
+  </main>;
 }
