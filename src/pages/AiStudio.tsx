@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import PeopleFeature from "../components/ui/PeopleFeature";
+import { generateStudioResource } from "../services/ai/studioGenerate";
 import { supabase } from "../lib/supabase";
 import "./AiStudio.css";
 
@@ -15,7 +16,7 @@ const tools = [
   { to: "/ai-studio/handnotes", icon: Layers3, title: "Texte → résumé", text: "Passe du texte brut à une synthèse claire pour réviser." },
   { to: "/ai-studio/handnotes", icon: ListChecks, title: "Texte → flashcards", text: "Extrais définitions, formules et idées à mémoriser." },
   { to: "/ai-studio/writing", icon: ImagePlus, title: "Writing Lab", text: "Rédige une dissertation ou un essay, avec photo manuscrite et correction à venir." },
-  { to: "#youtube-transcript", icon: PlaySquare, title: "Vidéo → sous-titres", text: "Uniquement pour les vidéos éducatives et de révision." },
+  { to: "#youtube-transcript", icon: PlaySquare, title: "Vidéo → résumé", text: "Transforme une vidéo éducative en synthèse de révision." },
 ];
 
 const recent = [
@@ -33,6 +34,7 @@ type FunctionErrorPayload = { error?: string; detail?: string };
 type EducationGateResult = { allowed: boolean; title: string | null; author: string | null; reason: string | null };
 type PdfExtractionResult = { success: boolean; file: { name: string; mimeType: string }; text: string; extraction: string };
 type StudioPhotoPage = { id: string; file: File; url: string };
+type SummaryResult = Record<string, unknown>;
 
 function formatTime(seconds: number) {
   const total = Math.max(0, Math.floor(seconds));
@@ -49,10 +51,10 @@ async function getFunctionErrorMessage(error: unknown) {
       if (payload?.detail) return `${payload.error ?? "Extraction impossible."} ${payload.detail}`;
       if (payload?.error) return payload.error;
     } catch {}
-    return `L'extracteur a répondu avec une erreur HTTP (${error.context?.status ?? "inconnue"}).`;
+    return `Le service a répondu avec une erreur HTTP (${error.context?.status ?? "inconnue"}).`;
   }
   if (error instanceof Error) return error.message;
-  return "Impossible de contacter l’extracteur.";
+  return "Impossible de contacter le service.";
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
@@ -83,6 +85,13 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character);
 }
 
+function formatSummaryValue(value: unknown) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map((item) => typeof item === "string" ? item : JSON.stringify(item)).join("\n");
+  if (value && typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value ?? "");
+}
+
 export default function AiStudio() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [photoPages, setPhotoPages] = useState<StudioPhotoPage[]>([]);
@@ -94,26 +103,43 @@ export default function AiStudio() {
   const [error, setError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [result, setResult] = useState<TranscriptResult | null>(null);
+  const [summary, setSummary] = useState<SummaryResult | null>(null);
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [savingToNotes, setSavingToNotes] = useState(false);
   const [savedToNotes, setSavedToNotes] = useState(false);
 
-  async function extractYoutubeTranscript() {
+  async function summarizeYoutube(transcript: TranscriptResult) {
+    const transcriptText = transcript.transcript.segments.map((segment) => segment.text).join(" ").trim();
+    if (!transcriptText) throw new Error("Aucun texte exploitable n'a été extrait de cette vidéo.");
+    const generated = await generateStudioResource<SummaryResult>({
+      mode: "summary",
+      text: transcriptText,
+      chapter: transcript.video.title,
+    });
+    setSummary(generated);
+  }
+
+  async function createYoutubeSummary() {
     const url = youtubeUrl.trim();
     if (!url || busy) return;
-    setBusy(true); setError(null); setResult(null);
+    setBusy(true); setError(null); setResult(null); setSummary(null);
     try {
       const { data: gate, error: gateError } = await supabase.functions.invoke("youtube-education-gate", { body: { url } });
       if (gateError) { setError(await getFunctionErrorMessage(gateError)); return; }
       const educationCheck = gate as EducationGateResult;
-      if (!educationCheck?.allowed) { setError(educationCheck?.reason ?? "Cette vidéo ne semble pas être éducative."); return; }
+      if (!educationCheck?.allowed) { setError(educationCheck?.reason ?? "Cette vidéo ne semble pas être une ressource éducative."); return; }
       const { data, error: invokeError } = await supabase.functions.invoke("youtube-transcript-v2", { body: { url, languages: ["fr", "en", "ar"] } });
       if (invokeError) { setError(await getFunctionErrorMessage(invokeError)); return; }
-      if (!data?.success) { setError(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé."); return; }
-      setResult(data as TranscriptResult);
-    } catch (error) { setError(await getFunctionErrorMessage(error)); }
-    finally { setBusy(false); }
+      if (!data?.success) { setError(data?.detail ? `${data?.error ?? "Impossible de récupérer le transcript."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé."); return; }
+      const transcript = data as TranscriptResult;
+      setResult(transcript);
+      await summarizeYoutube(transcript);
+    } catch (caught) {
+      setError(await getFunctionErrorMessage(caught));
+    } finally {
+      setBusy(false);
+    }
   }
 
   function addFiles(fileList: FileList | null) {
@@ -317,10 +343,11 @@ export default function AiStudio() {
         <aside className="studio-card"><span className="studio-eyebrow">RÉCENTS</span><h2>Ce que tu as créé</h2><p>Un historique compact pour reprendre tes ressources sans fouiller partout.</p><div className="studio-recent">{recent.map(([title, meta, badge]) => <Link to="/ai-studio/handnotes" className="studio-recent-item" key={title}><span className="studio-recent-item__icon"><FileText size={16} /></span><span><strong>{title}</strong><span>{meta}</span></span><b className="studio-badge">{badge}</b></Link>)}</div><div className="studio-note">V1 : PDF numériques, PDF scannés et images peuvent être convertis en texte avant de passer à la génération de fiches.</div><div className="studio-actions"><Link to="/ai-help" className="studio-btn studio-btn--soft"><Sparkles size={15} /> Aller au tuteur IA <ArrowRight size={14} /></Link></div></aside>
       </div>
       <section id="youtube-transcript" className="studio-card studio-youtube" aria-labelledby="youtube-transcript-title">
-        <div className="studio-youtube__header"><div><span className="studio-eyebrow"><PlaySquare size={14} /> TEST V1 · YOUTUBE</span><h2 id="youtube-transcript-title">Extraire les sous-titres</h2><p>Colle un lien YouTube. MentionMax vérifie d’abord que la vidéo est éducative avant de lancer l’extraction.</p></div>{result && <span className="studio-status studio-status--ok"><CheckCircle2 size={14} /> Extraction réussie</span>}</div>
-        <div className="studio-youtube__form"><div className="studio-url-input"><Link2 size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void extractYoutubeTranscript(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="studio-btn studio-btn--primary" onClick={() => void extractYoutubeTranscript()} disabled={!youtubeUrl.trim() || busy}>{busy ? <><LoaderCircle className="studio-spin" size={15} /> Vérification...</> : <><PlaySquare size={15} /> Vérifier et extraire</>}</button></div>
-        {error && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>Extraction impossible</strong><span>{error}</span></div></div>}
-        {result && <div className="studio-transcript"><div className="studio-transcript__meta"><img src={result.video.thumbnail} alt="" /><div><strong>{result.video.title}</strong><span>{result.video.author ?? "YouTube"} · {result.transcript.language} ({result.transcript.languageCode}) · {result.transcript.segments.length} segments{result.transcript.isGenerated ? " · automatique" : " · créée par le créateur"}{result.transcript.source ? ` · ${result.transcript.source}` : ""}</span></div></div><div className="studio-transcript__body">{result.transcript.segments.map((segment, index) => <article className="studio-transcript__segment" key={`${segment.start}-${index}`}><time><Clock3 size={12} /> {formatTime(segment.start)}</time><p>{segment.text}</p></article>)}</div></div>}
+        <div className="studio-youtube__header"><div><span className="studio-eyebrow"><Sparkles size={14} /> AI STUDIO · YOUTUBE</span><h2 id="youtube-transcript-title">Créer un résumé de la vidéo</h2><p>Colle un lien YouTube éducatif. MentionMax vérifie la vidéo, récupère le transcript, puis génère automatiquement une synthèse de révision.</p></div>{summary && <span className="studio-status studio-status--ok"><CheckCircle2 size={14} /> Résumé prêt</span>}</div>
+        <div className="studio-youtube__form"><div className="studio-url-input"><Link2 size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void createYoutubeSummary(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="studio-btn studio-btn--primary" onClick={() => void createYoutubeSummary()} disabled={!youtubeUrl.trim() || busy}>{busy ? <><LoaderCircle className="studio-spin" size={15} /> Vérification + résumé...</> : <><Sparkles size={15} /> Faire le résumé</>}</button></div>
+        {error && <div className="studio-youtube__error"><AlertCircle size={17} /><div><strong>Résumé impossible</strong><span>{error}</span></div></div>}
+        {result && <div className="studio-transcript"><div className="studio-transcript__meta"><img src={result.video.thumbnail} alt="" /><div><strong>{result.video.title}</strong><span>{result.video.author ?? "YouTube"} · {result.transcript.language} ({result.transcript.languageCode}) · {result.transcript.segments.length} segments{result.transcript.isGenerated ? " · automatique" : " · créée par le créateur"}</span></div></div></div>}
+        {summary && <div className="studio-transcript studio-youtube-summary"><div className="studio-youtube__header"><div><span className="studio-eyebrow"><CheckCircle2 size={14} /> RÉSUMÉ IA</span><h3>{typeof summary.title === "string" ? summary.title : "Résumé de la vidéo"}</h3><p>Généré à partir du transcript de la vidéo, sans inventer de contenu absent.</p></div></div><div className="studio-youtube-summary__body">{Object.entries(summary).filter(([key]) => key !== "title").map(([key, value]) => <section key={key}><span>{key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase())}</span><div>{formatSummaryValue(value).split("\n").map((line, index) => line.trim() ? <p key={`${key}-${index}`}>{line}</p> : <br key={`${key}-${index}`} />)}</div></section>)}</div></div>}
       </section>
     </main>
   );
