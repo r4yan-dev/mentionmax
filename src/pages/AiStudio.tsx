@@ -2,15 +2,27 @@ import { AlertCircle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Clock
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import PeopleFeature from "../components/ui/PeopleFeature";
-import { generateStudioResource } from "../services/ai/studioGenerate";
 import { supabase } from "../lib/supabase";
+import { generateStudioResource } from "../services/ai/studioGenerate";
+import PeopleFeature from "../components/ui/PeopleFeature";
 import "./AiStudio.css";
 
 const MAX_FILE_SIZE_MB = 25;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const MAX_PHOTOS = 12;
 const FILE_EXTRACTION_TIMEOUT_MS = 105_000;
+
+type TranscriptSegment = { start: number; duration: number; text: string };
+type TranscriptResult = {
+  video: { id: string; title: string; author: string | null; thumbnail: string };
+  transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[]; source?: string };
+};
+type FunctionErrorPayload = { error?: string; detail?: string };
+type EducationGateResult = { allowed: boolean; title: string | null; author: string | null; reason: string | null };
+type PdfExtractionResult = { success: boolean; file: { name: string; mimeType: string }; text: string; extraction: string };
+type StudioPhotoPage = { id: string; file: File; url: string };
+type SummaryResult = Record<string, unknown>;
+
 const tools = [
   { to: "/ai-studio/handnotes", icon: FileText, title: "PDF → fiches", text: "Transforme un cours ou un document en fiche structurée." },
   { to: "/ai-studio/handnotes", icon: Layers3, title: "Texte → résumé", text: "Passe du texte brut à une synthèse claire pour réviser." },
@@ -25,17 +37,6 @@ const recent = [
   ["Argumentation", "Flashcards · Français", "CARDS"],
 ];
 
-type TranscriptSegment = { start: number; duration: number; text: string };
-type TranscriptResult = {
-  video: { id: string; title: string; author: string | null; thumbnail: string };
-  transcript: { language: string; languageCode: string; isGenerated: boolean; segments: TranscriptSegment[]; source?: string };
-};
-type FunctionErrorPayload = { error?: string; detail?: string };
-type EducationGateResult = { allowed: boolean; title: string | null; author: string | null; reason: string | null };
-type PdfExtractionResult = { success: boolean; file: { name: string; mimeType: string }; text: string; extraction: string };
-type StudioPhotoPage = { id: string; file: File; url: string };
-type SummaryResult = Record<string, unknown>;
-
 function formatTime(seconds: number) {
   const total = Math.max(0, Math.floor(seconds));
   const hours = Math.floor(total / 3600);
@@ -48,7 +49,7 @@ async function getFunctionErrorMessage(error: unknown) {
   if (FunctionsHttpError && error instanceof FunctionsHttpError) {
     try {
       const payload = (await error.context.json()) as FunctionErrorPayload;
-      if (payload?.detail) return `${payload.error ?? "Extraction impossible."} ${payload.detail}`;
+      if (payload?.detail) return `${payload.error ?? "Impossible de traiter le contenu."} ${payload.detail}`;
       if (payload?.error) return payload.error;
     } catch {}
     return `Le service a répondu avec une erreur HTTP (${error.context?.status ?? "inconnue"}).`;
@@ -61,7 +62,9 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: s
   let timer: number | null = null;
   try {
     return await Promise.race([promise, new Promise<T>((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), timeoutMs); })]);
-  } finally { if (timer !== null) window.clearTimeout(timer); }
+  } finally {
+    if (timer !== null) window.clearTimeout(timer);
+  }
 }
 
 async function fileToDataUrl(file: File) {
@@ -182,10 +185,7 @@ export default function AiStudio() {
       ...current,
       ...images.slice(0, capacity).map((file) => ({ id: crypto.randomUUID(), file, url: URL.createObjectURL(file) })),
     ]);
-
-    if (images.length > capacity) {
-      setFileError(`Seules ${MAX_PHOTOS} pages photo peuvent être importées.`);
-    }
+    if (images.length > capacity) setFileError(`Seules ${MAX_PHOTOS} pages photo peuvent être importées.`);
   }
 
   function removePhoto(id: string) {
@@ -253,8 +253,6 @@ export default function AiStudio() {
       }
 
       if (!selectedFile) return;
-      const allowed = isPdf(selectedFile) || isImage(selectedFile);
-      if (!allowed) { setFileError("Format non pris en charge. Utilise un PDF, PNG, JPG ou WebP."); return; }
       if (selectedFile.size > MAX_FILE_SIZE_BYTES) { setFileError(`Fichier trop volumineux. La limite est de ${MAX_FILE_SIZE_MB} Mo.`); return; }
       setFileError("Lecture du fichier…");
       const dataUrl = await fileToDataUrl(selectedFile);
@@ -269,8 +267,11 @@ export default function AiStudio() {
       const extraction = data as PdfExtractionResult;
       setFileError(null);
       setExtractedText(extraction.text);
-    } catch (error) { setFileError(await getFunctionErrorMessage(error)); }
-    finally { setFileBusy(false); }
+    } catch (caught) {
+      setFileError(await getFunctionErrorMessage(caught));
+    } finally {
+      setFileBusy(false);
+    }
   }
 
   async function copyExtractedText() {
@@ -301,8 +302,8 @@ export default function AiStudio() {
       });
       if (error) throw error;
       setSavedToNotes(true);
-    } catch (error) {
-      setFileError(error instanceof Error ? error.message : "Impossible d’enregistrer cette extraction.");
+    } catch (caught) {
+      setFileError(caught instanceof Error ? caught.message : "Impossible d’enregistrer cette extraction.");
     } finally {
       setSavingToNotes(false);
     }
@@ -325,9 +326,7 @@ export default function AiStudio() {
           <p>Les parcours gardent la même logique : source → structure → ressource prête à réviser.</p>
           <div className="studio-tools">{tools.map(({ to, icon: Icon, title, text }) => title.startsWith("Vidéo") ? <a key={title} href={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></a> : <Link key={title} to={to} className="studio-tool"><span className="studio-tool__icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{text}</span></span><ArrowRight className="studio-tool__arrow" size={15} /></Link>)}</div>
           <div className={`studio-drop ${dropActive ? "is-drag-active" : ""}`} onDragOver={(event) => { event.preventDefault(); setDropActive(true); }} onDragLeave={() => setDropActive(false)} onDrop={(event) => { event.preventDefault(); setDropActive(false); addFiles(event.dataTransfer.files); }}>
-            <FileUp size={24} />
-            <strong>{sourceLabel}</strong>
-            <span>PDF numérique, PDF scanné ou 1 à {MAX_PHOTOS} pages photo · max. {MAX_FILE_SIZE_MB} Mo par fichier</span>
+            <FileUp size={24} /><strong>{sourceLabel}</strong><span>PDF numérique, PDF scanné ou 1 à {MAX_PHOTOS} pages photo · max. {MAX_FILE_SIZE_MB} Mo par fichier</span>
             <input id="studio-file" hidden type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" onChange={(event) => { addFiles(event.target.files); event.currentTarget.value = ""; }} />
             <div className="studio-actions">
               <label htmlFor="studio-file" className="studio-btn studio-btn--primary"><FileUp size={15} /> {photoPages.length > 0 ? "Ajouter des pages" : "Importer"}</label>
