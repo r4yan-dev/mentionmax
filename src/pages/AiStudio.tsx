@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Copy, FileText, FileUp, GripVertical, ImagePlus, Layers3, Link2, ListChecks, LoaderCircle, PlaySquare, Sparkles, Wand2, X } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, Copy, FileText, FileUp, GripVertical, ImagePlus, Layers3, Link2, ListChecks, LoaderCircle, PlaySquare, Sparkles, Wand2, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
@@ -36,14 +36,6 @@ const recent = [
   ["Circuit RC", "Résumé · Physique-Chimie", "RÉSUMÉ"],
   ["Argumentation", "Flashcards · Français", "CARDS"],
 ];
-
-function formatTime(seconds: number) {
-  const total = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const secs = total % 60;
-  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}` : `${minutes}:${String(secs).padStart(2, "0")}`;
-}
 
 async function getFunctionErrorMessage(error: unknown) {
   if (FunctionsHttpError && error instanceof FunctionsHttpError) {
