@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft, BookOpen, Check, ChevronLeft, ChevronRight, FileText, Layers3, ListChecks, LoaderCircle, PlaySquare, RefreshCw, Sparkles, RotateCcw } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { FunctionsHttpError } from "@supabase/supabase-js";
@@ -6,6 +6,7 @@ import { generateStudioResource, type StudioGenerationMode } from "../services/a
 import { supabase } from "../lib/supabase";
 import { LatexText } from "../components/ui/LatexText";
 import "./AiStudioGenerator.css";
+import "./AiStudioInteractive.css";
 
 type ResultRecord = Record<string, unknown>;
 type TranscriptSegment = { start: number; duration: number; text: string };
@@ -53,11 +54,9 @@ function TextList({ items, display = false, className = "" }: { items: unknown; 
   return <ul className={`generator-lesson-list ${className}`.trim()}>{items.map((item, index) => <li key={index}><LatexValue value={item} display={display} /></li>)}</ul>;
 }
 
-function HandwrittenShell({ title, eyebrow, children, footer }: { title: string; eyebrow: string; children: React.ReactNode; footer?: React.ReactNode }) {
+function HandwrittenShell({ title, eyebrow, children, footer }: { title: string; eyebrow: string; children: ReactNode; footer?: ReactNode }) {
   return <div className="generator-result generator-lesson generator-handwritten-resource">
-    <div className="generator-result__head generator-lesson__title-card">
-      <div><span className="generator-eyebrow"><Check size={14} /> {eyebrow}</span><h2><LatexValue value={title} /></h2></div>
-    </div>
+    <div className="generator-result__head generator-lesson__title-card"><div><span className="generator-eyebrow"><Check size={14} /> {eyebrow}</span><h2><LatexValue value={title} /></h2></div></div>
     {children}
     {footer && <div className="generator-lesson__footer">{footer}</div>}
   </div>;
@@ -69,34 +68,9 @@ function LessonResultView({ result }: { result: ResultRecord }) {
   const checkpoints = (section: ResultRecord) => Array.isArray(section.checkpoints) ? section.checkpoints as ResultRecord[] : [];
   return <HandwrittenShell title={title} eyebrow="LEÇON MENTI · TERMINÉE" footer={typeof result.estimatedStudyTimeMinutes === "number" ? <>Temps d'étude estimé : {result.estimatedStudyTimeMinutes} min · Leçon reconstruite à partir de la source</> : undefined}>
     {typeof result.intro === "string" && <section className="generator-lesson__intro"><span className="generator-result__label">Introduction</span><p><LatexValue value={result.intro} /></p></section>}
-    <div className="generator-lesson__meta-grid">
-      <section><span className="generator-result__label">Prérequis</span><TextList items={result.prerequisites} /></section>
-      <section><span className="generator-result__label">Objectifs</span><TextList items={result.learningObjectives} /></section>
-    </div>
-    <div className="generator-lesson__sections">
-      {sections.map((section, index) => <article className="generator-lesson__section" key={`${String(section.title)}-${index}`}>
-        <div className="generator-lesson__section-number">{String(index + 1).padStart(2, "0")}</div>
-        <div className="generator-lesson__section-body">
-          <h3><LatexValue value={typeof section.title === "string" ? section.title : `Partie ${index + 1}`} /></h3>
-          {typeof section.explanation === "string" && <p className="generator-lesson__explanation"><LatexValue value={section.explanation} /></p>}
-          {typeof section.intuition === "string" && section.intuition.trim() && <div className="generator-lesson__callout"><strong>💡 Intuition</strong><p><LatexValue value={section.intuition} /></p></div>}
-          <div className="generator-lesson__columns">
-            {Array.isArray(section.keyConcepts) && section.keyConcepts.length > 0 && <div><span className="generator-result__label">Concepts clés</span><TextList items={section.keyConcepts} /></div>}
-            {Array.isArray(section.definitions) && section.definitions.length > 0 && <div><span className="generator-result__label">Définitions</span>{(section.definitions as ResultRecord[]).map((item, i) => <div className="generator-lesson__definition" key={i}><strong><LatexValue value={item.term} /></strong><p><LatexValue value={item.definition} /></p></div>)}</div>}
-          </div>
-          {Array.isArray(section.formulas) && section.formulas.length > 0 && <div className="generator-lesson__formula-box"><span className="generator-result__label">Formules / relations</span><TextList items={section.formulas} display /></div>}
-          {Array.isArray(section.derivations) && section.derivations.length > 0 && <div><span className="generator-result__label">Raisonnement / démonstration</span><TextList items={section.derivations} /></div>}
-          {Array.isArray(section.examples) && section.examples.length > 0 && <div><span className="generator-result__label">Exemples</span><TextList items={section.examples} /></div>}
-          {checkpoints(section).length > 0 && <div className="generator-lesson__checkpoints"><span className="generator-result__label">✎ Checkpoints</span>{checkpoints(section).map((item, i) => <details key={i}><summary><LatexValue value={item.question} /></summary><p><strong>Réponse :</strong> <LatexValue value={item.answer} /></p>{typeof item.why === "string" && item.why.trim() && <p><LatexValue value={item.why} /></p>}</details>)}</div>}
-          {Array.isArray(section.commonMistakes) && section.commonMistakes.length > 0 && <div className="generator-lesson__warning"><span className="generator-result__label">⚠ Pièges fréquents</span><TextList items={section.commonMistakes} /></div>}
-          {Array.isArray(section.examFocusPoints) && section.examFocusPoints.length > 0 && <div className="generator-lesson__exam"><span className="generator-result__label">★ Focus examen</span><TextList items={section.examFocusPoints} /></div>}
-        </div>
-      </article>)}
-    </div>
-    <div className="generator-lesson__final-grid">
-      <section><span className="generator-result__label">À retenir absolument</span><TextList items={result.mustRemember} /></section>
-      <section><span className="generator-result__label">Auto-évaluation</span>{Array.isArray(result.selfAssessment) && (result.selfAssessment as ResultRecord[]).map((item, i) => <details key={i}><summary><LatexValue value={item.question} /></summary><p><LatexValue value={item.answer} /></p></details>)}</section>
-    </div>
+    <div className="generator-lesson__meta-grid"><section><span className="generator-result__label">Prérequis</span><TextList items={result.prerequisites} /></section><section><span className="generator-result__label">Objectifs</span><TextList items={result.learningObjectives} /></section></div>
+    <div className="generator-lesson__sections">{sections.map((section, index) => <article className="generator-lesson__section" key={`${String(section.title)}-${index}`}><div className="generator-lesson__section-number">{String(index + 1).padStart(2, "0")}</div><div className="generator-lesson__section-body"><h3><LatexValue value={typeof section.title === "string" ? section.title : `Partie ${index + 1}`} /></h3>{typeof section.explanation === "string" && <p className="generator-lesson__explanation"><LatexValue value={section.explanation} /></p>}{typeof section.intuition === "string" && section.intuition.trim() && <div className="generator-lesson__callout"><strong>💡 Intuition</strong><p><LatexValue value={section.intuition} /></p></div>}<div className="generator-lesson__columns">{Array.isArray(section.keyConcepts) && section.keyConcepts.length > 0 && <div><span className="generator-result__label">Concepts clés</span><TextList items={section.keyConcepts} /></div>}{Array.isArray(section.definitions) && section.definitions.length > 0 && <div><span className="generator-result__label">Définitions</span>{(section.definitions as ResultRecord[]).map((item, i) => <div className="generator-lesson__definition" key={i}><strong><LatexValue value={item.term} /></strong><p><LatexValue value={item.definition} /></p></div>)}</div>}</div>{Array.isArray(section.formulas) && section.formulas.length > 0 && <div className="generator-lesson__formula-box"><span className="generator-result__label">Formules / relations</span><TextList items={section.formulas} display /></div>}{Array.isArray(section.derivations) && section.derivations.length > 0 && <div><span className="generator-result__label">Raisonnement / démonstration</span><TextList items={section.derivations} /></div>}{Array.isArray(section.examples) && section.examples.length > 0 && <div><span className="generator-result__label">Exemples</span><TextList items={section.examples} /></div>}{checkpoints(section).length > 0 && <div className="generator-lesson__checkpoints"><span className="generator-result__label">✎ Checkpoints</span>{checkpoints(section).map((item, i) => <details key={i}><summary><LatexValue value={item.question} /></summary><p><strong>Réponse :</strong> <LatexValue value={item.answer} /></p>{typeof item.why === "string" && item.why.trim() && <p><LatexValue value={item.why} /></p>}</details>)}</div>}{Array.isArray(section.commonMistakes) && section.commonMistakes.length > 0 && <div className="generator-lesson__warning"><span className="generator-result__label">⚠ Pièges fréquents</span><TextList items={section.commonMistakes} /></div>}{Array.isArray(section.examFocusPoints) && section.examFocusPoints.length > 0 && <div className="generator-lesson__exam"><span className="generator-result__label">★ Focus examen</span><TextList items={section.examFocusPoints} /></div>}</div></article>)}</div>
+    <div className="generator-lesson__final-grid"><section><span className="generator-result__label">À retenir absolument</span><TextList items={result.mustRemember} /></section><section><span className="generator-result__label">Auto-évaluation</span>{Array.isArray(result.selfAssessment) && (result.selfAssessment as ResultRecord[]).map((item, i) => <details key={i}><summary><LatexValue value={item.question} /></summary><p><LatexValue value={item.answer} /></p></details>)}</section></div>
     {Array.isArray(result.progressiveExercises) && result.progressiveExercises.length > 0 && <section className="generator-lesson__exercises"><span className="generator-result__label">Exercices progressifs</span>{(result.progressiveExercises as ResultRecord[]).map((item, i) => <article key={i}><span><LatexValue value={item.difficulty} /></span><p><LatexValue value={item.statement} /></p><details><summary>Correction / indication</summary><p><LatexValue value={item.hint} /></p><p><LatexValue value={item.answer} /></p></details></article>)}</section>}
   </HandwrittenShell>;
 }
@@ -107,10 +81,7 @@ function SummaryResultView({ result }: { result: ResultRecord }) {
   const formulas = Array.isArray(result.formulas) ? result.formulas : [];
   return <HandwrittenShell title={title} eyebrow="RÉSUMÉ · TERMINÉ" footer="Synthèse compacte, reconstruite dans le style de révision Menti.">
     {typeof result.summary === "string" && <section className="generator-lesson__intro generator-summary__intro"><span className="generator-result__label">L'essentiel</span><p><LatexValue value={result.summary} /></p></section>}
-    <div className="generator-lesson__sections generator-summary__sections">
-      <section className="generator-lesson__section"><div className="generator-lesson__section-number">01</div><div className="generator-lesson__section-body"><h3>Points clés</h3><TextList items={keyPoints} /></div></section>
-      {formulas.length > 0 && <section className="generator-lesson__section"><div className="generator-lesson__section-number">02</div><div className="generator-lesson__section-body"><h3>Formules</h3><div className="generator-lesson__formula-box"><TextList items={formulas} display /></div></div></section>}
-    </div>
+    <div className="generator-lesson__sections generator-summary__sections"><section className="generator-lesson__section"><div className="generator-lesson__section-number">01</div><div className="generator-lesson__section-body"><h3>Points clés</h3><TextList items={keyPoints} /></div></section>{formulas.length > 0 && <section className="generator-lesson__section"><div className="generator-lesson__section-number">02</div><div className="generator-lesson__section-body"><h3>Formules</h3><div className="generator-lesson__formula-box"><TextList items={formulas} display /></div></div></section>}</div>
   </HandwrittenShell>;
 }
 
@@ -123,14 +94,8 @@ function FlashcardsResultView({ result }: { result: ResultRecord }) {
   if (!card) return <HandwrittenShell title="Flashcards" eyebrow="FLASHCARDS"><section className="generator-empty-note">Aucune carte n'a été générée.</section></HandwrittenShell>;
   const go = (next: number) => { setIndex(Math.max(0, Math.min(cards.length - 1, next))); setFlipped(false); };
   return <HandwrittenShell title={typeof result.title === "string" ? result.title : "Flashcards"} eyebrow="FLASHCARDS · PRÊTES">
-    <section className="generator-interactive-resource generator-flashcards">
-      <div className="generator-interactive-resource__top"><span className="generator-result__label">Carte {index + 1} / {cards.length}</span><span className="generator-interactive-hint">Clique sur la carte pour retourner</span></div>
-      <button type="button" className={`generator-flashcard ${flipped ? "is-flipped" : ""}`} onClick={() => setFlipped((value) => !value)} aria-label="Retourner la flashcard">
-        <span className="generator-flashcard__inner">
-          <span className="generator-flashcard__face generator-flashcard__front"><span className="generator-flashcard__tag">QUESTION</span><span className="generator-flashcard__text"><LatexValue value={card.question} /></span><span className="generator-flashcard__flip"><RotateCcw size={16} /> Retourner</span></span>
-          <span className="generator-flashcard__face generator-flashcard__back"><span className="generator-flashcard__tag">RÉPONSE</span><span className="generator-flashcard__text"><LatexValue value={card.answer} /></span><span className="generator-flashcard__flip"><RotateCcw size={16} /> Retourner</span></span>
-        </span>
-      </button>
+    <section className="generator-interactive-resource generator-flashcards"><div className="generator-interactive-resource__top"><span className="generator-result__label">Carte {index + 1} / {cards.length}</span><span className="generator-interactive-hint">Clique sur la carte pour retourner</span></div>
+      <button type="button" className={`generator-flashcard ${flipped ? "is-flipped" : ""}`} onClick={() => setFlipped((value) => !value)} aria-label="Retourner la flashcard"><span className="generator-flashcard__inner"><span className="generator-flashcard__face generator-flashcard__front"><span className="generator-flashcard__tag">QUESTION</span><span className="generator-flashcard__text"><LatexValue value={card.question} /></span><span className="generator-flashcard__flip"><RotateCcw size={16} /> Retourner</span></span><span className="generator-flashcard__face generator-flashcard__back"><span className="generator-flashcard__tag">RÉPONSE</span><span className="generator-flashcard__text"><LatexValue value={card.answer} /></span><span className="generator-flashcard__flip"><RotateCcw size={16} /> Retourner</span></span></span></button>
       <div className="generator-interactive-resource__controls"><button type="button" className="generator-btn generator-btn--secondary" onClick={() => go(index - 1)} disabled={index === 0}><ChevronLeft size={16} /> Précédente</button><button type="button" className="generator-btn" onClick={() => go(index + 1)} disabled={index === cards.length - 1}>Suivante <ChevronRight size={16} /></button></div>
     </section>
   </HandwrittenShell>;
@@ -149,14 +114,8 @@ function QuizResultView({ result }: { result: ResultRecord }) {
   const choose = (choiceIndex: number) => { if (selected !== null) return; setSelected(choiceIndex); if (choiceIndex === answerIndex) setScore((value) => value + 1); };
   const next = () => { if (index >= questions.length - 1) return; setIndex((value) => value + 1); setSelected(null); };
   return <HandwrittenShell title={typeof result.title === "string" ? result.title : "Quiz"} eyebrow="QUIZ · INTERACTIF">
-    <section className="generator-interactive-resource generator-quiz">
-      <div className="generator-interactive-resource__top"><span className="generator-result__label">Question {index + 1} / {questions.length}</span><span className="generator-quiz-score">Score : {score} / {questions.length}</span></div>
-      <article className="generator-quiz-card">
-        <div className="generator-quiz-card__number">{String(index + 1).padStart(2, "0")}</div>
-        <h3><LatexValue value={question.question} /></h3>
-        <div className="generator-quiz-choices">{choices.map((choice, choiceIndex) => { const isCorrect = choiceIndex === answerIndex; const isSelected = selected === choiceIndex; return <button type="button" key={choiceIndex} className={`generator-quiz-choice ${selected !== null && isCorrect ? "is-correct" : ""} ${selected !== null && isSelected && !isCorrect ? "is-wrong" : ""}`} onClick={() => choose(choiceIndex)} disabled={selected !== null}><span className="generator-quiz-choice__letter">{String.fromCharCode(65 + choiceIndex)}</span><span><LatexValue value={choice} /></span></button>; })}</div>
-        {selected !== null && <div className={`generator-quiz-feedback ${selected === answerIndex ? "is-correct" : "is-wrong"}`}><strong>{selected === answerIndex ? "✓ Bonne réponse" : "✗ Pas tout à fait"}</strong><p><LatexValue value={question.explanation} /></p></div>}
-      </article>
+    <section className="generator-interactive-resource generator-quiz"><div className="generator-interactive-resource__top"><span className="generator-result__label">Question {index + 1} / {questions.length}</span><span className="generator-quiz-score">Score : {score} / {questions.length}</span></div>
+      <article className="generator-quiz-card"><div className="generator-quiz-card__number">{String(index + 1).padStart(2, "0")}</div><h3><LatexValue value={question.question} /></h3><div className="generator-quiz-choices">{choices.map((choice, choiceIndex) => { const isCorrect = choiceIndex === answerIndex; const isSelected = selected === choiceIndex; return <button type="button" key={choiceIndex} className={`generator-quiz-choice ${selected !== null && isCorrect ? "is-correct" : ""} ${selected !== null && isSelected && !isCorrect ? "is-wrong" : ""}`} onClick={() => choose(choiceIndex)} disabled={selected !== null}><span className="generator-quiz-choice__letter">{String.fromCharCode(65 + choiceIndex)}</span><span><LatexValue value={choice} /></span></button>; })}</div>{selected !== null && <div className={`generator-quiz-feedback ${selected === answerIndex ? "is-correct" : "is-wrong"}`}><strong>{selected === answerIndex ? "✓ Bonne réponse" : "✗ Pas tout à fait"}</strong><p><LatexValue value={question.explanation} /></p></div>}</article>
       <div className="generator-interactive-resource__controls"><button type="button" className="generator-btn generator-btn--secondary" onClick={() => { if (index === 0) return; setIndex((value) => value - 1); setSelected(null); }} disabled={index === 0}><ChevronLeft size={16} /> Précédente</button>{index < questions.length - 1 ? <button type="button" className="generator-btn" onClick={next} disabled={selected === null}>Suivante <ChevronRight size={16} /></button> : <div className="generator-quiz-finished">Quiz terminé · {score} / {questions.length}</div>}</div>
     </section>
   </HandwrittenShell>;
@@ -198,8 +157,7 @@ export default function AiStudioGenerator() {
   }
 
   async function checkAndGenerateYoutube() {
-    const url = youtubeUrl.trim();
-    if (!url || youtubeBusy) return;
+    const url = youtubeUrl.trim(); if (!url || youtubeBusy) return;
     setYoutubeBusy(true); setYoutubeError(null); setError(null); setYoutubeResult(null); setResult(null);
     try {
       const { data: gate, error: gateError } = await supabase.functions.invoke("youtube-education-gate", { body: { url } });
@@ -210,8 +168,7 @@ export default function AiStudioGenerator() {
       if (transcriptError) throw transcriptError;
       if (!data?.success) throw new Error(data?.detail ? `${data?.error ?? "Extraction impossible."} ${data.detail}` : data?.error || "Aucun sous-titre exploitable n'a été trouvé.");
       const transcript = data as TranscriptResult;
-      setYoutubeResult(transcript);
-      await generateLesson(transcript);
+      setYoutubeResult(transcript); await generateLesson(transcript);
     } catch (caught) { setYoutubeError(await getFunctionErrorMessage(caught)); } finally { setYoutubeBusy(false); }
   }
 
