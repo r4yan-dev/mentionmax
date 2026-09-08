@@ -1,4 +1,3 @@
-import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 
 const EXAM_CREATOR_URL = "/api/ai-exam-creator";
@@ -35,18 +34,6 @@ export type AIExamCreatorInput = {
   questionCount?: number;
   weakPoints?: string[];
 };
-
-async function getErrorMessage(error: unknown) {
-  if (FunctionsHttpError && error instanceof FunctionsHttpError) {
-    try {
-      const payload = (await error.context.json()) as { error?: string; detail?: string };
-      if (payload?.detail) return `${payload.error ?? "La génération de l'examen a échoué."} ${payload.detail}`;
-      if (payload?.error) return payload.error;
-    } catch {}
-    return `Le générateur a répondu avec une erreur HTTP (${error.context?.status ?? "inconnue"}).`;
-  }
-  return error instanceof Error ? error.message : "Impossible de contacter le générateur d'examens IA.";
-}
 
 export async function generateExamWithAI(input: AIExamCreatorInput): Promise<AIExamResult> {
   const text = input.text.trim();
