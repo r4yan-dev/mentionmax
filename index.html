@@ -10,8 +10,8 @@
       window.MathJax = {
         startup: { typeset: false },
         tex: {
-          inlineMath: [["$", "$"], ["\\(", "\\)"]],
-          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+          inlineMath: [["\\(", "\\)"]],
+          displayMath: [["\\[", "\\]"]],
           processEscapes: true,
           processEnvironments: true
         },
@@ -22,37 +22,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      (function () {
-        function installMathJaxObserver() {
-          if (!window.MathJax || !window.MathJax.typesetPromise) return;
-          var root = document.getElementById("root");
-          if (!root) return;
-          var observer;
-          var scheduled = false;
-          var typeset = function () {
-            scheduled = false;
-            observer.disconnect();
-            window.MathJax.typesetPromise([root]).catch(function () {}).finally(function () {
-              observer.observe(root, { childList: true, subtree: true, characterData: true });
-            });
-          };
-          var schedule = function () {
-            if (scheduled) return;
-            scheduled = true;
-            window.requestAnimationFrame(typeset);
-          };
-          observer = new MutationObserver(schedule);
-          observer.observe(root, { childList: true, subtree: true, characterData: true });
-          schedule();
-        }
-        if (window.MathJax && window.MathJax.startup) {
-          window.MathJax.startup.promise.then(installMathJaxObserver);
-        } else {
-          window.addEventListener("load", installMathJaxObserver, { once: true });
-        }
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
