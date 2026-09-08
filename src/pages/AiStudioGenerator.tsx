@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, BookOpen, Bookmark, Check, ChevronLeft, ChevronRight, Download, FileImage, FileText, Layers3, ListChecks, LoaderCircle, PlaySquare, RefreshCw, Sparkles, RotateCcw } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { generateStudioResource, type StudioGenerationMode } from "../services/ai/studioGenerate";
 import { supabase } from "../lib/supabase";
@@ -134,11 +134,10 @@ export function ResultView({ result }: { result: ResultRecord }) {
 
 const modeToLibraryType: Record<StudioGenerationMode, LibraryResourceType> = { handnote: "handnote", summary: "summary", flashcards: "flashcards", quiz: "quiz" };
 
-export function ResourceActions({ result, mode, subject, chapter, sourceType, sourceRef, targetRef }: { result: ResultRecord; mode: StudioGenerationMode; subject: string; chapter: string; sourceType: string; sourceRef?: string | null; targetRef: React.RefObject<HTMLDivElement | null> }) {
+export function ResourceActions({ result, mode, subject, chapter, sourceType, sourceRef, targetRef }: { result: ResultRecord; mode: StudioGenerationMode; subject: string; chapter: string; sourceType: string; sourceRef?: string | null; targetRef: { current: HTMLDivElement | null } }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
-  const navigate = useNavigate();
   const title = typeof result.title === "string" ? result.title : mode === "handnote" ? "Leçon Menti" : mode === "summary" ? "Résumé" : mode === "flashcards" ? "Flashcards" : "Quiz";
 
   const save = async () => {
@@ -164,7 +163,7 @@ export function ResourceActions({ result, mode, subject, chapter, sourceType, so
     } finally { setExporting(null); }
   };
 
-  return <div className="generator-resource-actions">
+  return <div className="generator-resource-actions" style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }}>
     <button type="button" className="generator-btn" onClick={() => void save()} disabled={saving || saved}><Bookmark size={15} /> {saved ? "Enregistré" : saving ? "Sauvegarde…" : "Enregistrer"}</button>
     <Link to="/bibliotheque" className="generator-btn generator-btn--secondary"><Layers3 size={15} /> Bibliothèque</Link>
     <button type="button" className="generator-btn generator-btn--secondary" onClick={() => void exportFile("png")} disabled={exporting !== null}><FileImage size={15} /> {exporting === "png" ? "Création…" : "Image"}</button>
@@ -231,6 +230,6 @@ export default function AiStudioGenerator() {
         {sourceType === "youtube" ? <div className="generator-youtube"><div className="generator-youtube__row"><div className="generator-youtube__input"><PlaySquare size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void checkAndGenerateYoutube(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="generator-btn" onClick={() => void checkAndGenerateYoutube()} disabled={!youtubeUrl.trim() || youtubeBusy}>{youtubeBusy ? <><LoaderCircle className="generator-spin" size={16} /> Extraction + génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>{youtubeError && <div className="generator-error"><strong>Vidéo non exploitable</strong><span>{youtubeError}</span></div>}{youtubeResult && <div className="generator-youtube__result"><div className="generator-youtube__meta"><img src={youtubeResult.video.thumbnail} alt="" /><div><strong>{youtubeResult.video.title}</strong><span>{youtubeResult.video.author ?? "YouTube"} · {youtubeResult.transcript.language} · {youtubeResult.transcript.segments.length} segments{youtubeResult.transcript.isGenerated ? " · automatique" : ""}</span></div></div><div className="generator-youtube__segments">{youtubeResult.transcript.segments.slice(0, 10).map((segment, index) => <article key={`${segment.start}-${index}`}><time>{formatTime(segment.start)}</time><p><LatexValue value={segment.text} /></p></article>)}{youtubeResult.transcript.segments.length > 10 && <span className="generator-youtube__more">{youtubeResult.transcript.segments.length - 10} segments supplémentaires utilisés.</span>}</div></div>}</div> : <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder={`Colle ici le contenu à transformer en ${selectedMode.title.toLowerCase()}…`} />}
         <div className="generator-meta-grid"><label><span>Matière</span><input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Mathématiques" /></label><label><span>Chapitre</span><input value={chapter} onChange={(event) => setChapter(event.target.value)} placeholder="Dérivation" /></label><label><span>Parcours</span><select value={track} onChange={(event) => setTrack(event.target.value)}><option value="">Automatique</option><option value="SP">2BAC Sciences Physiques</option><option value="SMA">2BAC Sciences Mathématiques A</option><option value="SMB">2BAC Sciences Mathématiques B</option></select></label></div>
         <div className="generator-actions"><span>{text.trim().length.toLocaleString("fr-FR")} caractères · {sourceType === "youtube" ? "source YouTube" : "source texte"}</span><button type="button" className="generator-btn" onClick={() => void generate()} disabled={!text.trim() || busy}>{busy ? <><LoaderCircle className="generator-spin" size={16} /> Génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>{error && <div className="generator-error"><strong>Génération impossible</strong><span>{error}</span></div>}</div></section>
-    {result && <section className="generator-output"><div className="generator-output__toolbar"><div><span className="generator-eyebrow">03 · SORTIE</span><strong>{selectedMode.title}</strong></div><div className="generator-output__toolbar-actions"><button type="button" className="generator-btn generator-btn--secondary" onClick={() => void generate()} disabled={busy}><RefreshCw size={15} /> Régénérer</button><ResourceActions result={result} mode={mode} subject={subject} chapter={chapter} sourceType={sourceType} sourceRef={youtubeResult?.video.id ?? null} targetRef={resultContainerRef} /></div></div><div ref={resultContainerRef}><ResultView result={result} /></div></section>}
+    {result && <section className="generator-output"><div className="generator-output__toolbar"><div><span className="generator-eyebrow">03 · SORTIE</span><strong>{selectedMode.title}</strong></div><div><ResourceActions result={result} mode={mode} subject={subject} chapter={chapter} sourceType={sourceType} sourceRef={youtubeResult?.video.id ?? null} targetRef={resultContainerRef} /><button type="button" className="generator-btn generator-btn--secondary" onClick={() => void generate()} disabled={busy}><RefreshCw size={15} /> Régénérer</button></div></div><div ref={resultContainerRef}><ResultView result={result} /></div></section>}
   </main>;
 }
