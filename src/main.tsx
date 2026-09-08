@@ -91,7 +91,7 @@ document.addEventListener("click", (event) => {
     .then(() => {
       const item = deleteButton.closest(".ai-library-item");
       item?.remove();
-      libraryItems = libraryItems.filter((entry) => entry.id !== id);
+      window.setTimeout(() => window.location.reload(), 120);
     })
     .catch((error) => {
       nativeAlert(error instanceof Error ? error.message : "Impossible de supprimer cette ressource.");
