@@ -27,8 +27,8 @@ function stringifyValue(value: unknown) {
   return String(value ?? "");
 }
 
-function LatexValue({ value, className }: { value: unknown; className?: string }) {
-  return <LatexText className={className}>{stringifyValue(value)}</LatexText>;
+function LatexValue({ value, className, display = false }: { value: unknown; className?: string; display?: boolean }) {
+  return <LatexText className={className} display={display}>{stringifyValue(value)}</LatexText>;
 }
 
 function formatTime(seconds: number) {
@@ -48,9 +48,9 @@ async function getFunctionErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Impossible de contacter le service YouTube.";
 }
 
-function TextList({ items, className = "" }: { items: unknown; className?: string }) {
+function TextList({ items, display = false, className = "" }: { items: unknown; display?: boolean; className?: string }) {
   if (!Array.isArray(items) || items.length === 0) return null;
-  return <ul className={`generator-lesson-list ${className}`.trim()}>{items.map((item, index) => <li key={index}><LatexValue value={item} /></li>)}</ul>;
+  return <ul className={`generator-lesson-list ${className}`.trim()}>{items.map((item, index) => <li key={index}><LatexValue value={item} display={display} /></li>)}</ul>;
 }
 
 function LessonResultView({ result }: { result: ResultRecord }) {
@@ -75,7 +75,7 @@ function LessonResultView({ result }: { result: ResultRecord }) {
             {Array.isArray(section.keyConcepts) && section.keyConcepts.length > 0 && <div><span className="generator-result__label">Concepts clés</span><TextList items={section.keyConcepts} /></div>}
             {Array.isArray(section.definitions) && section.definitions.length > 0 && <div><span className="generator-result__label">Définitions</span>{(section.definitions as ResultRecord[]).map((item, i) => <div className="generator-lesson__definition" key={i}><strong><LatexValue value={item.term} /></strong><p><LatexValue value={item.definition} /></p></div>)}</div>}
           </div>
-          {Array.isArray(section.formulas) && section.formulas.length > 0 && <div className="generator-lesson__formula-box"><span className="generator-result__label">Formules / relations</span><TextList items={section.formulas} /></div>}
+          {Array.isArray(section.formulas) && section.formulas.length > 0 && <div className="generator-lesson__formula-box"><span className="generator-result__label">Formules / relations</span><TextList items={section.formulas} display /></div>}
           {Array.isArray(section.derivations) && section.derivations.length > 0 && <div><span className="generator-result__label">Raisonnement / démonstration</span><TextList items={section.derivations} /></div>}
           {Array.isArray(section.examples) && section.examples.length > 0 && <div><span className="generator-result__label">Exemples</span><TextList items={section.examples} /></div>}
           {checkpoints(section).length > 0 && <div className="generator-lesson__checkpoints"><span className="generator-result__label">✎ Checkpoints</span>{checkpoints(section).map((item, i) => <details key={i}><summary><LatexValue value={item.question} /></summary><p><strong>Réponse :</strong> <LatexValue value={item.answer} /></p>{typeof item.why === "string" && item.why.trim() && <p><LatexValue value={item.why} /></p>}</details>)}</div>}
