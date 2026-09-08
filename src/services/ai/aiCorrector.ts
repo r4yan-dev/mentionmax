@@ -1,4 +1,4 @@
-import { FunctionsHttpError } from "@supabase/supabase-js";
+import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 import type { Exercise } from "../../types/content";
 import type { TrackId } from "../../types/academic";
@@ -23,33 +23,54 @@ async function getFunctionError(error:unknown){
       if(payload?.error)return payload.error;
     }catch{}
   }
+  if(error instanceof FunctionsRelayError)return `Relais Supabase indisponible : ${error.message}`;
+  if(error instanceof FunctionsFetchError)return `Réseau Supabase indisponible : ${error.message}`;
   if(error instanceof Error&&error.message.trim())return error.message;
   return "Le correcteur IA est indisponible.";
 }
 
 async function invokeCorrection(body: Record<string, unknown>) {
-  const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-corrector-v2",{body});
-  const timeout = new Promise<never>((_,reject)=>window.setTimeout(()=>reject(new Error("Le correcteur IA a dépassé 50 secondes. La requête a été interrompue, tu peux réessayer.")),50_000));
-  const {data,error}=await Promise.race([request,timeout]);
-  if(error)throw error;
-  if(!data?.success||!data.data)throw new Error(data?.detail?`${data.error??"Le correcteur IA est indisponible."} ${data.detail}`:data?.error??"Le correcteur IA est indisponible.");
-  return data.data;
+  const invoke=()=>supabase.functions.invoke<FunctionResponse>("ai-exercise-corrector-v2",{body});
+  let lastError:unknown=null;
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const request=invoke();
+      const timeout=new Promise<never>((_,reject)=>window.setTimeout(()=>reject(new Error("Le correcteur IA a dépassé 50 secondes. La requête a été interrompue, tu peux réessayer.")),50_000));
+      const{data,error}=await Promise.race([request,timeout]);
+      if(error)throw error;
+      if(!data?.success||!data.data)throw new Error(data?.detail?`${data.error??"Le correcteur IA est indisponible."} ${data.detail}`:data?.error??"Le correcteur IA est indisponible.");
+      return data.data;
+    }catch(error){
+      lastError=error;
+      if(attempt===0)await new Promise(resolve=>window.setTimeout(resolve,900));
+    }
+  }
+  throw new Error(await getFunctionError(lastError));
+}
+
+async function saveCorrection(payload:Record<string,unknown>){
+  try{
+    await Promise.race([
+      supabase.from("ai_corrections").insert(payload),
+      new Promise((resolve)=>window.setTimeout(resolve,5_000)),
+    ]);
+  }catch(error){
+    console.warn("Impossible d'enregistrer la correction IA",error);
+  }
 }
 
 export async function correctExerciseWithAI(params:{exercise:Exercise;answers:string[];trackId:TrackId}){
   const{exercise,answers,trackId}=params;
   if(!answers.some(a=>a.trim()))throw new Error("Écris au moins une réponse avant de lancer la correction.");
-  try{
-    const result=await invokeCorrection({
-      mode:"exercise",
-      exercise:{id:exercise.id,title:exercise.title,statement:exercise.statement,type:exercise.type,difficulty:exercise.difficulty,expectedAnswer:exercise.expectedAnswer,correction:exercise.correction,target:exercise.target},
-      answers,
-      trackId,
-    });
-    const{data:userData,error:userError}=await supabase.auth.getUser();
-    if(userError)throw userError;
-    if(!userData.user)throw new Error("Utilisateur non authentifié.");
-    const{error:saveError}=await supabase.from("ai_corrections").insert({
+  const result=await invokeCorrection({
+    mode:"exercise",
+    exercise:{id:exercise.id,title:exercise.title,statement:exercise.statement,type:exercise.type,difficulty:exercise.difficulty,expectedAnswer:exercise.expectedAnswer,correction:exercise.correction,target:exercise.target},
+    answers,
+    trackId,
+  });
+  const{data:userData}=await supabase.auth.getUser();
+  if(userData.user){
+    void saveCorrection({
       user_id:userData.user.id,
       exercise_id:exercise.id,
       subject_id:exercise.target.subjectId,
@@ -59,20 +80,17 @@ export async function correctExerciseWithAI(params:{exercise:Exercise;answers:st
       result,
       provider:"gemini",
     });
-    if(saveError)throw saveError;
-    return result;
-  }catch(error){throw new Error(await getFunctionError(error));}
+  }
+  return result;
 }
 
 export async function correctExamCopyWithAI(params:{trackId:TrackId;ocr:AICorrectionOCRInput}){
   const{trackId,ocr}=params;
   if(!ocr.text.trim()&&!ocr.segments.length)throw new Error("La transcription de la copie est vide.");
-  try{
-    const result=await invokeCorrection({mode:"exam_copy",trackId,ocr});
-    const{data:userData,error:userError}=await supabase.auth.getUser();
-    if(userError)throw userError;
-    if(!userData.user)throw new Error("Utilisateur non authentifié.");
-    const{error:saveError}=await supabase.from("ai_corrections").insert({
+  const result=await invokeCorrection({mode:"exam_copy",trackId,ocr});
+  const{data:userData}=await supabase.auth.getUser();
+  if(userData.user){
+    void saveCorrection({
       user_id:userData.user.id,
       exercise_id:`exam-copy-${Date.now()}`,
       subject_id:"exam",
@@ -82,9 +100,8 @@ export async function correctExamCopyWithAI(params:{trackId:TrackId;ocr:AICorrec
       result,
       provider:"gemini",
     });
-    if(saveError)throw saveError;
-    return result;
-  }catch(error){throw new Error(await getFunctionError(error));}
+  }
+  return result;
 }
 
 export type AICorrectionOCRInput={
