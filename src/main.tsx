@@ -15,13 +15,15 @@ window.alert = (message?: unknown) => {
 document.addEventListener("click", (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
-  const libraryButton = target.closest<HTMLButtonElement>(".ai-studio-library-button");
-  if (!libraryButton) return;
+  const saveButton = target.closest<HTMLButtonElement>(".ai-resource-action--save");
+  if (!saveButton) return;
 
-  event.preventDefault();
-  event.stopPropagation();
-  window.history.pushState({}, "", "/bibliotheque");
-  window.dispatchEvent(new PopStateEvent("popstate"));
+  saveButton.dataset.saved = "true";
+  const icon = saveButton.querySelector<SVGElement>("svg");
+  if (icon) {
+    icon.setAttribute("fill", "currentColor");
+    icon.setAttribute("stroke-width", "1.7");
+  }
 }, true);
 
 const root = document.getElementById("root");
