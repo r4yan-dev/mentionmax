@@ -3,9 +3,10 @@ import { BookOpen, Download, FileImage, FileText, Layers3, ListChecks, Search, T
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { deletePersonalLibraryItem, listPersonalLibrary, type LibraryResourceType, type PersonalLibraryItem } from "../lib/personalLibrary";
 import { downloadResourcePdf, downloadResourcePng } from "../lib/resourceExport";
-import { ResultView } from "./AiStudioGenerator";
+import { ResultViewV2 } from "./AiStudioGeneratorV2";
 import "./AiStudioGenerator.css";
 import "./AiStudioInteractive.css";
+import "./AiStudioGeneratorV2.css";
 import "./Library.css";
 
 const labels: Record<LibraryResourceType, string> = {
@@ -53,7 +54,7 @@ function LibraryDetail({ item }: { item: PersonalLibraryItem }) {
         <button type="button" className="generator-btn" onClick={() => void exportFile("pdf")} disabled={exporting !== null}><Download size={16} /> {exporting === "pdf" ? "Création…" : "PDF"}</button>
       </div>
     </header>
-    <div ref={resultRef} className="library-render-target"><ResultView result={item.content} /></div>
+    <div ref={resultRef} className="library-render-target"><ResultViewV2 result={item.content} /></div>
   </main>;
 }
 
