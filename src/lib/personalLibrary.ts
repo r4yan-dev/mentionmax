@@ -26,7 +26,7 @@ type SaveInput = {
   content: Record<string, unknown>;
 };
 
-const inFlightSaves = new Map<string, Promise<PersonalLibraryItem>>();
+const saveQueues = new Map<string, Promise<PersonalLibraryItem>>();
 
 function saveKey(userId: string, input: SaveInput) {
   return JSON.stringify([
@@ -46,52 +46,60 @@ export async function saveToPersonalLibrary(input: SaveInput) {
   if (!user) throw new Error("Connecte-toi pour sauvegarder cette ressource.");
 
   const key = saveKey(user.id, input);
-  const pending = inFlightSaves.get(key);
-  if (pending) return pending;
+  const previous = saveQueues.get(key) ?? Promise.resolve({} as PersonalLibraryItem);
 
-  const savePromise = (async () => {
-    const { data: candidates, error: lookupError } = await supabase
-      .from("personal_library_items")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("resource_type", input.resourceType)
-      .eq("title", input.title)
-      .eq("subject", input.subject ?? null)
-      .eq("chapter", input.chapter ?? null)
-      .eq("source_type", input.sourceType ?? null)
-      .eq("source_ref", input.sourceRef ?? null)
-      .order("created_at", { ascending: false })
-      .limit(10);
+  const operation = previous
+    .catch(() => ({} as PersonalLibraryItem))
+    .then(async () => {
+      const { data: candidates, error: lookupError } = await supabase
+        .from("personal_library_items")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("resource_type", input.resourceType)
+        .eq("title", input.title)
+        .eq("subject", input.subject ?? null)
+        .eq("chapter", input.chapter ?? null)
+        .eq("source_type", input.sourceType ?? null)
+        .eq("source_ref", input.sourceRef ?? null)
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-    if (lookupError) throw lookupError;
+      if (lookupError) throw lookupError;
 
-    const existing = (candidates ?? []).find((item) => JSON.stringify(item.content) === JSON.stringify(input.content));
-    if (existing) return existing as PersonalLibraryItem;
+      const existing = (candidates ?? []).find((item) => JSON.stringify(item.content) === JSON.stringify(input.content));
+      if (existing) {
+        const { error } = await supabase
+          .from("personal_library_items")
+          .delete()
+          .eq("id", existing.id);
+        if (error) throw error;
+        return existing as PersonalLibraryItem;
+      }
 
-    const { data, error } = await supabase
-      .from("personal_library_items")
-      .insert({
-        user_id: user.id,
-        resource_type: input.resourceType,
-        title: input.title,
-        subject: input.subject ?? null,
-        chapter: input.chapter ?? null,
-        source_type: input.sourceType ?? null,
-        source_ref: input.sourceRef ?? null,
-        content: input.content,
-      })
-      .select("*")
-      .single();
+      const { data, error } = await supabase
+        .from("personal_library_items")
+        .insert({
+          user_id: user.id,
+          resource_type: input.resourceType,
+          title: input.title,
+          subject: input.subject ?? null,
+          chapter: input.chapter ?? null,
+          source_type: input.sourceType ?? null,
+          source_ref: input.sourceRef ?? null,
+          content: input.content,
+        })
+        .select("*")
+        .single();
 
-    if (error) throw error;
-    return data as PersonalLibraryItem;
-  })();
+      if (error) throw error;
+      return data as PersonalLibraryItem;
+    });
 
-  inFlightSaves.set(key, savePromise);
+  saveQueues.set(key, operation);
   try {
-    return await savePromise;
+    return await operation;
   } finally {
-    inFlightSaves.delete(key);
+    if (saveQueues.get(key) === operation) saveQueues.delete(key);
   }
 }
 
