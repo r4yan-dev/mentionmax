@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Bot, Clock3, FileText, ScanLine, Sparkles, Upload, Wand2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowRight, Bot, CheckCircle2, Clock3, FileText, ScanLine, Sparkles, Upload, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { exams as nationalExams } from "../features/exams/catalog";
+import { extractExerciseOCR, type AIExerciseOCRResult } from "../services/ai/aiExerciseOCR";
 import PeopleFeature from "../components/ui/PeopleFeature";
 import "./Exams.css";
 import "./ExamsFocusLayout.css";
@@ -30,6 +31,10 @@ export default function Exams() {
   const [loading, setLoading] = useState(true);
   const [sourceText, setSourceText] = useState("");
   const [query, setQuery] = useState("");
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrResult, setOcrResult] = useState<AIExerciseOCRResult | null>(null);
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +67,22 @@ export default function Exams() {
         .includes(q),
     );
   }, [query, tests]);
+
+  async function handleOCRFile(file?: File) {
+    if (!file) return;
+    setOcrError(null);
+    setOcrResult(null);
+    setOcrBusy(true);
+    try {
+      const result = await extractExerciseOCR(file);
+      setOcrResult(result);
+    } catch (error) {
+      setOcrError(error instanceof Error ? error.message : "Le scanner IA est indisponible.");
+    } finally {
+      setOcrBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   return (
     <main className="app-page exams-page exams-ai-page">
@@ -114,9 +135,9 @@ export default function Exams() {
 
         <article className="exams-ai-corrector">
           <div>
-            <span className="exams-kicker">CORRECTEUR IA</span>
-            <h2>Scanne. Corrige. Comprends.</h2>
-            <p>Envoie ton devoir ou une photo de ta copie pour obtenir une correction guidée et exploitable.</p>
+            <span className="exams-kicker">SCANNER OCR</span>
+            <h2>Scanne. Transcris. Prépare la correction.</h2>
+            <p>Envoie une photo, une copie scannée ou un PDF. L'OCR sépare autant que possible les questions imprimées et tes réponses manuscrites.</p>
           </div>
           <div className="exams-corrector-visual">
             <div className="exams-corrector-ring"><ScanLine size={34} /></div>
@@ -125,11 +146,59 @@ export default function Exams() {
             <span className="exams-corrector-line exams-corrector-line--two" />
           </div>
           <div className="exams-corrector-actions">
-            <button type="button" className="btn btn-primary"><Upload size={16} /> Scanner pour corriger</button>
-            <span>PDF, image ou copie scannée</span>
+            <input
+              ref={fileInputRef}
+              className="exams-file-input"
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={(event) => void handleOCRFile(event.target.files?.[0])}
+            />
+            <button type="button" className="btn btn-primary" disabled={ocrBusy} onClick={() => fileInputRef.current?.click()}>
+              <Upload size={16} /> {ocrBusy ? "Analyse en cours..." : "Scanner pour transcrire"}
+            </button>
+            <span>PDF, image ou copie scannée · 15 Mo max</span>
           </div>
+          {ocrError && <div className="exams-ocr-error">{ocrError}</div>}
         </article>
       </section>
+
+      {ocrResult && (
+        <section className="exams-ocr-result card">
+          <div className="exams-ocr-result__header">
+            <div>
+              <span className="section-eyebrow">TRANSCRIPTION IA</span>
+              <h2>Copie détectée</h2>
+              <p>
+                {ocrResult.documentType === "exam_copy" ? "Copie d'examen" : ocrResult.documentType === "exercise" ? "Exercice" : "Document"}
+                {ocrResult.confidence != null ? ` · confiance ${(ocrResult.confidence * 100).toFixed(0)} %` : ""}
+              </p>
+            </div>
+            <span className="exams-ocr-badge"><CheckCircle2 size={15} /> OCR terminé</span>
+          </div>
+          <div className="exams-ocr-result__body">
+            <pre className="exams-ocr-transcription">{ocrResult.text}</pre>
+            {ocrResult.segments.length > 0 && (
+              <div className="exams-ocr-segments">
+                {ocrResult.segments.map((segment, index) => (
+                  <article key={`${segment.label}-${index}`} className="exams-ocr-segment">
+                    <div className="exams-ocr-segment__meta">
+                      <strong>{segment.label || `Bloc ${index + 1}`}</strong>
+                      <span>{segment.kind === "student_answer" ? "Réponse" : segment.kind === "printed_question" ? "Question" : "Annotation"}</span>
+                    </div>
+                    <div>{segment.text}</div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="exams-ocr-result__footer">
+            <span>La transcription sert de passerelle vers le correcteur IA. Le correcteur #5 reste séparé du moteur OCR #6.</span>
+            <Link className="btn btn-secondary" to="/exercices">
+              Ouvrir les exercices <ArrowRight size={15} />
+            </Link>
+          </div>
+        </section>
+      )}
 
       <section className="exams-ai-library card">
         <div className="exams-ai-library__header">
