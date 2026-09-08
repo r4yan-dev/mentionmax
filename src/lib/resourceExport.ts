@@ -78,7 +78,6 @@ export async function downloadResourcePdf(element: HTMLElement, title: string) {
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 8;
   const usableWidth = pageWidth - margin * 2;
-  const pageImageHeight = (canvas.height * usableWidth) / canvas.width;
   const pagePixelHeight = Math.max(1, Math.floor((canvas.width * (pageHeight - margin * 2)) / usableWidth));
 
   let offset = 0;
@@ -100,6 +99,5 @@ export async function downloadResourcePdf(element: HTMLElement, title: string) {
     pageIndex += 1;
   }
 
-  void pageImageHeight;
   pdf.save(`${safeFileName(title)}.pdf`);
 }
