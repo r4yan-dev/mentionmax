@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase";
-import { aiService } from "./aiService";
+import { aiService } from "./index";
 import type { Exercise } from "../../types/content";
 import type { TrackId } from "../../types/academic";
 
@@ -94,7 +94,10 @@ export async function correctExerciseWithAI(params: {
   trackId: TrackId;
 }) {
   const { exercise, answers, trackId } = params;
-  const nonEmptyAnswers = answers.map((answer, index) => `Partie ${String.fromCharCode(97 + index)}:\n${answer.trim()}`).filter(Boolean).join("\n\n");
+  const nonEmptyAnswers = answers
+    .map((answer, index) => `Partie ${String.fromCharCode(97 + index)}:\n${answer.trim()}`)
+    .filter((answer) => answer.trim().length > 0)
+    .join("\n\n");
 
   if (!nonEmptyAnswers.trim()) throw new Error("Écris au moins une réponse avant de lancer la correction.");
 
