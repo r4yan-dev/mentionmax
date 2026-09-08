@@ -50,7 +50,7 @@ export async function extractExerciseOCR(file: File): Promise<AIExerciseOCRResul
   }
 
   try {
-    const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-ocr", {
+    const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-ocr-v2", {
       headers: {
         "Content-Type": file.type,
         "X-File-Mime-Type": file.type,
