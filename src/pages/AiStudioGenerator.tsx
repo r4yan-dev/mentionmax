@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowLeft, BookOpen, Check, ChevronLeft, ChevronRight, FileText, Layers3, ListChecks, LoaderCircle, PlaySquare, RefreshCw, Sparkles, RotateCcw } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, BookOpen, Bookmark, Check, ChevronLeft, ChevronRight, Download, FileImage, FileText, Layers3, ListChecks, LoaderCircle, PlaySquare, RefreshCw, Sparkles, RotateCcw } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { generateStudioResource, type StudioGenerationMode } from "../services/ai/studioGenerate";
 import { supabase } from "../lib/supabase";
+import { saveToPersonalLibrary, type LibraryResourceType } from "../lib/personalLibrary";
+import { downloadResourcePdf, downloadResourcePng } from "../lib/resourceExport";
 import { LatexText } from "../components/ui/LatexText";
 import "./AiStudioGenerator.css";
 import "./AiStudioInteractive.css";
@@ -54,7 +56,7 @@ function TextList({ items, display = false, className = "" }: { items: unknown; 
   return <ul className={`generator-lesson-list ${className}`.trim()}>{items.map((item, index) => <li key={index}><LatexValue value={item} display={display} /></li>)}</ul>;
 }
 
-function HandwrittenShell({ title, eyebrow, children, footer }: { title: string; eyebrow: string; children: ReactNode; footer?: ReactNode }) {
+export function HandwrittenShell({ title, eyebrow, children, footer }: { title: string; eyebrow: string; children: ReactNode; footer?: ReactNode }) {
   return <div className="generator-result generator-lesson generator-handwritten-resource">
     <div className="generator-result__head generator-lesson__title-card"><div><span className="generator-eyebrow"><Check size={14} /> {eyebrow}</span><h2><LatexValue value={title} /></h2></div></div>
     {children}
@@ -121,13 +123,53 @@ function QuizResultView({ result }: { result: ResultRecord }) {
   </HandwrittenShell>;
 }
 
-function ResultView({ result }: { result: ResultRecord }) {
+export function ResultView({ result }: { result: ResultRecord }) {
   if (Array.isArray(result.sections) || result.intro || result.mustRemember) return <LessonResultView result={result} />;
   if (Array.isArray(result.cards)) return <FlashcardsResultView result={result} />;
   if (Array.isArray(result.questions)) return <QuizResultView result={result} />;
   if (typeof result.summary === "string" || Array.isArray(result.keyPoints) || Array.isArray(result.formulas)) return <SummaryResultView result={result} />;
   const title = typeof result.title === "string" ? result.title : "Ressource générée";
   return <HandwrittenShell title={title} eyebrow="GÉNÉRATION TERMINÉE"><section className="generator-empty-note"><LatexValue value={result} /></section></HandwrittenShell>;
+}
+
+const modeToLibraryType: Record<StudioGenerationMode, LibraryResourceType> = { handnote: "handnote", summary: "summary", flashcards: "flashcards", quiz: "quiz" };
+
+export function ResourceActions({ result, mode, subject, chapter, sourceType, sourceRef, targetRef }: { result: ResultRecord; mode: StudioGenerationMode; subject: string; chapter: string; sourceType: string; sourceRef?: string | null; targetRef: React.RefObject<HTMLDivElement | null> }) {
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
+  const navigate = useNavigate();
+  const title = typeof result.title === "string" ? result.title : mode === "handnote" ? "Leçon Menti" : mode === "summary" ? "Résumé" : mode === "flashcards" ? "Flashcards" : "Quiz";
+
+  const save = async () => {
+    if (saving || saved) return;
+    setSaving(true);
+    try {
+      await saveToPersonalLibrary({ resourceType: modeToLibraryType[mode], title, subject: subject.trim() || null, chapter: chapter.trim() || null, sourceType, sourceRef, content: result });
+      setSaved(true);
+    } catch (caught) {
+      window.alert(caught instanceof Error ? caught.message : "Impossible de sauvegarder cette ressource.");
+    } finally { setSaving(false); }
+  };
+
+  const exportFile = async (kind: "png" | "pdf") => {
+    const element = targetRef.current;
+    if (!element) return;
+    setExporting(kind);
+    try {
+      if (kind === "png") await downloadResourcePng(element, title);
+      else await downloadResourcePdf(element, title);
+    } catch (caught) {
+      window.alert(caught instanceof Error ? caught.message : "Impossible de créer le fichier.");
+    } finally { setExporting(null); }
+  };
+
+  return <div className="generator-resource-actions">
+    <button type="button" className="generator-btn" onClick={() => void save()} disabled={saving || saved}><Bookmark size={15} /> {saved ? "Enregistré" : saving ? "Sauvegarde…" : "Enregistrer"}</button>
+    <Link to="/bibliotheque" className="generator-btn generator-btn--secondary"><Layers3 size={15} /> Bibliothèque</Link>
+    <button type="button" className="generator-btn generator-btn--secondary" onClick={() => void exportFile("png")} disabled={exporting !== null}><FileImage size={15} /> {exporting === "png" ? "Création…" : "Image"}</button>
+    <button type="button" className="generator-btn generator-btn--secondary" onClick={() => void exportFile("pdf")} disabled={exporting !== null}><Download size={15} /> {exporting === "pdf" ? "Création…" : "PDF"}</button>
+  </div>;
 }
 
 export default function AiStudioGenerator() {
@@ -147,6 +189,7 @@ export default function AiStudioGenerator() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ResultRecord | null>(null);
+  const resultContainerRef = useRef<HTMLDivElement>(null);
 
   async function generateLesson(source: TranscriptResult) {
     const transcriptText = source.transcript.segments.map((segment) => segment.text).join(" ").trim();
@@ -188,6 +231,6 @@ export default function AiStudioGenerator() {
         {sourceType === "youtube" ? <div className="generator-youtube"><div className="generator-youtube__row"><div className="generator-youtube__input"><PlaySquare size={17} /><input value={youtubeUrl} onChange={(event) => setYoutubeUrl(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void checkAndGenerateYoutube(); }} placeholder="https://www.youtube.com/watch?v=..." aria-label="Lien YouTube" /></div><button type="button" className="generator-btn" onClick={() => void checkAndGenerateYoutube()} disabled={!youtubeUrl.trim() || youtubeBusy}>{youtubeBusy ? <><LoaderCircle className="generator-spin" size={16} /> Extraction + génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>{youtubeError && <div className="generator-error"><strong>Vidéo non exploitable</strong><span>{youtubeError}</span></div>}{youtubeResult && <div className="generator-youtube__result"><div className="generator-youtube__meta"><img src={youtubeResult.video.thumbnail} alt="" /><div><strong>{youtubeResult.video.title}</strong><span>{youtubeResult.video.author ?? "YouTube"} · {youtubeResult.transcript.language} · {youtubeResult.transcript.segments.length} segments{youtubeResult.transcript.isGenerated ? " · automatique" : ""}</span></div></div><div className="generator-youtube__segments">{youtubeResult.transcript.segments.slice(0, 10).map((segment, index) => <article key={`${segment.start}-${index}`}><time>{formatTime(segment.start)}</time><p><LatexValue value={segment.text} /></p></article>)}{youtubeResult.transcript.segments.length > 10 && <span className="generator-youtube__more">{youtubeResult.transcript.segments.length - 10} segments supplémentaires utilisés.</span>}</div></div>}</div> : <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder={`Colle ici le contenu à transformer en ${selectedMode.title.toLowerCase()}…`} />}
         <div className="generator-meta-grid"><label><span>Matière</span><input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Mathématiques" /></label><label><span>Chapitre</span><input value={chapter} onChange={(event) => setChapter(event.target.value)} placeholder="Dérivation" /></label><label><span>Parcours</span><select value={track} onChange={(event) => setTrack(event.target.value)}><option value="">Automatique</option><option value="SP">2BAC Sciences Physiques</option><option value="SMA">2BAC Sciences Mathématiques A</option><option value="SMB">2BAC Sciences Mathématiques B</option></select></label></div>
         <div className="generator-actions"><span>{text.trim().length.toLocaleString("fr-FR")} caractères · {sourceType === "youtube" ? "source YouTube" : "source texte"}</span><button type="button" className="generator-btn" onClick={() => void generate()} disabled={!text.trim() || busy}>{busy ? <><LoaderCircle className="generator-spin" size={16} /> Génération…</> : <><Sparkles size={16} /> Générer {selectedMode.title.toLowerCase()}</>}</button></div>{error && <div className="generator-error"><strong>Génération impossible</strong><span>{error}</span></div>}</div></section>
-    {result && <section className="generator-output"><div className="generator-output__toolbar"><div><span className="generator-eyebrow">03 · SORTIE</span><strong>{selectedMode.title}</strong></div><button type="button" className="generator-btn generator-btn--secondary" onClick={() => void generate()} disabled={busy}><RefreshCw size={15} /> Régénérer</button></div><ResultView result={result} /></section>}
+    {result && <section className="generator-output"><div className="generator-output__toolbar"><div><span className="generator-eyebrow">03 · SORTIE</span><strong>{selectedMode.title}</strong></div><div className="generator-output__toolbar-actions"><button type="button" className="generator-btn generator-btn--secondary" onClick={() => void generate()} disabled={busy}><RefreshCw size={15} /> Régénérer</button><ResourceActions result={result} mode={mode} subject={subject} chapter={chapter} sourceType={sourceType} sourceRef={youtubeResult?.video.id ?? null} targetRef={resultContainerRef} /></div></div><div ref={resultContainerRef}><ResultView result={result} /></div></section>}
   </main>;
 }
