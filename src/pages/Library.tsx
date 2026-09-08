@@ -82,7 +82,6 @@ export default function Library() {
   }, [items, query]);
 
   const remove = async (item: PersonalLibraryItem) => {
-    if (!window.confirm(`Supprimer « ${item.title} » de ta bibliothèque ?`)) return;
     try {
       await deletePersonalLibraryItem(item.id);
       setItems((current) => current.filter((entry) => entry.id !== item.id));
