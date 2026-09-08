@@ -1,4 +1,4 @@
-/* AI Studio resource controls. Keep the full Library page in the sidebar, and also expose the compact drawer inside AI Studio. */
+/* AI Studio resource controls. Keep the compact Library drawer inside AI Studio, with the full Library page accessible elsewhere when needed. */
 body .ai-studio-v2 .ai-studio-library-button {
   display: inline-flex !important;
   visibility: visible !important;
@@ -21,18 +21,53 @@ body .ai-studio-v2 .ai-studio-v2__bottom-actions {
   opacity: 1 !important;
 }
 
-body .ai-studio-v2 .ai-resource-action {
+body .ai-studio-v2 .ai-resource-action,
+body .ai-studio-v2 .ai-resource-action--save {
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-body .ai-studio-v2 .ai-resource-action--save {
-  display: inline-flex !important;
-}
-
 body .ai-studio-v2 .ai-resource-action--save[data-saved="true"] svg {
   fill: currentColor !important;
+}
+
+body .ai-studio-v2 .ai-library-item {
+  position: relative !important;
+  padding-right: 52px !important;
+}
+
+body .ai-studio-v2 .ai-library-delete {
+  position: absolute !important;
+  top: 50% !important;
+  right: 10px !important;
+  transform: translateY(-50%) !important;
+  z-index: 2 !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  background: transparent !important;
+  color: #76213a !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+body .ai-studio-v2 .ai-library-delete:hover {
+  background: rgba(118, 33, 58, .09) !important;
+  transform: translateY(-50%) scale(1.04) !important;
+}
+
+body .ai-studio-v2 .ai-library-delete:disabled {
+  opacity: .45 !important;
+  cursor: wait !important;
+}
+
+body .ai-studio-v2 .ai-library-delete svg {
+  width: 17px !important;
+  height: 17px !important;
 }
 
 body .library-page .library-export-actions,
