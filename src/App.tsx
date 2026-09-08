@@ -28,6 +28,7 @@ import Progression from "./pages/Progression";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Preferences from "./pages/Preferences";
+import Library from "./pages/Library";
 import AuthenticatedShell from "./components/AuthenticatedShell";
 import "./index.css";
 
@@ -77,6 +78,8 @@ export default function App() {
       <Route path="/ai-help" element={<AIHelp />} />
       <Route path="/progression" element={<Progression />} />
       <Route path="/classement" element={<Leaderboard />} />
+      <Route path="/bibliotheque" element={<Library />} />
+      <Route path="/bibliotheque/:itemId" element={<Library />} />
       <Route path="/profil" element={<Profile />} />
       <Route path="/preferences" element={<Preferences />} />
       <Route path="/preferences/personality" element={<Preferences />} />
