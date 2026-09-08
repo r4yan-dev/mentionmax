@@ -69,6 +69,18 @@ function protectLatex(text: string): { source: string; tokens: string[] } {
 }
 function restoreLatex(text: string, tokens: string[]): string { return text.replace(/@@MM_LATEX_(\d+)@@/g,(_m,i)=>tokens[Number(i)] ?? _m); }
 function wrapFormula(value: string) { return `\\(${normalize(value.trim())}\\)`; }
+
+function preserveSpacesInsideTextMath(value: string) {
+  return value.replace(/\\\(([^\\[\\]]+)\\\)/g, (match, body: string) => {
+    const trimmed = body.trim();
+    const wordCount = (trimmed.match(/[A-Za-zÀ-ÿ]{2,}/g) ?? []).length;
+    const looksLikeSentence = wordCount >= 2 && /\s/.test(trimmed) && !/[=<>+*/^_{}]/.test(trimmed) && !/\\[A-Za-z]+/.test(trimmed);
+    if (!looksLikeSentence) return match;
+    const escaped = trimmed.replace(/([%&#])/g, "\\$1").replace(/\{/g, "\\{").replace(/\}/g, "\\}");
+    return `\\(\\text{${escaped}}\\)`;
+  });
+}
+
 function toLatex(text: string): string {
   if (!text) return text;
   const protectedValue = protectLatex(text);
@@ -81,7 +93,7 @@ function toLatex(text: string): string {
   source = source.replace(/(^|[(:]\s*)([A-Za-z0-9α-ωΑ-Ω][^,.;!?]*?(?:=|<|>|≤|≥|≠|≈|→|↦)[^,.;!?]*)(?=\s*[,.;!?]|$)/g,(_m,prefix,formula)=>`${prefix}${wrapFormula(formula)}`);
   source = source.replace(/∫\s*[^,.;!?]+/g,(match)=>wrapFormula(match));
   source = normalize(source);
-  return restoreLatex(source,protectedValue.tokens);
+  return preserveSpacesInsideTextMath(restoreLatex(source,protectedValue.tokens));
 }
 
 export function LatexText({ children, className, display=false }: { children: string; className?: string; display?: boolean }) {
@@ -96,5 +108,5 @@ export function LatexText({ children, className, display=false }: { children: st
     void loadMathJax().then(async()=>{ if (!cancelled && window.MathJax?.typesetPromise && ref.current) await window.MathJax.typesetPromise([ref.current]); }).catch(()=>undefined);
     return ()=>{cancelled=true;};
   },[latex]);
-  return <span ref={ref} className={className} data-latex-display={display || undefined} />;
+  return <span ref={ref} className={className} data-latex-display={display || undefined} style={{ fontSize: display ? "1.08em" : "1em" }} />;
 }
