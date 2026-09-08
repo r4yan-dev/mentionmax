@@ -1,4 +1,4 @@
-import { FunctionsHttpError } from "@supabase/supabase-js";
+import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 
 export type OCRSegment = {
@@ -21,8 +21,10 @@ type FunctionResponse = {
   detail?: string;
 };
 
+const OCR_TIMEOUT_MS = 90_000;
+
 async function getFunctionError(error: unknown) {
-  if (FunctionsHttpError && error instanceof FunctionsHttpError) {
+  if (error instanceof FunctionsHttpError) {
     try {
       const payload = (await error.context.json()) as FunctionResponse;
       if (payload?.detail) return `${payload.error ?? "Le service OCR IA est indisponible."} ${payload.detail}`;
@@ -31,6 +33,9 @@ async function getFunctionError(error: unknown) {
       // Fall back to the SDK error below.
     }
   }
+
+  if (error instanceof FunctionsRelayError) return `Relais Supabase indisponible : ${error.message}`;
+  if (error instanceof FunctionsFetchError) return `Réseau Supabase indisponible : ${error.message}`;
   if (error instanceof Error && error.message.trim()) return error.message;
   return "Le service OCR IA est indisponible.";
 }
@@ -44,24 +49,31 @@ export async function extractExerciseOCR(file: File): Promise<AIExerciseOCRResul
     throw new Error("Le fichier est trop volumineux. Limite de 15 Mo pour le scanner.");
   }
 
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") resolve(reader.result);
-      else reject(new Error("Impossible de lire le fichier."));
-    };
-    reader.onerror = () => reject(reader.error ?? new Error("Impossible de lire le fichier."));
-    reader.readAsDataURL(file);
-  });
-
   try {
-    const { data, error } = await supabase.functions.invoke<FunctionResponse>("ai-exercise-ocr", {
-      body: { file: dataUrl, mimeType: file.type },
+    const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-ocr", {
+      headers: {
+        "Content-Type": file.type,
+        "X-File-Mime-Type": file.type,
+      },
+      body: file,
     });
+
+    const { data, error } = await Promise.race([
+      request,
+      new Promise<never>((_, reject) => {
+        window.setTimeout(() => {
+          reject(new Error("Le scanner a dépassé 90 secondes. Vérifie le fichier et réessaie avec une image/PDF plus léger."));
+        }, OCR_TIMEOUT_MS);
+      }),
+    ]);
 
     if (error) throw error;
     if (!data?.success || !data.data) {
-      throw new Error(data?.detail ? `${data.error ?? "Le service OCR IA est indisponible."} ${data.detail}` : data?.error ?? "Le service OCR IA est indisponible.");
+      throw new Error(
+        data?.detail
+          ? `${data.error ?? "Le service OCR IA est indisponible."} ${data.detail}`
+          : data?.error ?? "Le service OCR IA est indisponible.",
+      );
     }
 
     return data.data;
