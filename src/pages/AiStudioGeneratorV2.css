@@ -1,2 +1,56 @@
 .ai-studio-v2__header{align-items:flex-start}.ai-studio-v2__header-actions{display:flex;align-items:flex-end;gap:12px}.ai-studio-library-button{display:inline-flex;align-items:center;gap:8px;border:2px solid rgba(23,59,57,.12);border-radius:16px 12px 15px 11px;padding:12px 14px;background:#fffdf5;color:#073b3a;font-family:"Kalam",cursive;font-size:16px;font-weight:700;cursor:pointer;transform:rotate(-.5deg);box-shadow:5px 6px 0 rgba(23,59,57,.045)}.ai-studio-library-button:hover{transform:rotate(.25deg) translateY(-1px)}.ai-studio-library-button span{display:grid;place-items:center;min-width:21px;height:21px;padding:0 5px;border-radius:50%;background:#ddf5f1;color:#073b3a;font:700 12px/1 system-ui,sans-serif}.ai-library-scrim{position:fixed;inset:0;z-index:90;border:0;background:rgba(7,59,58,.18);opacity:0;pointer-events:none;transition:opacity .2s}.ai-library-scrim.is-open{opacity:1;pointer-events:auto}.ai-library-drawer{position:fixed;top:0;right:0;bottom:0;width:min(390px,92vw);z-index:91;display:flex;flex-direction:column;padding:24px 18px;background:#edf8f5;border-left:2px solid rgba(23,59,57,.1);box-shadow:-20px 0 50px rgba(7,59,58,.12);transform:translateX(102%);transition:transform .25s cubic-bezier(.2,.7,.2,1)}.ai-library-drawer.is-open{transform:translateX(0)}.ai-library-drawer__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:4px 4px 18px}.ai-library-drawer__head h2{margin:6px 0 0;font:700 36px/1 "Kalam",cursive;color:#073b3a}.ai-library-close{border:0;background:#fffdf5;color:#073b3a;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;cursor:pointer;box-shadow:3px 4px 0 rgba(23,59,57,.06)}.ai-library-drawer__list{display:grid;gap:10px;overflow:auto;padding:4px}.ai-library-item{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:12px;width:100%;border:2px solid rgba(23,59,57,.1);border-radius:19px 14px 21px 15px;background:#fffdf5;padding:12px;text-align:left;cursor:pointer;box-shadow:4px 5px 0 rgba(23,59,57,.04);transform:rotate(-.2deg)}.ai-library-item:nth-child(2n){transform:rotate(.3deg)}.ai-library-item__icon{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;background:#ddf5f1;color:#0fa3a3}.ai-library-item>span:last-child{min-width:0;display:flex;flex-direction:column;gap:4px}.ai-library-item strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 19px/1.08 "Kalam",cursive;color:#173b39}.ai-library-item small{font:600 12px/1.4 "Patrick Hand",cursive;color:#718582}.ai-library-empty{min-height:300px;display:grid;place-items:center;align-content:center;gap:7px;text-align:center;color:#718582;font:16px/1.45 "Patrick Hand",cursive}.ai-library-empty strong{font:700 24px/1 "Kalam",cursive;color:#073b3a}.ai-studio-v2__output .generator-output__toolbar>div:last-child{margin-left:auto}.ai-studio-v2__bottom-actions{display:flex;justify-content:center;gap:12px;margin:22px 0 4px;padding-top:18px;border-top:2px dashed rgba(23,59,57,.15)}.ai-resource-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:145px;padding:12px 16px;border:2px solid rgba(23,59,57,.12);border-radius:16px 12px 17px 13px;background:#fffdf5;color:#073b3a;font:700 17px/1 "Kalam",cursive;cursor:pointer;box-shadow:5px 6px 0 rgba(23,59,57,.045);transform:rotate(-.4deg)}.ai-resource-action:nth-child(2n){transform:rotate(.35deg)}.ai-resource-action:hover{transform:translateY(-1px) rotate(-.15deg)}.ai-resource-action--save{background:#ddf5f1;border-color:rgba(15,163,163,.25)}
+
+/* Browser-native PDF/print layout: reuse the exact handwritten result instead of rasterizing or rebuilding it. */
+@page{size:A4 portrait;margin:10mm}
+@media print{
+  html,body,#root{background:#fff!important}
+  body.mentionmax-printing-resource *{visibility:hidden!important}
+  body.mentionmax-printing-resource .ai-studio-print-target,
+  body.mentionmax-printing-resource .ai-studio-print-target *{visibility:visible!important}
+  body.mentionmax-printing-resource .ai-studio-print-target{position:absolute!important;left:0!important;top:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:8mm!important;box-sizing:border-box!important;background:
+    radial-gradient(circle at 10% 8%,rgba(66,201,189,.11),transparent 24%),
+    radial-gradient(circle at 90% 18%,rgba(217,67,95,.06),transparent 20%),
+    linear-gradient(transparent 31px,rgba(23,59,57,.09) 32px),
+    linear-gradient(90deg,transparent 31px,rgba(23,59,57,.045) 32px),#edf8f5!important;
+    background-size:auto,auto,32px 32px,32px 32px,auto!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+    box-shadow:none!important;border-radius:0!important
+  body.mentionmax-printing-resource .generator-lesson{overflow:visible!important;box-shadow:none!important}
+  body.mentionmax-printing-resource .generator-lesson__title-card{break-after:avoid-page!important;page-break-after:avoid!important}
+  body.mentionmax-printing-resource .generator-lesson__intro,
+  body.mentionmax-printing-resource .generator-lesson__meta-grid,
+  body.mentionmax-printing-resource .generator-lesson__final-grid,
+  body.mentionmax-printing-resource .generator-lesson__section,
+  body.mentionmax-printing-resource .generator-lesson__callout,
+  body.mentionmax-printing-resource .generator-lesson__definition,
+  body.mentionmax-printing-resource .generator-lesson__formula-box,
+  body.mentionmax-printing-resource .generator-lesson__warning,
+  body.mentionmax-printing-resource .generator-lesson__exam,
+  body.mentionmax-printing-resource .generator-lesson__exercises>article,
+  body.mentionmax-printing-resource .generator-quiz-card,
+  body.mentionmax-printing-resource .generator-flashcard{break-inside:avoid!important;page-break-inside:avoid!important}
+  body.mentionmax-printing-resource .generator-lesson__sections{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10mm!important;align-items:start!important}
+  body.mentionmax-printing-resource .generator-lesson__meta-grid,
+  body.mentionmax-printing-resource .generator-lesson__final-grid{gap:7mm!important;align-items:start!important}
+  body.mentionmax-printing-resource .generator-lesson__section{transform:none!important;box-shadow:7px 9px 0 rgba(23,59,57,.045),0 8px 18px rgba(23,59,57,.035)!important}
+  body.mentionmax-printing-resource .generator-lesson__section:nth-child(2n),
+  body.mentionmax-printing-resource .generator-lesson__section:nth-child(4n){transform:none!important}
+  body.mentionmax-printing-resource .generator-lesson__section::before{display:block!important}
+  body.mentionmax-printing-resource .generator-interactive-resource__controls,
+  body.mentionmax-printing-resource .generator-interactive-hint,
+  body.mentionmax-printing-resource .generator-flip,
+  body.mentionmax-printing-resource .generator-quiz-score,
+  body.mentionmax-printing-resource .generator-quiz-finished{display:none!important}
+  body.mentionmax-printing-resource .generator-flashcard{min-height:0!important;height:auto!important}
+  body.mentionmax-printing-resource .generator-flashcard__inner{min-height:0!important;height:auto!important;transform:none!important}
+  body.mentionmax-printing-resource .generator-flashcard__face{position:relative!important;inset:auto!important;transform:none!important;min-height:110mm!important;break-inside:avoid!important}
+  body.mentionmax-printing-resource .generator-flashcard__back{margin-top:6mm!important}
+  body.mentionmax-printing-resource .generator-quiz-choice{break-inside:avoid!important}
+  body.mentionmax-printing-resource .mjx-container[display="true"],
+  body.mentionmax-printing-resource mjx-container[display="true"]{display:block!important;margin:.7em auto!important}
+  body.mentionmax-printing-resource .generator-result__head{background:transparent!important}
+  body.mentionmax-printing-resource .generator-lesson__title-card h2{font-size:48px!important}
+  body.mentionmax-printing-resource .generator-lesson__section-body h3{font-size:28px!important}
+}
+
 @media (max-width:700px){.ai-studio-v2__header-actions{align-items:stretch;flex-direction:column;width:100%}.ai-studio-v2__header{align-items:stretch}.ai-studio-v2__bottom-actions{display:grid;grid-template-columns:1fr;gap:10px}.ai-resource-action{width:100%}.ai-library-drawer{padding:18px 12px}.ai-library-drawer__head h2{font-size:31px}}
