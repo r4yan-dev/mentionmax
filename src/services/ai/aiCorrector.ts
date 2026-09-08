@@ -28,7 +28,9 @@ async function getFunctionError(error:unknown){
 }
 
 async function invokeCorrection(body: Record<string, unknown>) {
-  const {data,error}=await supabase.functions.invoke<FunctionResponse>("ai-exercise-corrector",{body});
+  const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-corrector-v2",{body});
+  const timeout = new Promise<never>((_,reject)=>window.setTimeout(()=>reject(new Error("Le correcteur IA a dépassé 50 secondes. La requête a été interrompue, tu peux réessayer.")),50_000));
+  const {data,error}=await Promise.race([request,timeout]);
   if(error)throw error;
   if(!data?.success||!data.data)throw new Error(data?.detail?`${data.error??"Le correcteur IA est indisponible."} ${data.detail}`:data?.error??"Le correcteur IA est indisponible.");
   return data.data;
