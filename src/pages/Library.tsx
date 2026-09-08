@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, Download, FileImage, FileText, Layers3, ListChecks, Search, Trash2 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { deletePersonalLibraryItem, listPersonalLibrary, type LibraryResourceType, type PersonalLibraryItem } from "../lib/personalLibrary";
 import { downloadResourcePdf, downloadResourcePng } from "../lib/resourceExport";
 import { ResultView } from "./AiStudioGenerator";
@@ -22,16 +22,19 @@ const icons = {
   quiz: ListChecks,
 };
 
-function LibraryDetail({ item, onBack }: { item: PersonalLibraryItem; onBack: () => void }) {
-  const resultRef = useState<HTMLDivElement | null>(null)[0];
+function LibraryDetail({ item }: { item: PersonalLibraryItem }) {
+  const resultRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
   const exportFile = async (kind: "png" | "pdf") => {
-    const element = resultRef;
+    const element = resultRef.current;
     if (!element) return;
     setExporting(kind);
     try {
       if (kind === "png") await downloadResourcePng(element, item.title);
       else await downloadResourcePdf(element, item.title);
+    } catch (caught) {
+      window.alert(caught instanceof Error ? caught.message : "Impossible de créer le fichier.");
     } finally {
       setExporting(null);
     }
@@ -40,7 +43,7 @@ function LibraryDetail({ item, onBack }: { item: PersonalLibraryItem; onBack: ()
   return <main className="library-page">
     <header className="library-header">
       <div>
-        <button type="button" className="library-back" onClick={onBack}>← Ma bibliothèque</button>
+        <button type="button" className="library-back" onClick={() => navigate("/bibliotheque")}>← Ma bibliothèque</button>
         <span className="generator-eyebrow">BIBLIOTHÈQUE PERSONNELLE</span>
         <h1>{item.title}</h1>
         <p>{labels[item.resource_type]}{item.subject ? ` · ${item.subject}` : ""}{item.chapter ? ` · ${item.chapter}` : ""}</p>
@@ -50,29 +53,27 @@ function LibraryDetail({ item, onBack }: { item: PersonalLibraryItem; onBack: ()
         <button type="button" className="generator-btn" onClick={() => void exportFile("pdf")} disabled={exporting !== null}><Download size={16} /> {exporting === "pdf" ? "Création…" : "PDF"}</button>
       </div>
     </header>
-    <div className="library-render-target" ref={(node) => { if (node && resultRef !== node) { /* ref callback kept intentionally lightweight */ } }}>
-      <div className="generator-handwritten-resource library-render-result"><ResultView result={item.content} /></div>
-    </div>
+    <div ref={resultRef} className="library-render-target"><ResultView result={item.content} /></div>
   </main>;
 }
 
 export default function Library() {
   const { itemId } = useParams();
+  const navigate = useNavigate();
   const [items, setItems] = useState<PersonalLibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<PersonalLibraryItem | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = async () => {
-    setLoading(true);
-    try { setItems(await listPersonalLibrary()); setError(null); } catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de charger ta bibliothèque."); }
-    finally { setLoading(false); }
-  };
+  useEffect(() => {
+    void (async () => {
+      try { setItems(await listPersonalLibrary()); setError(null); }
+      catch (caught) { setError(caught instanceof Error ? caught.message : "Impossible de charger ta bibliothèque."); }
+      finally { setLoading(false); }
+    })();
+  }, []);
 
-  useEffect(() => { void refresh(); }, []);
-  useEffect(() => { setSelected(itemId ? items.find((item) => item.id === itemId) ?? null : null); }, [itemId, items]);
-
+  const selected = itemId ? items.find((item) => item.id === itemId) ?? null : null;
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return items;
@@ -81,12 +82,16 @@ export default function Library() {
 
   const remove = async (item: PersonalLibraryItem) => {
     if (!window.confirm(`Supprimer « ${item.title} » de ta bibliothèque ?`)) return;
-    await deletePersonalLibraryItem(item.id);
-    setItems((current) => current.filter((entry) => entry.id !== item.id));
-    if (selected?.id === item.id) setSelected(null);
+    try {
+      await deletePersonalLibraryItem(item.id);
+      setItems((current) => current.filter((entry) => entry.id !== item.id));
+      if (selected?.id === item.id) navigate("/bibliotheque");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Impossible de supprimer cette ressource.");
+    }
   };
 
-  if (selected) return <LibraryDetail item={selected} onBack={() => setSelected(null)} />;
+  if (selected) return <LibraryDetail item={selected} />;
 
   return <main className="library-page">
     <header className="library-header">
@@ -102,8 +107,8 @@ export default function Library() {
       {error && <div className="library-error">{error}</div>}
       {loading ? <div className="library-empty">Chargement…</div> : filtered.length === 0 ? <div className="library-empty"><BookOpen size={28} /><strong>{items.length ? "Aucun résultat" : "Ta bibliothèque est vide"}</strong><span>{items.length ? "Essaie un autre terme de recherche." : "Sauvegarde une ressource depuis AI Studio pour la retrouver ici."}</span></div> : <div className="library-grid">{filtered.map((item) => { const Icon = icons[item.resource_type]; return <article className="library-card" key={item.id}>
         <div className="library-card__top"><span className="library-card__icon"><Icon size={18} /></span><span className="library-card__type">{labels[item.resource_type]}</span><button type="button" className="library-card__delete" onClick={() => void remove(item)} aria-label={`Supprimer ${item.title}`}><Trash2 size={15} /></button></div>
-        <button type="button" className="library-card__body" onClick={() => setSelected(item)}><h2>{item.title}</h2><p>{item.subject || "Menti"}{item.chapter ? ` · ${item.chapter}` : ""}</p><time>{new Date(item.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</time></button>
-        <div className="library-card__footer"><button type="button" className="library-card__open" onClick={() => setSelected(item)}>Ouvrir</button><span>LaTeX conservé</span></div>
+        <button type="button" className="library-card__body" onClick={() => navigate(`/bibliotheque/${item.id}`)}><h2>{item.title}</h2><p>{item.subject || "Menti"}{item.chapter ? ` · ${item.chapter}` : ""}</p><time>{new Date(item.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}</time></button>
+        <div className="library-card__footer"><button type="button" className="library-card__open" onClick={() => navigate(`/bibliotheque/${item.id}`)}>Ouvrir</button><span>LaTeX conservé</span></div>
       </article>; })}</div>}
     </section>
   </main>;
