@@ -55,3 +55,6 @@
 }
 
 @media (max-width:700px){.ai-studio-v2__header-actions{align-items:stretch;flex-direction:column;width:100%}.ai-studio-v2__header{align-items:stretch}.ai-studio-v2__bottom-actions{display:grid;grid-template-columns:1fr;gap:10px}.ai-resource-action{width:100%}.ai-library-drawer{padding:18px 12px}.ai-library-drawer__head h2{font-size:31px}}
+
+/* Personal Library was removed from the product surface. Keep legacy styles inert for old cached bundles. */
+.ai-studio-library-button,.ai-library-scrim,.ai-library-drawer,.ai-resource-action--save{display:none!important}
