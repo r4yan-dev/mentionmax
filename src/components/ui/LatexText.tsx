@@ -17,7 +17,7 @@ function loadMathJax(): Promise<void> {
   if (mathJaxPromise) return mathJaxPromise;
   window.MathJax = window.MathJax || {};
   window.MathJax.tex = { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] };
-  mathJaxPromise = new Promise((resolve, reject) => {
+  mathJaxPromise = new Promise<void>((resolve, reject) => {
     const existing = document.querySelector('script[data-mentionmax-mathjax="true"]');
     if (existing) {
       existing.addEventListener("load", () => resolve(), { once: true });
@@ -39,8 +39,21 @@ const SUPERS: Record<string, string> = { "⁰":"0","¹":"1","²":"2","³":"3","�
 const SUBS: Record<string, string> = {"₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9","₊":"+","₋":"-","ₐ":"a","ₑ":"e","ᵢ":"i","ⱼ":"j","ₖ":"k","ₗ":"l","ₘ":"m","ₙ":"n","ₒ":"o","ₚ":"p","ᵣ":"r","ₛ":"s","ₜ":"t","ᵤ":"u","ᵥ":"v","ₓ":"x"};
 const GREEK: Record<string, string> = {α:"\\alpha",β:"\\beta",γ:"\\gamma",δ:"\\delta",ε:"\\varepsilon",ϵ:"\\epsilon",ζ:"\\zeta",η:"\\eta",θ:"\\theta",ϑ:"\\vartheta",ι:"\\iota",κ:"\\kappa",λ:"\\lambda",μ:"\\mu",ν:"\\nu",ξ:"\\xi",π:"\\pi",ϖ:"\\varpi",ρ:"\\rho",ϱ:"\\varrho",σ:"\\sigma",ς:"\\varsigma",τ:"\\tau",υ:"\\upsilon",φ:"\\varphi",ϕ:"\\phi",χ:"\\chi",ψ:"\\psi",ω:"\\omega",Γ:"\\Gamma",Δ:"\\Delta",Θ:"\\Theta",Λ:"\\Lambda",Ξ:"\\Xi",Π:"\\Pi",Σ:"\\Sigma",Υ:"\\Upsilon",Φ:"\\Phi",Ψ:"\\Psi",Ω:"\\Omega"};
 function mapChars(value: string, map: Record<string,string>) { return [...value].map((c) => map[c] ?? c).join(""); }
+
+/** Recover LaTeX commands that were damaged while JSON was parsed. For example,
+ * a raw "\\to" can become tab + "o" and "\\frac" can become form-feed + "rac".
+ * This pass is deliberately applied only inside protected math so normal prose
+ * whitespace is never rewritten into LaTeX commands.
+ */
+function repairEscapedLatexControls(value: string) {
+  return value
+    .replace(/[\u0008\u0009\u000b\u000c\u000d]/g, "\\")
+    .replace(/\\([A-Za-z]+)/g, "\\$1")
+    .replace(/\u0000/g, "");
+}
+
 function normalize(value: string) {
-  let result = value;
+  let result = repairEscapedLatexControls(value);
   result = result.replace(/([A-Za-z0-9)\]])([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ]+)/g, (_m,b,p) => `${b}^{${mapChars(p,SUPERS)}}`);
   result = result.replace(/([A-Za-z0-9)\]])([₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+)/g, (_m,b,s) => `${b}_{${mapChars(s,SUBS)}}`);
   result = result.replace(/√\s*\(([^()]*)\)/g, "\\sqrt{$1}").replace(/√\s*([A-Za-z0-9]+)/g, "\\sqrt{$1}");
@@ -51,7 +64,7 @@ function normalize(value: string) {
   return result;
 }
 function sanitizeProtectedMath(value: string) {
-  return value.replace(/\\left\s*/g, "").replace(/\\right\s*/g, "").replace(/\\middle\s*/g, "");
+  return normalize(value).replace(/\\left\s*/g, "").replace(/\\right\s*/g, "").replace(/\\middle\s*/g, "");
 }
 function protectLatex(text: string): { source: string; tokens: string[] } {
   const tokens: string[] = [];
@@ -74,7 +87,7 @@ function toLatex(text: string) {
   let source = protectedValue.source;
   source = source.replace(/\b(?:lim\s*\([^)]*\)|sin\s*\([^)]*\)|cos\s*\([^)]*\)|tan\s*\([^)]*\)|cot\s*\([^)]*\)|arcsin\s*\([^)]*\)|arccos\s*\([^)]*\)|arctan\s*\([^)]*\)|ln\s*\([^)]*\)|log\s*\([^)]*\)|exp\s*\([^)]*\)|sqrt\s*\([^)]*\)|√\s*\([^)]*\)|P\s*\([^)]*\)|A\s*\([^)]*\)|C\s*\([^)]*\))/g,wrapFormula);
   source = source.replace(/\b[A-Za-z](?:\^[-+]?\d+|\^[A-Za-z0-9]+|\^\{[^}]+\}|[_][A-Za-z0-9]+|[_]\{[^}]+\})/g,wrapFormula);
-  source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g,wrapFormula);
+  source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱᶦᶠʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g,wrapFormula);
   source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g,(_m,n,d)=>`\\(\\frac{${n}}{${d}}\\)`);
   source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*([A-Za-z0-9]+)/g,(_m,n,d)=>`\\(\\frac{${n}}{${d}}\\)`);
   source = source.replace(/(^|[(:]\s*)([A-Za-z0-9α-ωΑ-Ω][^,.;!?]*?(?:=|<|>|≤|≥|≠|≈|→|↦)[^,.;!?]*)(?=\s*[,.;!?]|$)/g,(_m,prefix,formula)=>`${prefix}${wrapFormula(formula)}`);
