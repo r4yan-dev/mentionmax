@@ -1,0 +1,10 @@
+.latex-content { line-height: 1.7; overflow-wrap: anywhere; }
+.latex-math { display: inline-flex; align-items: baseline; font-family: "Cambria Math", "STIX Two Math", "STIXGeneral", serif; font-size: 1.03em; white-space: nowrap; }
+.latex-math--display { display: flex; width: 100%; justify-content: center; margin: 0.7rem 0; font-size: 1.12em; }
+.latex-frac { display: inline-flex; flex-direction: column; vertical-align: middle; align-items: center; line-height: 1.05; margin: 0 0.12em; }
+.latex-frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 0.18em 0.06em; }
+.latex-frac > span:last-child { padding: 0.06em 0.18em 0; }
+.latex-root { display: inline-flex; align-items: flex-start; vertical-align: middle; }
+.latex-root > sup { font-size: 0.65em; margin-right: -0.15em; margin-top: 0.05em; }
+.latex-root > span { border-top: 1px solid currentColor; padding: 0 0.14em; }
+.latex-content sup, .latex-content sub { line-height: 0; }
