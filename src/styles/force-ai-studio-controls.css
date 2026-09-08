@@ -1,14 +1,8 @@
-/* Keep the AI Studio and personal-library controls visible. */
-body .ai-studio-v2 .ai-studio-library-button {
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-body .ai-studio-v2 .ai-library-scrim.is-open,
-body .ai-studio-v2 .ai-library-drawer.is-open {
-  visibility: visible !important;
-  opacity: 1 !important;
+/* AI Studio resource controls. Library navigation stays in the authenticated sidebar. */
+body .ai-studio-v2 .ai-studio-library-button,
+body .ai-studio-v2 .ai-library-scrim,
+body .ai-studio-v2 .ai-library-drawer {
+  display: none !important;
 }
 
 body .ai-studio-v2 .ai-studio-v2__bottom-actions {
@@ -21,6 +15,10 @@ body .ai-studio-v2 .ai-resource-action {
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+body .ai-studio-v2 .ai-resource-action--save[data-saved="true"] svg {
+  fill: currentColor !important;
 }
 
 body .library-page .library-export-actions,
