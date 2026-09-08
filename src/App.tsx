@@ -11,7 +11,7 @@ import Exams from "./pages/Exams";
 import Tests from "./pages/Tests";
 import NationalExams from "./pages/NationalExams";
 import ExamReader from "./pages/ExamReader";
-import AiStudioGenerator from "./pages/AiStudioGenerator";
+import AiStudioGenerator from "./pages/AiStudioGeneratorV2";
 import AIHelp from "./pages/AIHelp";
 import Handnotes from "./pages/Handnotes";
 import WritingLab from "./pages/WritingLab";
