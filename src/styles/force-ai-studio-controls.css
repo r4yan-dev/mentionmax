@@ -1,0 +1,37 @@
+/* Keep the AI Studio and personal-library controls visible. */
+body .ai-studio-v2 .ai-studio-library-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body .ai-studio-v2 .ai-library-scrim.is-open,
+body .ai-studio-v2 .ai-library-drawer.is-open {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body .ai-studio-v2 .ai-studio-v2__bottom-actions {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body .ai-studio-v2 .ai-resource-action {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body .library-page .library-export-actions,
+body .library-page .library-export-actions .generator-btn {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 700px) {
+  body .ai-studio-v2 .ai-studio-v2__bottom-actions {
+    display: grid !important;
+  }
+}
