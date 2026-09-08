@@ -5,6 +5,7 @@ import { useAccount } from "../context/AccountContext";
 import { useAuth } from "../context/AuthContext";
 import { resolveUserPath } from "../data/curriculum/secondBac";
 import { contentCatalogService } from "../services/content/contentCatalogService";
+import { correctExerciseWithAI, type AICorrectionResult } from "../services/ai/aiCorrector";
 import { getMissionHeliosProgress, saveMissionHeliosProgress } from "../features/exercises/missionHeliosProgress";
 import { missionHeliosByDay, missionHeliosById } from "../data/mock/missionHeliosBank";
 import { LatexText } from "../components/ui/LatexText";
@@ -16,6 +17,13 @@ const difficultyLabels = ["", "Très facile", "Facile", "Intermédiaire", "Diffi
 type RunnerExercise = Exercise & { missionDay?: number; missionObjective?: string; context?: string; parts?: string[]; animation?: string };
 
 function trackIdForPath(path: ReturnType<typeof resolveUserPath>) { return path === "SP" ? "SP" : path === "SMA" ? "SMA" : "SMB"; }
+
+const verdictLabels = {
+  correct: "Correct",
+  mostly_correct: "Presque correct",
+  partially_correct: "Partiellement correct",
+  incorrect: "À reprendre",
+} as const;
 
 export default function FocusExercise() {
   const { exerciseId } = useParams();
@@ -36,6 +44,8 @@ export default function FocusExercise() {
   const [done, setDone] = useState(false);
   const [hint, setHint] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiResult, setAiResult] = useState<AICorrectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,6 +53,7 @@ export default function FocusExercise() {
     async function load() {
       setError(null);
       setDone(false);
+      setAiResult(null);
       setAnswers(parts.map(() => ""));
       if (!exercise || !isHelios || !user) return;
       try {
@@ -67,6 +78,21 @@ export default function FocusExercise() {
   const next = index >= 0 ? dayExercises[index + 1] : undefined;
   const answered = answers.filter((value) => value.trim()).length;
 
+  async function runAICorrection() {
+    if (!user || !answered || aiBusy) return;
+    setAiBusy(true);
+    setError(null);
+    try {
+      const result = await correctExerciseWithAI({ exercise, answers, trackId });
+      setAiResult(result);
+    } catch (correctionError) {
+      console.error(correctionError);
+      setError(correctionError instanceof Error ? correctionError.message : "Le correcteur IA est momentanément indisponible.");
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   async function complete() {
     if (!isHelios || !user || !answered || busy) return;
     setBusy(true);
@@ -87,6 +113,12 @@ export default function FocusExercise() {
     try { await saveMissionHeliosProgress(exercise.id, answers, false); } catch (saveError) { console.error(saveError); }
   }
 
+  function updateAnswer(indexPart: number, value: string) {
+    setDone(false);
+    setAiResult(null);
+    setAnswers((current) => current.map((answer, indexValue) => indexValue === indexPart ? value : answer));
+  }
+
   return <main className="focus-exercise-page helios-runner-page"><div className="helios-runner-shell">
     <header className="helios-runner-header"><button className="runner-back" onClick={() => navigate(isHelios ? "/exercices?collection=helios&subject=maths" : "/exercices")}><ArrowLeft size={16} /> Exercices</button>{isHelios ? <div className="helios-runner-progress"><div className="helios-runner-progress__top"><span>MISSION HELIOS · JOUR {String(exercise.missionDay).padStart(2,"0")}</span><strong>Exercice {index + 1}/20</strong></div><div className="helios-progress-track"><div style={{ width: `${((index + 1) / 20) * 100}%` }} /></div></div> : <div className="helios-runner-progress"><div className="helios-runner-progress__top"><span>{path}</span><strong>Exercice</strong></div></div>}<span className={`exercise-difficulty difficulty-${exercise.difficulty}`}>{difficultyLabels[exercise.difficulty]}</span></header>
 
@@ -94,12 +126,25 @@ export default function FocusExercise() {
 
     <section className="focus-question-card helios-question-card"><div className="helios-question-meta"><span><Sparkles size={14} /> {isHelios ? "MISSION HELIOS" : "EXERCICE"}</span><span><Clock3 size={14} /> {exercise.estimatedMinutes} min</span>{done ? <span className="helios-complete-badge"><CheckCircle2 size={14} /> Terminé</span> : null}</div><h1>{exercise.title}</h1><div className="helios-context-box"><span className="section-eyebrow">CONTEXTE</span><LatexText>{exercise.context ?? exercise.statement}</LatexText></div><div className="helios-objective-box"><Target size={17} /><div><span>Objectif</span><strong>{exercise.missionObjective ?? "Résoudre et justifier."}</strong></div></div>
 
-      <div className="helios-parts"><div className="helios-parts__header"><div><span className="section-eyebrow">TRAVAIL À EFFECTUER</span><h2>{parts.length} partie{parts.length > 1 ? "s" : ""}</h2></div><span>{answered}/{parts.length} remplie{answered > 1 ? "s" : ""}</span></div>{parts.map((part, indexPart) => <label className="helios-part" key={`${exercise.id}-${indexPart}`}><span className="helios-part__number">{String.fromCharCode(97 + indexPart)}</span><div className="helios-part__content"><LatexText>{part}</LatexText><textarea value={answers[indexPart] ?? ""} rows={5} disabled={done} onBlur={() => void saveDraft()} onChange={(event) => { setDone(false); setAnswers((current) => current.map((value, index) => index === indexPart ? event.target.value : value)); }} placeholder="Écris ton raisonnement ici..." /></div></label>)}</div>
+      <div className="helios-parts"><div className="helios-parts__header"><div><span className="section-eyebrow">TRAVAIL À EFFECTUER</span><h2>{parts.length} partie{parts.length > 1 ? "s" : ""}</h2></div><span>{answered}/{parts.length} remplie{answered > 1 ? "s" : ""}</span></div>{parts.map((part, indexPart) => <label className="helios-part" key={`${exercise.id}-${indexPart}`}><span className="helios-part__number">{String.fromCharCode(97 + indexPart)}</span><div className="helios-part__content"><LatexText>{part}</LatexText><textarea value={answers[indexPart] ?? ""} rows={5} disabled={done || aiBusy} onBlur={() => void saveDraft()} onChange={(event) => updateAnswer(indexPart, event.target.value)} placeholder="Écris ton raisonnement ici..." /></div></label>)}</div>
 
-      <div className="helios-work-footer"><div className="helios-animation-note"><Sparkles size={15} /> <span>{exercise.animation ?? "Visualisation du raisonnement prévue dans l’interface."}</span></div>{isHelios ? <button className="btn btn-primary" disabled={!user || !answered || busy || done} onClick={() => void complete()}>{busy ? <><Loader2 size={16} /> Enregistrement...</> : done ? <><CheckCircle2 size={16} /> Exercice terminé</> : <>Terminer <CheckCircle2 size={16} /></>}</button> : <Link to="/exercices" className="btn btn-primary">Valider ma session <ArrowRight size={16} /></Link>}</div>
-      <div className="helios-runner-tools"><button className="runner-tool-button" onClick={() => setHint((value) => !value)}><Lightbulb size={16} /> {hint ? "Masquer le rappel" : "Afficher un rappel"}</button>{isHelios && busy ? <span>Enregistrement...</span> : null}</div>{hint ? <div className="helios-hint-box"><strong>Rappel de méthode</strong><p>{exercise.hint ?? "Identifie la notion, écris la propriété utilisée, puis avance étape par étape avant de vérifier le résultat."}</p></div> : null}{error ? <div className="helios-save-error">{error}</div> : null}{done ? <section className="helios-correction-panel"><div className="helios-correction-panel__icon"><CheckCircle2 size={21} /></div><div><span className="section-eyebrow">CORRECTION</span><h2>Compare ton raisonnement</h2><p><LatexText>{exercise.correction}</LatexText></p></div></section> : null}
+      <div className="helios-work-footer"><div className="helios-animation-note"><Sparkles size={15} /> <span>{exercise.animation ?? "Le correcteur analyse chaque étape de ton raisonnement."}</span></div><div className="helios-ai-actions">{!aiResult ? <button className="btn btn-primary" disabled={!user || !answered || aiBusy || done} onClick={() => void runAICorrection()}>{aiBusy ? <><Loader2 size={16} className="helios-spin" /> Analyse...</> : <>Corriger avec l’IA <Sparkles size={16} /></>}</button> : isHelios ? <button className="btn btn-primary" disabled={!user || !answered || busy || done} onClick={() => void complete()}>{busy ? <><Loader2 size={16} className="helios-spin" /> Enregistrement...</> : done ? <><CheckCircle2 size={16} /> Exercice terminé</> : <>Terminer l’exercice <CheckCircle2 size={16} /></>}</button> : <button className="btn btn-primary" onClick={() => void runAICorrection()} disabled={aiBusy}>{aiBusy ? <><Loader2 size={16} className="helios-spin" /> Nouvelle analyse...</> : <>Recalculer <Sparkles size={16} /></>}</button>}</div></div>
+      <div className="helios-runner-tools"><button className="runner-tool-button" onClick={() => setHint((value) => !value)}><Lightbulb size={16} /> {hint ? "Masquer le rappel" : "Afficher un rappel"}</button>{aiBusy ? <span className="helios-saving-status"><Loader2 size={13} className="helios-spin" /> Le correcteur analyse ton raisonnement…</span> : null}</div>{hint ? <div className="helios-hint-box"><strong>Rappel de méthode</strong><p>{exercise.hint ?? "Identifie la notion, écris la propriété utilisée, puis avance étape par étape avant de vérifier le résultat."}</p></div> : null}{error ? <div className="helios-save-error">{error}</div> : null}
+
+      {aiResult ? <AICorrectionPanel result={aiResult} /> : null}
     </section>
 
     {isHelios ? <nav className="helios-runner-nav"><button className="runner-nav-button" disabled={!previous} onClick={() => previous && navigate(`/exercices/${previous.id}`)}><ArrowLeft size={18} /><span><small>Précédent</small><strong>{previous?.title ?? "Premier exercice"}</strong></span></button><span className="runner-day-status">J{String(exercise.missionDay).padStart(2,"0")} · {index + 1}/20</span><button className="runner-nav-button runner-nav-button--next" disabled={!next} onClick={() => next && navigate(`/exercices/${next.id}`)}><span><small>Suivant</small><strong>{next?.title ?? "Fin de la journée"}</strong></span><ArrowRight size={18} /></button></nav> : null}
   </div></main>;
+}
+
+function AICorrectionPanel({ result }: { result: AICorrectionResult }) {
+  return <section className={`helios-ai-correction verdict-${result.verdict}`}>
+    <div className="helios-ai-correction__header"><div><span className="section-eyebrow">CORRECTEUR IA</span><h2>{verdictLabels[result.verdict]}</h2></div>{result.score !== null ? <div className="helios-ai-score"><strong>{result.score}</strong><span>/20</span></div> : null}</div>
+    <p className="helios-ai-summary">{result.summary}</p>
+    {result.strengths.length > 0 ? <div className="helios-ai-block"><strong>Ce qui est réussi</strong><ul>{result.strengths.map((strength, index) => <li key={`strength-${index}`}>{strength}</li>)}</ul></div> : null}
+    {result.errors.length > 0 ? <div className="helios-ai-block"><strong>À corriger</strong><div className="helios-ai-errors">{result.errors.map((error, index) => <article key={`error-${index}`}><span>{error.location}</span><p><b>Attendu :</b> {error.expected}</p><p><b>Dans ta copie :</b> {error.observed}</p><p><b>Correction :</b> {error.fix}</p></article>)}</div></div> : null}
+    {result.correctedSolution ? <div className="helios-ai-block"><strong>Solution corrigée</strong><div className="helios-ai-solution"><LatexText>{result.correctedSolution}</LatexText></div></div> : null}
+    <div className="helios-ai-next"><Sparkles size={15} /><div><span>Prochaine action</span><strong>{result.nextStep}</strong></div></div>
+  </section>;
 }
