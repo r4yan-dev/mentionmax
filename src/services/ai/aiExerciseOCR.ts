@@ -29,11 +29,8 @@ async function getFunctionError(error: unknown) {
       const payload = (await error.context.json()) as FunctionResponse;
       if (payload?.detail) return `${payload.error ?? "Le service OCR IA est indisponible."} ${payload.detail}`;
       if (payload?.error) return payload.error;
-    } catch {
-      // Fall back to the SDK error below.
-    }
+    } catch {}
   }
-
   if (error instanceof FunctionsRelayError) return `Relais Supabase indisponible : ${error.message}`;
   if (error instanceof FunctionsFetchError) return `Réseau Supabase indisponible : ${error.message}`;
   if (error instanceof Error && error.message.trim()) return error.message;
