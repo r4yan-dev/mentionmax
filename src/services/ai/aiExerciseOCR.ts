@@ -46,35 +46,41 @@ export async function extractExerciseOCR(file: File): Promise<AIExerciseOCRResul
     throw new Error("Le fichier est trop volumineux. Limite de 15 Mo pour le scanner.");
   }
 
-  try {
-    const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-ocr-v2", {
-      headers: {
-        "Content-Type": file.type,
-        "X-File-Mime-Type": file.type,
-      },
-      body: file,
-    });
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const request = supabase.functions.invoke<FunctionResponse>("ai-exercise-ocr-v2", {
+        headers: {
+          "Content-Type": file.type,
+          "X-File-Mime-Type": file.type,
+        },
+        body: file,
+      });
 
-    const { data, error } = await Promise.race([
-      request,
-      new Promise<never>((_, reject) => {
-        window.setTimeout(() => {
-          reject(new Error("Le scanner a dépassé 90 secondes. Vérifie le fichier et réessaie avec une image/PDF plus léger."));
-        }, OCR_TIMEOUT_MS);
-      }),
-    ]);
+      const { data, error } = await Promise.race([
+        request,
+        new Promise<never>((_, reject) => {
+          window.setTimeout(() => {
+            reject(new Error("Le scanner a dépassé 90 secondes. Vérifie le fichier et réessaie avec une image/PDF plus léger."));
+          }, OCR_TIMEOUT_MS);
+        }),
+      ]);
 
-    if (error) throw error;
-    if (!data?.success || !data.data) {
-      throw new Error(
-        data?.detail
-          ? `${data.error ?? "Le service OCR IA est indisponible."} ${data.detail}`
-          : data?.error ?? "Le service OCR IA est indisponible.",
-      );
+      if (error) throw error;
+      if (!data?.success || !data.data) {
+        throw new Error(
+          data?.detail
+            ? `${data.error ?? "Le service OCR IA est indisponible."} ${data.detail}`
+            : data?.error ?? "Le service OCR IA est indisponible.",
+        );
+      }
+
+      return data.data;
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) await new Promise((resolve) => window.setTimeout(resolve, 900));
     }
-
-    return data.data;
-  } catch (error) {
-    throw new Error(await getFunctionError(error));
   }
+
+  throw new Error(await getFunctionError(lastError));
 }
