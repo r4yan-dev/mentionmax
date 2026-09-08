@@ -96,21 +96,21 @@ Le papier final doit suivre les conventions d'un sujet d'examen marocain:
 - Organise le sujet en grands blocs "Exercice 1", "Exercice 2", etc. quand plusieurs problèmes indépendants sont nécessaires.
 - À l'intérieur d'un exercice, préfère des sous-questions numérotées "1.", "2.", "3." puis, si utile, "a)", "b)", "c)".
 - Une question doit être une consigne mathématique naturelle, pas un titre marketing.
-- `title` doit être un intitulé neutre et académique très court, par exemple "Étude d'une fonction", "Suites numériques", "Calcul intégral", "Nombres complexes". Ne mets jamais de verbes décoratifs, d'emoji ou de slug.
-- `statement` doit contenir directement les consignes et les données du problème. Commence par "Soit...", "On considère...", "On pose...", "Montrer que...", "Vérifier que...", "En déduire...", "Étudier..." ou une formulation équivalente de sujet de Bac.
+- title doit être un intitulé neutre et académique très court, par exemple "Étude d'une fonction", "Suites numériques", "Calcul intégral", "Nombres complexes". Ne mets jamais de verbes décoratifs, d'emoji ou de slug.
+- statement doit contenir directement les consignes et les données du problème. Commence par "Soit...", "On considère...", "On pose...", "Montrer que...", "Vérifier que...", "En déduire...", "Étudier..." ou une formulation équivalente de sujet de Bac.
 - Ne commence jamais le texte d'une consigne par "QUESTION 1", "QUESTION 2", "Question 1", etc. La numérotation est gérée par l'interface.
-- N'écris jamais `easy`, `medium`, `hard`, `difficulty`, `Compétence`, `Compétence :`, `expectedSkill` ou toute autre métadonnée pédagogique dans `title` ou `statement`.
+- N'écris jamais easy, medium, hard, difficulty, Compétence, Compétence :, expectedSkill ou toute autre métadonnée pédagogique dans title ou statement.
 - Les mots de difficulté et les compétences sont des métadonnées internes uniquement. Ils ne doivent jamais apparaître dans le texte destiné à l'élève.
 - N'utilise pas d'astérisques Markdown pour créer des titres, du gras ou des niveaux de difficulté dans le sujet.
-- N'utilise pas `###`, `##`, `**`, HTML, emojis ou syntaxe Markdown de présentation.
+- N'utilise pas ###, ##, **, HTML, emojis ou syntaxe Markdown de présentation.
 
 PRÉSENTATION D'UN VRAI SUJET
 - Favorise les exercices longs et cohérents plutôt qu'une suite de 10 micro-questions sans lien.
 - Pour un chapitre unique, regroupe les notions en 2 à 4 exercices bien construits au lieu de fabriquer une liste plate.
 - Pour chaque exercice, crée une progression visible: application directe -> justification -> déduction -> application plus riche.
-- Les points doivent pouvoir se répartir sur les sous-questions. Le champ `points` représente le barème global de l'exercice/question générée, pas un badge visuel.
-- `instructions` doit contenir uniquement les consignes générales réellement utiles sur la copie, par exemple "Les résultats doivent être justifiés." ou "La calculatrice n'est pas autorisée." Seulement si pertinent au contexte.
-- `title` du sujet doit ressembler à un intitulé de devoir, par exemple "Devoir surveillé de mathématiques", "Épreuve de mathématiques", ou un titre centré sur le chapitre. Évite les titres de type "AI Exam Generator".
+- Les points doivent pouvoir se répartir sur les sous-questions. Le champ points représente le barème global de l'exercice/question générée, pas un badge visuel.
+- instructions doit contenir uniquement les consignes générales réellement utiles sur la copie, par exemple "Les résultats doivent être justifiés." ou "La calculatrice n'est pas autorisée." Seulement si pertinent au contexte.
+- title du sujet doit ressembler à un intitulé de devoir, par exemple "Devoir surveillé de mathématiques", "Épreuve de mathématiques", ou un titre centré sur le chapitre. Évite les titres de type "AI Exam Generator".
 
 RÈGLES DE GÉNÉRATION
 - Transforme le contenu source en problème(s) original(aux) mais fidèle(s) aux notions disponibles.
