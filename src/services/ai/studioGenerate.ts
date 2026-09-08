@@ -19,6 +19,34 @@ export type StudioGenerationResponse<T = unknown> = {
   detail?: string;
 };
 
+let lastSelectedMode: StudioGenerationMode | null = null;
+
+const modeFromLabel: Record<string, StudioGenerationMode> = {
+  "leçon menti": "handnote",
+  "résumé": "summary",
+  "flashcards": "flashcards",
+  "quiz": "quiz",
+};
+
+if (typeof document !== "undefined") {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest(".generator-mode");
+    if (!button) return;
+    const label = button.textContent?.replace(/\s+/g, " ").trim().toLocaleLowerCase() ?? "";
+    const matched = Object.entries(modeFromLabel).find(([name]) => label.includes(name));
+    if (matched) lastSelectedMode = matched[1];
+  });
+}
+
+function resolveGenerationMode(inputMode: StudioGenerationMode): StudioGenerationMode {
+  // YouTube previously forced handnote inside the page. Keep the user's latest
+  // explicit format selection authoritative, even when that old path still passes
+  // "handnote" to this shared service.
+  return lastSelectedMode ?? inputMode;
+}
+
 async function getErrorMessage(error: unknown) {
   if (FunctionsHttpError && error instanceof FunctionsHttpError) {
     try {
@@ -35,9 +63,10 @@ export async function generateStudioResource<T = unknown>(input: StudioGeneratio
   const text = input.text.trim();
   if (!text) throw new Error("Le texte source est vide.");
 
+  const mode = resolveGenerationMode(input.mode);
   const { data, error } = await supabase.functions.invoke("ai-studio-generate", {
     body: {
-      mode: input.mode,
+      mode,
       text,
       subject: input.subject?.trim() || undefined,
       chapter: input.chapter?.trim() || undefined,
