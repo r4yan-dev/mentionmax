@@ -18,8 +18,8 @@ function loadMathJax(): Promise<void> {
 
   window.MathJax = window.MathJax || {};
   window.MathJax.tex = {
-    inlineMath: [["\\(", "\\)"], ["$", "$"]],
-    displayMath: [["\\[", "\\]"], ["$$", "$$"]],
+    inlineMath: [["\\(", "\\)"]],
+    displayMath: [["\\[", "\\]"]],
   };
 
   mathJaxPromise = new Promise((resolve, reject) => {
@@ -64,7 +64,7 @@ function normalize(value: string): string {
 
 function protectLatex(text: string): { source: string; tokens: string[] } {
   const tokens: string[] = [];
-  const source = text.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$\$[\s\S]*?\$\$/g,(match)=>{ const token=`@@MM_LATEX_${tokens.length}@@`; tokens.push(match); return token; });
+  const source = text.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)/g,(match)=>{ const token=`@@MM_LATEX_${tokens.length}@@`; tokens.push(match); return token; });
   return { source, tokens };
 }
 function restoreLatex(text: string, tokens: string[]): string { return text.replace(/@@MM_LATEX_(\d+)@@/g,(_m,i)=>tokens[Number(i)] ?? _m); }
@@ -92,7 +92,7 @@ export function LatexText({ children, className, display=false }: { children: st
     const element=ref.current;
     if (!element) return;
     element.textContent=latex;
-    if (!latex.includes("\\(") && !latex.includes("\\[") && !latex.includes("$$") && !latex.includes("$")) return;
+    if (!latex.includes("\\(") && !latex.includes("\\[")) return;
     void loadMathJax().then(async()=>{ if (!cancelled && window.MathJax?.typesetPromise && ref.current) await window.MathJax.typesetPromise([ref.current]); }).catch(()=>undefined);
     return ()=>{cancelled=true;};
   },[latex]);
