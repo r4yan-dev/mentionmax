@@ -10,6 +10,27 @@ const HEADERS = {
   "Cache-Control": "no-store",
 };
 
+const MOROCCAN_MATHS_PROFILE = `
+MOROCCAN 2BAC MATHS GENERATION PROFILE
+- Generate connected mathematical problems, not random unrelated questions.
+- When appropriate, later questions must reuse earlier results. Treat question order as part of the pedagogy.
+- Common progression: direct technique -> proof/verification -> deduction -> application -> deeper reasoning -> synthesis/graphical interpretation.
+- Functions often follow: domain/continuity -> limits -> infinite branch -> derivative -> sign -> variations -> zeros/equations -> relative position -> tangent/asymptote -> concavity -> graph -> integral.
+- Auxiliary-function pattern is common: study g -> establish sign of g -> express/use f' through g -> deduce variations of f -> continue to equation/graph/application.
+- Sequences often follow: first term -> invariant interval/bounds -> positivity -> monotonicity -> convergence -> limit -> estimate/inequality; transformations such as v_n=phi(u_n) may be introduced to reveal a geometric/arithmetic sequence.
+- Complex-number problems often bridge algebra and geometry: equation in C -> algebraic/trigonometric form -> module/argument -> affixes -> rotation/translation/homothety -> angle/alignment/triangle/circle conclusion.
+- Integral problems often chain primitive recognition -> integration by parts -> definite integral -> deduction -> area.
+- Probability problems often chain sample space -> event probability -> random variable values -> probability law -> expectation -> standard deviation.
+- Reciprocal-function problems often chain continuity -> strict monotonicity -> image -> inverse existence -> inverse values/comparison -> formula.
+- Short independent questions should only be used when the source pattern explicitly calls for independence.
+- Moroccan instruction verbs have mathematical roles: "Montrer que" = proof, "Vérifier que" = short verification, "En déduire" = dependent deduction, "Étudier" = structured study, "Dresser le tableau" = organize established sign/variation information, "Interpréter géométriquement" = translate analytic result into geometry, "Construire/Tracer" = final representation.
+- Difficulty should come mainly from reasoning, deduction, dependency and representation changes, not ugly coefficients.
+- Build the barème with the question. Prefer small, evidence-based allocations and do not double-count the same reasoning.
+- Use concise formal French consistent with Moroccan 2BAC assessment.
+- For mathematics use standard notation such as R, C, N, intervals, limits, derivatives, integrals, affine/complex notation and LaTeX. Never wrap formulas in dollar or other math delimiters inside JSON strings.
+- Never introduce concepts absent from the supplied source or selected curriculum.
+`;
+
 const schema = {
   type: "object",
   properties: {
@@ -61,12 +82,45 @@ function prompt(input: {
     input.weakPoints?.length ? `Faiblesses à cibler: ${input.weakPoints.join(", ")}` : "",
   ].filter(Boolean).join("\n");
 
-  return `Tu es le générateur d'examens de MentionMax pour le baccalauréat marocain 2BAC.\n\n${meta}\n\nOBJECTIF\nCrée un vrai sujet d'entraînement à partir UNIQUEMENT du contenu source. Il doit ressembler à un devoir sérieux de niveau Bac, avec progression de difficulté, barème cohérent et correction exploitable.\n\nRÈGLES PÉDAGOGIQUES\n- Ne fabrique pas de notion absente de la source.\n- Transforme la source en questions, au lieu de simplement recopier ses phrases.\n- Mélange compréhension, application, raisonnement et exercices plus exigeants.\n- Chaque question doit tester une compétence identifiable.\n- Le total des points doit être cohérent, idéalement sur 20 si le sujet est court, sinon indique le total réel.\n- Évite les questions ambiguës ou dépendantes d'informations non fournies.\n- Pour un enchaînement de sous-questions, fais progresser la difficulté.\n- Si des faiblesses sont fournies, donne-leur davantage de poids sans rendre le sujet artificiel.\n- Pour le parcours SMB, n'introduis jamais de SVT.\n\nFORMAT MATHÉMATIQUE\n- Écris toutes les expressions mathématiques en LaTeX BRUT, sans délimiteurs.\n- Exemples autorisés: \\frac{a}{b}, x^2, \\sqrt{x}, \\sum_{k=1}^n, \\int_0^1 x^2 dx, \\leq, \\rightarrow.\n- N'écris jamais $...$, $$...$$, \\( ... \\) ou \\[ ... \\].\n- Les chaînes JSON doivent conserver les commandes LaTeX intactes.\n\nCORRECTION\n- Donne une correction complète pour chaque question.\n- La correction doit être concise mais suffisamment détaillée pour comprendre la méthode.\n- Pour les mathématiques et la physique-chimie, montre les étapes utiles, unités et conclusions.\n\nRetourne UNIQUEMENT le JSON conforme au schéma.\n\nSOURCE:\n${input.text}`;
+  return `Tu es le générateur d'examens de MentionMax pour le baccalauréat marocain 2BAC.
+
+${meta}
+
+${MOROCCAN_MATHS_PROFILE}
+
+OBJECTIF
+Crée un vrai sujet d'entraînement à partir UNIQUEMENT du contenu source. Il doit ressembler à un devoir sérieux de niveau Bac, avec progression de difficulté, barème cohérent et correction exploitable.
+
+RÈGLES DE GÉNÉRATION
+- Transforme le contenu source en problème(s) original(aux) mais fidèle(s) aux notions disponibles.
+- Favorise une architecture logique et cumulative quand le chapitre s'y prête.
+- Vérifie mentalement les résultats et la cohérence des questions avant de répondre.
+- Ne donne pas une question difficile simplement parce que les calculs sont longs.
+- Les sous-questions d'un même exercice doivent avoir un lien mathématique clair lorsque l'exercice est construit comme un problème.
+- Si des faiblesses sont fournies, cible-les par des compétences et raisonnements précis sans rendre le sujet artificiel.
+- Pour le parcours SMB, n'introduis jamais de SVT.
+
+FORMAT MATHÉMATIQUE
+- Écris toutes les expressions mathématiques en LaTeX BRUT, sans délimiteurs.
+- Exemples: \\frac{a}{b}, x^2, \\sqrt{x}, \\sum_{k=1}^n, \\int_0^1 x^2 dx, \\leq, \\rightarrow.
+- N'écris jamais $...$, $$...$$, \\( ... \\) ou \\[ ... \\].
+- Les chaînes JSON doivent conserver les commandes LaTeX intactes.
+
+CORRECTION
+- Donne une correction complète pour chaque question.
+- La correction doit suivre exactement la question et montrer les étapes réellement nécessaires.
+- Pour les questions dépendantes, réutilise explicitement les résultats précédents.
+
+Retourne UNIQUEMENT le JSON conforme au schéma.
+
+SOURCE:
+${input.text}`;
 }
 
 function extractText(payload: any): string {
+  const direct = typeof payload?.output_text === "string" ? payload.output_text.trim() : "";
+  if (direct) return direct;
   const parts: string[] = [];
-  if (typeof payload?.output_text === "string") parts.push(payload.output_text);
   for (const key of ["steps", "outputs"]) {
     if (!Array.isArray(payload?.[key])) continue;
     for (const item of payload[key]) {
@@ -81,11 +135,27 @@ function extractText(payload: any): string {
   return parts.join("\n").trim();
 }
 
+function normalizeRaw(raw: string): string {
+  return raw
+    .replace(/^\s*```(?:json)?\s*/i, "")
+    .replace(/\s*```\s*$/i, "")
+    .trim();
+}
+
+function parseJson(raw: string): any {
+  const cleaned = normalizeRaw(raw);
+  try { return JSON.parse(cleaned); } catch {}
+  const first = cleaned.indexOf("{");
+  const last = cleaned.lastIndexOf("}");
+  if (first >= 0 && last > first) return JSON.parse(cleaned.slice(first, last + 1));
+  throw new Error("Gemini a renvoyé un JSON invalide.");
+}
+
 function normalizeMath(value: any): any {
   if (typeof value === "string") {
     return value
-      .replace(/\\\\\\(([\\\\s\\\\S]*?)\\\\\\)/g, "$1")
-      .replace(/\\\\\\[([\\\\s\\\\S]*?)\\\\\\]/g, "$1");
+      .replace(/\\\\\\(([\\s\\S]*?)\\\\\\)/g, "$1")
+      .replace(/\\\\\\[([\\s\\S]*?)\\\\\\]/g, "$1");
   }
   if (Array.isArray(value)) return value.map(normalizeMath);
   if (value && typeof value === "object") {
@@ -154,12 +224,14 @@ Deno.serve(async (req) => {
 
     const raw = extractText(payload);
     try {
-      const result = normalizeMath(JSON.parse(raw));
-      return jsonResponse({ success: true, result, model: MODEL });
+      const result = normalizeMath(parseJson(raw));
+      return jsonResponse({ success: true, result, model: MODEL, profile: "moroccan-maths-v1" });
     } catch (error) {
-      return jsonResponse({ success: false, error: error instanceof Error ? error.message : "Réponse IA invalide.", raw: raw.slice(0, 4000) }, 502);
+      console.error("ai-exam-creator parse failure", { message: error instanceof Error ? error.message : String(error), preview: raw.slice(0, 1200) });
+      return jsonResponse({ success: false, error: error instanceof Error ? error.message : "Réponse IA invalide.", preview: raw.slice(0, 1200) }, 502);
     }
   } catch (error) {
+    console.error("ai-exam-creator unexpected error", error);
     return jsonResponse({ success: false, error: error instanceof Error ? error.message : "Erreur inattendue." }, 500);
   }
 });
