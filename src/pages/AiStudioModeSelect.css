@@ -1,0 +1,156 @@
+/* Output-mode selector: make the Menti lesson the visual primary action while keeping the other formats available. */
+.generator-mode-grid{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:12px;
+  align-items:stretch;
+}
+
+.generator-mode{
+  position:relative;
+  min-height:88px;
+  border:1.5px solid rgba(7,59,58,.10);
+  background:#fffdf5;
+  border-radius:18px 14px 20px 15px;
+  padding:15px 14px;
+  box-shadow:0 4px 0 rgba(7,59,58,.025);
+  overflow:visible;
+}
+
+.generator-mode:hover{
+  transform:translateY(-2px) rotate(-.15deg);
+  border-color:rgba(15,163,163,.38);
+  box-shadow:0 8px 20px rgba(7,59,58,.07),0 3px 0 rgba(7,59,58,.025);
+}
+
+.generator-mode.is-active{
+  border:2px solid #0fa3a3;
+  background:
+    linear-gradient(transparent 27px,rgba(15,163,163,.055) 28px),
+    linear-gradient(90deg,transparent 27px,rgba(15,163,163,.035) 28px),
+    #f5fffc;
+  background-size:28px 28px;
+  box-shadow:7px 8px 0 rgba(7,59,58,.07),0 14px 28px rgba(15,163,163,.10);
+}
+
+/* Featured primary format */
+.generator-mode:first-child{
+  grid-column:span 6;
+  min-height:122px;
+  padding:20px 20px 18px;
+  background:
+    radial-gradient(circle at 90% 15%,rgba(118,33,58,.08),transparent 27%),
+    linear-gradient(transparent 30px,rgba(23,59,57,.055) 31px),
+    #fffdf5;
+  background-size:auto,31px 31px,auto;
+  transform:rotate(-.25deg);
+}
+
+.generator-mode:first-child:hover{transform:translateY(-2px) rotate(-.45deg)}
+.generator-mode:first-child.is-active{transform:rotate(-.35deg)}
+
+.generator-mode:first-child::after{
+  content:"RECOMMANDÉ POUR YOUTUBE";
+  position:absolute;
+  top:-12px;
+  right:18px;
+  padding:6px 9px;
+  border-radius:3px;
+  background:#fff19a;
+  color:#635900;
+  font-family:"Permanent Marker",cursive;
+  font-size:9px;
+  line-height:1;
+  letter-spacing:.03em;
+  transform:rotate(3deg);
+  box-shadow:3px 4px 0 rgba(7,59,58,.08);
+}
+
+.generator-mode:first-child .generator-mode__icon{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+  border-radius:14px 10px 13px 11px;
+  background:#ddf5f1;
+  color:#073b3a;
+  transform:rotate(-3deg);
+}
+
+.generator-mode:first-child.is-active .generator-mode__icon{
+  background:#0fa3a3;
+  color:#fff;
+}
+
+.generator-mode:first-child strong{
+  font-family:"Kalam",cursive;
+  font-size:25px;
+  line-height:1;
+  letter-spacing:-.02em;
+  color:#073b3a;
+}
+
+.generator-mode:first-child small{
+  max-width:470px;
+  margin-top:3px;
+  font-family:"Patrick Hand",cursive;
+  font-size:17px;
+  line-height:1.2;
+  color:#506d68;
+}
+
+/* Secondary formats */
+.generator-mode:nth-child(2),
+.generator-mode:nth-child(3),
+.generator-mode:nth-child(4){
+  grid-column:span 2;
+  align-items:flex-start;
+  min-height:122px;
+  padding:15px 13px;
+  background:#fbfcfa;
+}
+
+.generator-mode:nth-child(2){transform:rotate(.35deg)}
+.generator-mode:nth-child(3){transform:rotate(-.25deg) translateY(5px)}
+.generator-mode:nth-child(4){transform:rotate(.45deg) translateY(1px)}
+.generator-mode:nth-child(2):hover{transform:translateY(-2px) rotate(.15deg)}
+.generator-mode:nth-child(3):hover{transform:translateY(-2px) rotate(-.45deg)}
+.generator-mode:nth-child(4):hover{transform:translateY(-2px) rotate(.2deg)}
+
+.generator-mode:nth-child(n+2) .generator-mode__icon{
+  width:36px;
+  height:36px;
+  flex-basis:36px;
+  border-radius:11px;
+}
+
+.generator-mode:nth-child(n+2) strong{
+  font-family:"Kalam",cursive;
+  font-size:19px;
+  line-height:1.05;
+  color:#183f3b;
+}
+
+.generator-mode:nth-child(n+2) small{
+  font-family:"Patrick Hand",cursive;
+  font-size:14px;
+  line-height:1.15;
+  color:#718582;
+}
+
+@media (max-width:900px){
+  .generator-mode:first-child{grid-column:span 12}
+  .generator-mode:nth-child(2),
+  .generator-mode:nth-child(3),
+  .generator-mode:nth-child(4){grid-column:span 4;min-height:104px}
+}
+
+@media (max-width:620px){
+  .generator-mode-grid{grid-template-columns:1fr}
+  .generator-mode:first-child,
+  .generator-mode:nth-child(2),
+  .generator-mode:nth-child(3),
+  .generator-mode:nth-child(4){grid-column:span 1;min-height:auto}
+  .generator-mode:first-child{padding:18px 16px}
+  .generator-mode:first-child strong{font-size:23px}
+  .generator-mode:first-child small{font-size:15px}
+}
