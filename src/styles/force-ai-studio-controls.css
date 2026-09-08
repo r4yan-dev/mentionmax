@@ -1,4 +1,4 @@
-/* AI Studio resource controls. Keep the compact Library drawer inside AI Studio, with the full Library page accessible elsewhere when needed. */
+/* AI Studio resource controls. The compact Library drawer stays inside AI Studio. */
 body .ai-studio-v2 .ai-studio-library-button {
   display: inline-flex !important;
   visibility: visible !important;
@@ -32,42 +32,37 @@ body .ai-studio-v2 .ai-resource-action--save[data-saved="true"] svg {
   fill: currentColor !important;
 }
 
+/* Give every saved-resource row a fixed, private delete zone. */
 body .ai-studio-v2 .ai-library-item {
   position: relative !important;
-  padding-right: 52px !important;
+  padding-right: 64px !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
 }
 
-body .ai-studio-v2 .ai-library-delete {
+body .ai-studio-v2 .ai-library-item::after {
+  content: "" !important;
   position: absolute !important;
   top: 50% !important;
-  right: 10px !important;
+  right: 13px !important;
+  width: 36px !important;
+  height: 36px !important;
   transform: translateY(-50%) !important;
-  z-index: 2 !important;
-  width: 34px !important;
-  height: 34px !important;
-  display: grid !important;
-  place-items: center !important;
-  border: 0 !important;
   border-radius: 11px !important;
-  background: transparent !important;
-  color: #76213a !important;
-  cursor: pointer !important;
-  box-shadow: none !important;
+  background-color: #76213a !important;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 7h16M9 7V4h6v3m-9 0 1 13h8l1-13M10 11v6m4-6v6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px 18px no-repeat !important;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 7h16M9 7V4h6v3m-9 0 1 13h8l1-13M10 11v6m4-6v6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px 18px no-repeat !important;
+  opacity: .9 !important;
+  pointer-events: none !important;
 }
 
-body .ai-studio-v2 .ai-library-delete:hover {
-  background: rgba(118, 33, 58, .09) !important;
-  transform: translateY(-50%) scale(1.04) !important;
+body .ai-studio-v2 .ai-library-item:hover::after {
+  opacity: 1 !important;
+  background-color: #76213a !important;
 }
 
-body .ai-studio-v2 .ai-library-delete:disabled {
-  opacity: .45 !important;
-  cursor: wait !important;
-}
-
-body .ai-studio-v2 .ai-library-delete svg {
-  width: 17px !important;
-  height: 17px !important;
+body .ai-studio-v2 .ai-library-item[data-deleting="true"]::after {
+  opacity: .35 !important;
 }
 
 body .library-page .library-export-actions,
