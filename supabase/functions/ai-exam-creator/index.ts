@@ -89,7 +89,28 @@ ${meta}
 ${MOROCCAN_MATHS_PROFILE}
 
 OBJECTIF
-Crée un vrai sujet d'entraînement à partir UNIQUEMENT du contenu source. Il doit ressembler à un devoir sérieux de niveau Bac, avec progression de difficulté, barème cohérent et correction exploitable.
+Crée un vrai sujet d'entraînement à partir UNIQUEMENT du contenu source. Il doit ressembler à un sujet marocain de 2BAC que l'élève pourrait réellement recevoir sur une feuille A4, pas à une fiche web, une carte SaaS, un quiz ou une liste de prompts.
+
+RÈGLE CENTRALE DE STRUCTURE
+Le papier final doit suivre les conventions d'un sujet d'examen marocain:
+- Organise le sujet en grands blocs "Exercice 1", "Exercice 2", etc. quand plusieurs problèmes indépendants sont nécessaires.
+- À l'intérieur d'un exercice, préfère des sous-questions numérotées "1.", "2.", "3." puis, si utile, "a)", "b)", "c)".
+- Une question doit être une consigne mathématique naturelle, pas un titre marketing.
+- `title` doit être un intitulé neutre et académique très court, par exemple "Étude d'une fonction", "Suites numériques", "Calcul intégral", "Nombres complexes". Ne mets jamais de verbes décoratifs, d'emoji ou de slug.
+- `statement` doit contenir directement les consignes et les données du problème. Commence par "Soit...", "On considère...", "On pose...", "Montrer que...", "Vérifier que...", "En déduire...", "Étudier..." ou une formulation équivalente de sujet de Bac.
+- Ne commence jamais le texte d'une consigne par "QUESTION 1", "QUESTION 2", "Question 1", etc. La numérotation est gérée par l'interface.
+- N'écris jamais `easy`, `medium`, `hard`, `difficulty`, `Compétence`, `Compétence :`, `expectedSkill` ou toute autre métadonnée pédagogique dans `title` ou `statement`.
+- Les mots de difficulté et les compétences sont des métadonnées internes uniquement. Ils ne doivent jamais apparaître dans le texte destiné à l'élève.
+- N'utilise pas d'astérisques Markdown pour créer des titres, du gras ou des niveaux de difficulté dans le sujet.
+- N'utilise pas `###`, `##`, `**`, HTML, emojis ou syntaxe Markdown de présentation.
+
+PRÉSENTATION D'UN VRAI SUJET
+- Favorise les exercices longs et cohérents plutôt qu'une suite de 10 micro-questions sans lien.
+- Pour un chapitre unique, regroupe les notions en 2 à 4 exercices bien construits au lieu de fabriquer une liste plate.
+- Pour chaque exercice, crée une progression visible: application directe -> justification -> déduction -> application plus riche.
+- Les points doivent pouvoir se répartir sur les sous-questions. Le champ `points` représente le barème global de l'exercice/question générée, pas un badge visuel.
+- `instructions` doit contenir uniquement les consignes générales réellement utiles sur la copie, par exemple "Les résultats doivent être justifiés." ou "La calculatrice n'est pas autorisée." Seulement si pertinent au contexte.
+- `title` du sujet doit ressembler à un intitulé de devoir, par exemple "Devoir surveillé de mathématiques", "Épreuve de mathématiques", ou un titre centré sur le chapitre. Évite les titres de type "AI Exam Generator".
 
 RÈGLES DE GÉNÉRATION
 - Transforme le contenu source en problème(s) original(aux) mais fidèle(s) aux notions disponibles.
@@ -110,6 +131,7 @@ CORRECTION
 - Donne une correction complète pour chaque question.
 - La correction doit suivre exactement la question et montrer les étapes réellement nécessaires.
 - Pour les questions dépendantes, réutilise explicitement les résultats précédents.
+- La correction est interne à l'IA et ne doit pas être mélangée aux consignes de l'élève.
 
 Retourne UNIQUEMENT le JSON conforme au schéma.
 
@@ -225,7 +247,7 @@ Deno.serve(async (req) => {
     const raw = extractText(payload);
     try {
       const result = normalizeMath(parseJson(raw));
-      return jsonResponse({ success: true, result, model: MODEL, profile: "moroccan-maths-v1" });
+      return jsonResponse({ success: true, result, model: MODEL, profile: "moroccan-maths-v2" });
     } catch (error) {
       console.error("ai-exam-creator parse failure", { message: error instanceof Error ? error.message : String(error), preview: raw.slice(0, 1200) });
       return jsonResponse({ success: false, error: error instanceof Error ? error.message : "Réponse IA invalide.", preview: raw.slice(0, 1200) }, 502);
