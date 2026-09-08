@@ -16,7 +16,7 @@ export type PersonalLibraryItem = {
   updated_at: string;
 };
 
-export async function saveToPersonalLibrary(input: {
+type SaveInput = {
   resourceType: LibraryResourceType;
   title: string;
   subject?: string | null;
@@ -24,27 +24,75 @@ export async function saveToPersonalLibrary(input: {
   sourceType?: string | null;
   sourceRef?: string | null;
   content: Record<string, unknown>;
-}) {
+};
+
+const inFlightSaves = new Map<string, Promise<PersonalLibraryItem>>();
+
+function saveKey(userId: string, input: SaveInput) {
+  return JSON.stringify([
+    userId,
+    input.resourceType,
+    input.title.trim(),
+    input.subject?.trim() || null,
+    input.chapter?.trim() || null,
+    input.sourceType ?? null,
+    input.sourceRef ?? null,
+    input.content,
+  ]);
+}
+
+export async function saveToPersonalLibrary(input: SaveInput) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Connecte-toi pour sauvegarder cette ressource.");
 
-  const { data, error } = await supabase
-    .from("personal_library_items")
-    .insert({
-      user_id: user.id,
-      resource_type: input.resourceType,
-      title: input.title,
-      subject: input.subject ?? null,
-      chapter: input.chapter ?? null,
-      source_type: input.sourceType ?? null,
-      source_ref: input.sourceRef ?? null,
-      content: input.content,
-    })
-    .select("*")
-    .single();
+  const key = saveKey(user.id, input);
+  const pending = inFlightSaves.get(key);
+  if (pending) return pending;
 
-  if (error) throw error;
-  return data as PersonalLibraryItem;
+  const savePromise = (async () => {
+    const { data: candidates, error: lookupError } = await supabase
+      .from("personal_library_items")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("resource_type", input.resourceType)
+      .eq("title", input.title)
+      .eq("subject", input.subject ?? null)
+      .eq("chapter", input.chapter ?? null)
+      .eq("source_type", input.sourceType ?? null)
+      .eq("source_ref", input.sourceRef ?? null)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (lookupError) throw lookupError;
+
+    const existing = (candidates ?? []).find((item) => JSON.stringify(item.content) === JSON.stringify(input.content));
+    if (existing) return existing as PersonalLibraryItem;
+
+    const { data, error } = await supabase
+      .from("personal_library_items")
+      .insert({
+        user_id: user.id,
+        resource_type: input.resourceType,
+        title: input.title,
+        subject: input.subject ?? null,
+        chapter: input.chapter ?? null,
+        source_type: input.sourceType ?? null,
+        source_ref: input.sourceRef ?? null,
+        content: input.content,
+      })
+      .select("*")
+      .single();
+
+    if (error) throw error;
+    return data as PersonalLibraryItem;
+  })();
+
+  inFlightSaves.set(key, savePromise);
+  try {
+    return await savePromise;
+  } finally {
+    inFlightSaves.delete(key);
+  }
 }
 
 export async function listPersonalLibrary() {
