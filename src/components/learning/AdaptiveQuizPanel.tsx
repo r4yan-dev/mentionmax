@@ -6,75 +6,19 @@ import { generateAdaptiveQuiz, type AdaptiveQuiz, type AdaptiveQuizQuestion } fr
 import { recordQuizAttempt } from "../../services/learning/weakPointsService";
 import type { LearningJourney } from "../../services/learning/weakPointsTutor";
 
-type Props = {
-  lessonId: string;
-  courseTitle: string;
-  chapter: string;
-  topic: string;
-  intro?: string;
-  objectives?: string[];
-  subjectId: SubjectId;
-  trackId: TrackId;
-  nextAction: LearningJourney["nextAction"];
-  onFinished: () => void;
-};
-
+type Props = { lessonId: string; courseTitle: string; chapter: string; topic: string; intro?: string; objectives?: string[]; subjectId: SubjectId; trackId: TrackId; nextAction: LearningJourney["nextAction"]; onFinished: () => void };
+type Answer = { choiceIndex: number; correct: boolean };
 function text(value: unknown) { return typeof value === "string" ? value : String(value ?? ""); }
-function Question({ question, selected, onChoose }: { question: AdaptiveQuizQuestion; selected: number | null; onChoose: (index: number) => void }) {
-  return <article className="lesson-adaptive-quiz__question">
-    <div className="lesson-adaptive-quiz__question-top"><span>QUESTION CIBLÉE</span><strong>Niveau {question.difficulty}/5</strong></div>
-    <h3><LatexText>{text(question.question)}</LatexText></h3>
-    <div className="lesson-adaptive-quiz__choices">{question.choices.map((choice, i) => <button key={`${i}-${choice}`} type="button" className={`lesson-adaptive-quiz__choice ${selected !== null && i === question.answerIndex ? "is-correct" : ""} ${selected === i && i !== question.answerIndex ? "is-wrong" : ""}`} onClick={() => onChoose(i)} disabled={selected !== null}><span>{String.fromCharCode(65 + i)}</span><LatexText>{text(choice)}</LatexText></button>)}</div>
-    {selected !== null && <div className={`lesson-adaptive-quiz__feedback ${selected === question.answerIndex ? "is-correct" : "is-wrong"}`}><strong>{selected === question.answerIndex ? "Bonne réponse" : "À retravailler"}</strong><p><LatexText>{text(question.explanation)}</LatexText></p></div>}
-  </article>;
-}
+function Question({ question, selected, onChoose }: { question: AdaptiveQuizQuestion; selected: number | null; onChoose: (index: number) => void }) { return <article className="lesson-adaptive-quiz__question"><div className="lesson-adaptive-quiz__question-top"><span>QUESTION CIBLÉE</span><strong>Niveau {question.difficulty}/5</strong></div><h3><LatexText>{text(question.question)}</LatexText></h3><div className="lesson-adaptive-quiz__choices">{question.choices.map((choice, i) => <button key={`${i}-${choice}`} type="button" className={`lesson-adaptive-quiz__choice ${selected !== null && i === question.answerIndex ? "is-correct" : ""} ${selected === i && i !== question.answerIndex ? "is-wrong" : ""}`} onClick={() => onChoose(i)} disabled={selected !== null}><span>{String.fromCharCode(65 + i)}</span><LatexText>{text(choice)}</LatexText></button>)}</div>{selected !== null && <div className={`lesson-adaptive-quiz__feedback ${selected === question.answerIndex ? "is-correct" : "is-wrong"}`}><strong>{selected === question.answerIndex ? "Bonne réponse" : "À retravailler"}</strong><p><LatexText>{text(question.explanation)}</LatexText></p></div>}</article>; }
 
 export default function AdaptiveQuizPanel(props: Props) {
-  const [quiz, setQuiz] = useState<AdaptiveQuiz | null>(null);
-  const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<Record<number, boolean>>({});
-  const [loading, setLoading] = useState(false);
-  const [finishing, setFinishing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const question = quiz?.questions[index] ?? null;
-  const score = useMemo(() => Object.values(answers).filter(Boolean).length, [answers]);
-  const started = !!quiz;
-
-  async function start() {
-    setLoading(true); setError(null); setIndex(0); setSelected(null); setAnswers({});
-    try {
-      setQuiz(await generateAdaptiveQuiz({ lessonId: props.lessonId, courseTitle: props.courseTitle, chapter: props.chapter, topic: props.topic, intro: props.intro, objectives: props.objectives, subjectId: props.subjectId, trackId: props.trackId, nextAction: props.nextAction }));
-    } catch (err) { setError(err instanceof Error ? err.message : "Impossible de générer cette pratique."); }
-    finally { setLoading(false); }
-  }
-
-  function choose(choiceIndex: number) {
-    if (!question || selected !== null) return;
-    setSelected(choiceIndex);
-    setAnswers((current) => ({ ...current, [index]: choiceIndex === question.answerIndex }));
-  }
-
-  async function finish() {
-    if (!quiz || finishing) return;
-    setFinishing(true); setError(null);
-    try {
-      await recordQuizAttempt({
-        subjectId: props.subjectId,
-        trackId: props.trackId,
-        quizId: `adaptive:${props.lessonId}:${Date.now()}`,
-        chapter: props.chapter,
-        items: quiz.questions.map((item, i) => ({ conceptIds: item.conceptIds, topic: props.topic, difficulty: item.difficulty, correct: answers[i] === true, pointsEarned: answers[i] === true ? 1 : 0, pointsPossible: 1 })),
-      });
-      props.onFinished();
-    } catch (err) { setError(err instanceof Error ? err.message : "La mise à jour de ta progression a échoué."); }
-    finally { setFinishing(false); }
-  }
-
-  if (!started) return <div className="lesson-adaptive-quiz"><div className="lesson-adaptive-quiz__intro"><div><span className="lessons-eyebrow">PRATIQUE ADAPTATIVE</span><h3>{props.nextAction.title}</h3><p>{props.nextAction.reason}</p><div className="lesson-adaptive-quiz__chips">{props.nextAction.conceptIds.slice(0, 5).map((concept) => <span key={concept}><Target size={12} />{concept}</span>)}</div></div><button type="button" className="lesson-journey__cta" onClick={() => void start()} disabled={loading}>{loading ? <><LoaderCircle size={15} className="spin" /> Génération ciblée…</> : <>Commencer <ArrowRight size={15} /></>}</button></div>{error && <div className="lesson-journey__error"><span>{error}</span><button type="button" onClick={() => void start()}>Réessayer</button></div>}</div>;
-
+  const [quiz, setQuiz] = useState<AdaptiveQuiz | null>(null); const [index, setIndex] = useState(0); const [answers, setAnswers] = useState<Record<number, Answer>>({}); const [loading, setLoading] = useState(false); const [finishing, setFinishing] = useState(false); const [error, setError] = useState<string | null>(null);
+  const question = quiz?.questions[index] ?? null; const score = useMemo(() => Object.values(answers).filter((answer) => answer.correct).length, [answers]); const selected = question ? answers[index]?.choiceIndex ?? null : null;
+  async function start() { setLoading(true); setError(null); setIndex(0); setAnswers({}); try { setQuiz(await generateAdaptiveQuiz({ lessonId: props.lessonId, courseTitle: props.courseTitle, chapter: props.chapter, topic: props.topic, intro: props.intro, objectives: props.objectives, subjectId: props.subjectId, trackId: props.trackId, nextAction: props.nextAction })); } catch (err) { setError(err instanceof Error ? err.message : "Impossible de générer cette pratique."); } finally { setLoading(false); } }
+  function choose(choiceIndex: number) { if (!question || selected !== null) return; setAnswers((current) => ({ ...current, [index]: { choiceIndex, correct: choiceIndex === question.answerIndex } })); }
+  async function finish() { if (!quiz || finishing) return; setFinishing(true); setError(null); try { await recordQuizAttempt({ subjectId: props.subjectId, trackId: props.trackId, quizId: `adaptive:${props.lessonId}:${Date.now()}`, chapter: props.chapter, items: quiz.questions.map((item, i) => ({ conceptIds: item.conceptIds, topic: props.topic, difficulty: item.difficulty, correct: answers[i]?.correct === true, pointsEarned: answers[i]?.correct ? 1 : 0, pointsPossible: 1 })) }); props.onFinished(); } catch (err) { setError(err instanceof Error ? err.message : "La mise à jour de ta progression a échoué."); } finally { setFinishing(false); } }
+  if (!quiz) return <div className="lesson-adaptive-quiz"><div className="lesson-adaptive-quiz__intro"><div><span className="lessons-eyebrow">PRATIQUE ADAPTATIVE</span><h3>{props.nextAction.title}</h3><p>{props.nextAction.reason}</p><div className="lesson-adaptive-quiz__chips">{props.nextAction.conceptIds.slice(0, 5).map((concept) => <span key={concept}><Target size={12} />{concept}</span>)}</div></div><button type="button" className="lesson-journey__cta" onClick={() => void start()} disabled={loading}>{loading ? <><LoaderCircle size={15} className="spin" /> Génération ciblée…</> : <>Commencer <ArrowRight size={15} /></>}</button></div>{error && <div className="lesson-journey__error"><span>{error}</span><button type="button" onClick={() => void start()}>Réessayer</button></div>}</div>;
   if (!question) return null;
   const last = index === quiz.questions.length - 1;
-  return <div className="lesson-adaptive-quiz"><div className="lesson-adaptive-quiz__head"><div><span className="lessons-eyebrow">{quiz.title}</span><p>{quiz.subtitle}</p></div><span>{index + 1} / {quiz.questions.length}</span></div><Question question={question} selected={selected} onChoose={choose} /><div className="lesson-adaptive-quiz__controls">{index > 0 ? <button type="button" className="lesson-journey__refresh" onClick={() => { setIndex((v) => v - 1); setSelected(answers[index - 1] !== undefined ? (quiz.questions[index - 1]?.answerIndex ?? null) : null); }}><ArrowLeft size={14} /></button> : <span />}{last ? <button type="button" className="lesson-journey__cta" disabled={selected === null || finishing} onClick={() => void finish()}>{finishing ? <><LoaderCircle size={15} className="spin" /> Mise à jour…</> : <>Terminer · {score + (selected === question.answerIndex ? 1 : 0)}/{quiz.questions.length} <CheckCircle2 size={15} /></>}</button> : <button type="button" className="lesson-journey__cta" disabled={selected === null} onClick={() => { setIndex((v) => v + 1); setSelected(null); }}>Suivante <ArrowRight size={15} /></button>}</div>{error && <div className="lesson-journey__error"><span>{error}</span></div>}</div>;
+  return <div className="lesson-adaptive-quiz"><div className="lesson-adaptive-quiz__head"><div><span className="lessons-eyebrow">{quiz.title}</span><p>{quiz.subtitle}</p></div><span>{index + 1} / {quiz.questions.length}</span></div><Question question={question} selected={selected} onChoose={choose} /><div className="lesson-adaptive-quiz__controls">{index > 0 ? <button type="button" className="lesson-journey__refresh" onClick={() => setIndex((v) => v - 1)}><ArrowLeft size={14} /></button> : <span />}{last ? <button type="button" className="lesson-journey__cta" disabled={selected === null || finishing} onClick={() => void finish()}>{finishing ? <><LoaderCircle size={15} className="spin" /> Mise à jour…</> : <>Terminer · {score}/{quiz.questions.length} <CheckCircle2 size={15} /></>}</button> : <button type="button" className="lesson-journey__cta" disabled={selected === null} onClick={() => setIndex((v) => v + 1)}>Suivante <ArrowRight size={15} /></button>}</div>{error && <div className="lesson-journey__error"><span>{error}</span></div>}</div>;
 }
