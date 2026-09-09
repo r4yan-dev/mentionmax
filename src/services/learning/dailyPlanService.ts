@@ -3,7 +3,7 @@ import { supabase } from "../../lib/supabase";
 import type { SubjectId, TrackId } from "../../types/academic";
 import { getWeakPoints } from "./weakPointsService";
 
-type DailyPlanTask = {
+export type DailyPlanTask = {
   id: string;
   type: "review" | "exercise" | "quiz";
   title: string;
