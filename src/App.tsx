@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import type { ReactNode } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { AccountProvider, useAccount } from "./context/AccountContext";
+import { AccountProvider } from "./context/AccountContext";
 import { FocusProvider } from "./context/FocusContext";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
