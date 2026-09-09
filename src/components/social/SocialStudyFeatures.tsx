@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell, BookOpen, Check, ExternalLink, Flag, Plus, Trophy, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useFocus } from "../../context/FocusContext";
@@ -48,7 +48,6 @@ function metricLabel(metric: ChallengeRow["metric"]) {
 export default function SocialStudyFeatures({ groupId }: { groupId: string }) {
   const { user } = useAuth();
   const { groups } = useFocus();
-  const selectedGroup = useMemo(() => groups.find((group) => group.id === groupId) ?? null, [groups, groupId]);
   const [challenges, setChallenges] = useState<ChallengeRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementRow[]>([]);
