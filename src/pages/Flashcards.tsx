@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { ArrowLeft, BookmarkCheck, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { contentCatalogService } from "../services/content/contentCatalogService";
 import { MathText } from "../components/ui/MathText";
@@ -16,6 +16,23 @@ const subjectLabels: Record<SubjectId, string> = {
   philosophie: "Philosophie",
 };
 const trackLabels: Record<TrackId, string> = { SP: "SPC", SMA: "SM A", SMB: "SM B" };
+const REVIEW_KEY = "mentionmax:flashcards-to-review:v1";
+
+function cardKey(card: Flashcard) {
+  const candidate = card as Flashcard & { id?: string };
+  return candidate.id ?? `${card.target.chapter}::${card.front}`;
+}
+
+function readReviewSet(key: string) {
+  if (typeof window === "undefined") return new Set<string>();
+  try {
+    const raw = window.localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set<string>(Array.isArray(parsed) ? parsed.map(String) : []);
+  } catch {
+    return new Set<string>();
+  }
+}
 
 function PhilosophyText({ children }: { children: string }) {
   return (
@@ -36,22 +53,36 @@ export default function Flashcards() {
   const [params] = useSearchParams();
   const trackId = (params.get("track") || "SP") as TrackId;
   const subjectId = (params.get("subject") || "maths") as SubjectId;
+  const reviewStorageKey = `${REVIEW_KEY}:${trackId}:${subjectId}`;
   const allCards = useMemo(
     () => contentCatalogService.getBaseFlashcards(trackId, subjectId),
     [trackId, subjectId],
   );
   const chapterList = useMemo(() => chapters(allCards), [allCards]);
   const [selectedChapter, setSelectedChapter] = useState("all");
+  const [reviewOnly, setReviewOnly] = useState(false);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [reviewSet, setReviewSet] = useState<Set<string>>(() => readReviewSet(reviewStorageKey));
 
-  const cards = selectedChapter === "all" ? allCards : allCards.filter((card) => card.target.chapter === selectedChapter);
+  const chapterCards = selectedChapter === "all" ? allCards : allCards.filter((card) => card.target.chapter === selectedChapter);
+  const cards = reviewOnly ? chapterCards.filter((card) => reviewSet.has(cardKey(card))) : chapterCards;
   const current = cards[index];
   const subjectLabel = subjectLabels[subjectId] ?? "Matière";
 
   const reset = () => {
     setIndex(0);
     setFlipped(false);
+  };
+
+  const changeFilter = (nextReviewOnly: boolean) => {
+    setReviewOnly(nextReviewOnly);
+    reset();
+  };
+
+  const selectChapter = (chapter: string) => {
+    setSelectedChapter(chapter);
+    reset();
   };
 
   const previous = () => {
@@ -62,6 +93,18 @@ export default function Flashcards() {
   const next = () => {
     setIndex((value) => (cards.length ? (value + 1) % cards.length : 0));
     setFlipped(false);
+  };
+
+  const toggleReview = () => {
+    if (!current || typeof window === "undefined") return;
+    const key = cardKey(current);
+    setReviewSet((previousSet) => {
+      const nextSet = new Set(previousSet);
+      if (nextSet.has(key)) nextSet.delete(key);
+      else nextSet.add(key);
+      window.localStorage.setItem(reviewStorageKey, JSON.stringify([...nextSet]));
+      return nextSet;
+    });
   };
 
   return (
@@ -77,14 +120,15 @@ export default function Flashcards() {
           <h1>Flashcards de {subjectLabel.toLowerCase()}</h1>
           <p>Réactive les définitions, concepts, méthodes et idées essentielles du programme.</p>
         </div>
-        <div className="flashcards-count"><strong>{cards.length}</strong><span>cartes</span></div>
+        <div className="flashcards-count"><strong>{cards.length}</strong><span>{reviewOnly ? "à réviser" : "cartes"}</span></div>
       </header>
 
       <div className="flashcards-layout">
         <aside className="flashcards-sidebar">
-          <button className={selectedChapter === "all" ? "active" : ""} onClick={() => { setSelectedChapter("all"); reset(); }}>Tous les chapitres</button>
+          <button className={selectedChapter === "all" && !reviewOnly ? "active" : ""} onClick={() => { setReviewOnly(false); selectChapter("all"); }}>Tous les chapitres</button>
+          <button className={reviewOnly ? "active" : ""} onClick={() => changeFilter(true)}><BookmarkCheck size={15} /> À réviser ({reviewSet.size})</button>
           {chapterList.map((chapter) => (
-            <button key={chapter} className={selectedChapter === chapter ? "active" : ""} onClick={() => { setSelectedChapter(chapter); reset(); }}>{chapter}</button>
+            <button key={chapter} className={!reviewOnly && selectedChapter === chapter ? "active" : ""} onClick={() => { setReviewOnly(false); selectChapter(chapter); }}>{chapter}</button>
           ))}
         </aside>
 
@@ -118,10 +162,13 @@ export default function Flashcards() {
                 <button onClick={next} aria-label="Carte suivante"><ChevronRight size={20} /></button>
               </div>
 
+              <button className="flashcards-reset" onClick={toggleReview}>
+                <BookmarkCheck size={15} /> {reviewSet.has(cardKey(current)) ? "Retirer des cartes à réviser" : "À réviser"}
+              </button>
               <button className="flashcards-reset" onClick={reset}><RotateCcw size={15} /> Recommencer</button>
             </>
           ) : (
-            <div className="flashcards-empty">Aucune flashcard disponible pour ce filtre.</div>
+            <div className="flashcards-empty">{reviewOnly ? "Aucune carte marquée à réviser pour ce filtre." : "Aucune flashcard disponible pour ce filtre."}</div>
           )}
         </section>
       </div>
