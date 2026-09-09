@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { recordLearningEvent } from "../../services/learning/weakPointsService";
 
 export type ExerciseQuestion = {
   id: number;
@@ -11,6 +12,8 @@ export type ExerciseQuestion = {
   hint: string;
   difficulty: "Easy" | "Medium" | "Hard";
   duration: number;
+  topic?: string;
+  conceptId?: string;
 };
 
 type Props = {
@@ -29,6 +32,22 @@ function normalize(value: string) {
     .replace(",", ".");
 }
 
+function difficultyValue(value: ExerciseQuestion["difficulty"]) {
+  if (value === "Easy") return 1;
+  if (value === "Hard") return 4;
+  return 3;
+}
+
+function subjectIdFromLabel(value: string) {
+  const normalized = value.toLowerCase();
+  if (normalized.includes("math")) return "maths";
+  if (normalized.includes("phys") || normalized.includes("chim")) return "physique-chimie";
+  if (normalized.includes("svt")) return "svt";
+  if (normalized.includes("anglais") || normalized.includes("english")) return "anglais";
+  if (normalized.includes("philo")) return "philosophie";
+  return value;
+}
+
 export default function ExerciseEngine({
   exercise,
   completed,
@@ -41,9 +60,8 @@ export default function ExerciseEngine({
   const [correct, setCorrect] = useState(completed);
   const [showHint, setShowHint] = useState(false);
 
-  function checkAnswer() {
+  async function checkAnswer() {
     const value = normalize(answer);
-
     if (!value) return;
 
     const valid = exercise.acceptedAnswers.some(
@@ -53,9 +71,25 @@ export default function ExerciseEngine({
     setCorrect(valid);
     setSubmitted(true);
 
-    if (valid) {
-      onComplete();
-    }
+    void recordLearningEvent({
+      source: "exercise",
+      subjectId: subjectIdFromLabel(exercise.subject),
+      chapter: exercise.chapter,
+      topic: exercise.topic ?? exercise.title,
+      conceptId: exercise.conceptId ?? exercise.topic ?? exercise.chapter,
+      outcome: valid ? "correct" : "incorrect",
+      pointsEarned: valid ? 1 : 0,
+      pointsPossible: 1,
+      difficulty: difficultyValue(exercise.difficulty),
+      mistakeType: valid ? null : "answer_mismatch",
+      metadata: {
+        exerciseId: exercise.id,
+        durationMinutes: exercise.duration,
+        usedHint: showHint,
+      },
+    });
+
+    if (valid) onComplete();
   }
 
   return (
@@ -90,7 +124,7 @@ export default function ExerciseEngine({
           onChange={(event) => setAnswer(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              checkAnswer();
+              void checkAnswer();
             }
           }}
           placeholder="Enter your answer..."
@@ -109,7 +143,7 @@ export default function ExerciseEngine({
             <button
               className="button primary"
               disabled={!answer.trim()}
-              onClick={checkAnswer}
+              onClick={() => void checkAnswer()}
             >
               Check answer
             </button>
