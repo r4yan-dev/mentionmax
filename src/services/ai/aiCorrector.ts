@@ -2,15 +2,26 @@ import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@s
 import { supabase } from "../../lib/supabase";
 import type { Exercise } from "../../types/content";
 import type { TrackId } from "../../types/academic";
-import { recordCorrectionOutcome } from "../learning/weakPointsService";
+import { recordCorrectionOutcome, recordExamErrorFeedback } from "../learning/weakPointsService";
 
 export type CorrectionVerdict = "correct" | "mostly_correct" | "partially_correct" | "incorrect";
+export type AICorrectionError = {
+  location: string;
+  expected: string;
+  observed: string;
+  fix: string;
+  weaknessPoints: number;
+  subjectId: string;
+  chapter: string;
+  topic: string;
+  conceptId: string;
+};
 export type AICorrectionResult = {
   score: number | null;
   verdict: CorrectionVerdict;
   summary: string;
   strengths: string[];
-  errors: Array<{ location: string; expected: string; observed: string; fix: string }>;
+  errors: AICorrectionError[];
   correctedSolution: string;
   nextStep: string;
 };
@@ -131,6 +142,26 @@ export async function correctExamCopyWithAI(params: { trackId: TrackId; ocr: AIC
     });
   }
   return result;
+}
+
+export async function confirmExamError(params: {
+  trackId: TrackId;
+  error: AICorrectionError;
+  examId?: string;
+}) {
+  return recordExamErrorFeedback({
+    trackId: params.trackId,
+    subjectId: params.error.subjectId,
+    chapter: params.error.chapter,
+    topic: params.error.topic,
+    conceptId: params.error.conceptId,
+    weaknessPoints: params.error.weaknessPoints,
+    location: params.error.location,
+    expected: params.error.expected,
+    observed: params.error.observed,
+    fix: params.error.fix,
+    examId: params.examId,
+  });
 }
 
 export type AICorrectionOCRInput = {
