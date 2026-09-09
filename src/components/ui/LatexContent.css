@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Permanent+Marker&display=swap');
+
 .latex-content { line-height: 1.7; overflow-wrap: anywhere; }
 .latex-math { display: inline-flex; align-items: baseline; font-family: "Cambria Math", "STIX Two Math", "STIXGeneral", serif; font-size: 1.03em; white-space: nowrap; }
 .latex-math--display { display: flex; width: 100%; justify-content: center; margin: 0.7rem 0; font-size: 1.12em; }
@@ -9,7 +11,7 @@
 .latex-root > span { border-top: 1px solid currentColor; padding: 0 0.14em; }
 .latex-content sup, .latex-content sub { line-height: 0; }
 
-/* Handwritten study-sheet treatment for generated exams. */
+/* Generated exams use the same handwritten study-sheet language as AI Studio. */
 .exams-generated-result.card {
   position: relative !important;
   overflow: hidden !important;
@@ -23,6 +25,8 @@
     linear-gradient(90deg, rgba(15,163,163,.055) 1px, transparent 1px) !important;
   background-size: 100% 31px, 31px 100% !important;
   box-shadow: 0 18px 42px rgba(7,59,58,.08) !important;
+  font-family: "Patrick Hand", cursive !important;
+  color: #173b39 !important;
 }
 .exams-generated-result.card:before {
   content: "" !important;
@@ -30,9 +34,9 @@
   left: 9% !important;
   right: 9% !important;
   top: 154px !important;
-  height: 3px !important;
+  height: 4px !important;
   border-radius: 99px !important;
-  background: rgba(15,163,163,.28) !important;
+  background: rgba(66,201,189,.36) !important;
   transform: rotate(-.2deg) !important;
 }
 .exams-generated-result__header {
@@ -42,67 +46,86 @@
   margin: 0 0 52px !important;
 }
 .exams-generated-result__header h2 {
-  max-width: 860px !important;
-  margin: 8px 0 10px !important;
+  max-width: 940px !important;
+  margin: 7px 0 10px !important;
   color: #073b3a !important;
-  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive !important;
-  font-size: clamp(34px, 4.5vw, 58px) !important;
-  font-weight: 800 !important;
-  line-height: 1.04 !important;
+  font-family: "Kalam", cursive !important;
+  font-size: clamp(52px, 7vw, 82px) !important;
+  font-weight: 700 !important;
+  line-height: .92 !important;
   letter-spacing: -.055em !important;
+  transform: rotate(-1deg) !important;
 }
 .exams-generated-result__header p {
-  color: #527a73 !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  color: #54716f !important;
+  font-family: "Patrick Hand", cursive !important;
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
 }
 .exams-generated-result__actions .btn {
   border-radius: 13px !important;
   box-shadow: 0 6px 16px rgba(7,59,58,.07) !important;
+  font-family: "Inter", system-ui, sans-serif !important;
 }
 .exams-generated-instructions {
   position: relative !important;
   z-index: 1 !important;
   grid-template-columns: 1.25fr .75fr !important;
-  padding: 23px 25px 24px !important;
-  margin-bottom: 32px !important;
-  border: 1.5px dashed #b9b39c !important;
-  border-radius: 22px 19px 24px 18px !important;
-  background: #fffdf4 !important;
-  box-shadow: 0 7px 0 rgba(122,135,58,.06) !important;
+  padding: 25px 27px 26px !important;
+  margin-bottom: 34px !important;
+  border: 2px dashed rgba(23,59,57,.14) !important;
+  border-radius: 25px 19px 28px 20px !important;
+  background: #fffdf5 !important;
+  box-shadow: 7px 9px 0 rgba(23,59,57,.055), 0 18px 35px rgba(23,59,57,.04) !important;
+  font-family: "Patrick Hand", cursive !important;
 }
 .exams-generated-instructions:before {
   content: "À LIRE D'ABORD" !important;
   position: absolute !important;
   top: -13px !important;
   left: 20px !important;
-  padding: 5px 10px !important;
-  color: #776723 !important;
-  background: #f7e77d !important;
-  font-family: "Segoe Print", "Bradley Hand", cursive !important;
-  font-size: 8px !important;
-  font-weight: 900 !important;
-  letter-spacing: .04em !important;
-  transform: rotate(-2deg) !important;
-  box-shadow: 0 3px 6px rgba(90,80,30,.08) !important;
+  padding: 6px 10px !important;
+  color: #625500 !important;
+  background: #fff19a !important;
+  font-family: "Permanent Marker", cursive !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  transform: rotate(-3deg) !important;
+  box-shadow: 3px 4px 0 rgba(23,59,57,.06) !important;
+}
+.exams-generated-instructions > div:first-child > .section-eyebrow,
+.exams-generated-instructions > div:last-child > .section-eyebrow {
+  font-family: "Permanent Marker", cursive !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: .02em !important;
 }
 .exams-generated-instructions > div:first-child > div {
-  color: #355b55 !important;
-  font-size: 10px !important;
-  line-height: 1.7 !important;
+  color: #244f4b !important;
+  font-family: "Patrick Hand", cursive !important;
+  font-size: 19px !important;
+  line-height: 1.45 !important;
+  font-weight: 400 !important;
 }
 .exams-generated-instructions > div:first-child > div > span {
-  width: 22px !important;
-  height: 22px !important;
-  border-radius: 8px !important;
-  background: #dff4ef !important;
-  color: #0b817d !important;
+  width: 23px !important;
+  height: 23px !important;
+  border-radius: 7px !important;
+  background: #ddf5f1 !important;
+  color: #168c83 !important;
+  font-family: "Kalam", cursive !important;
+  font-weight: 700 !important;
 }
 .exams-generated-tag {
   padding: 7px 10px !important;
-  border-color: #cfe4de !important;
-  border-radius: 999px !important;
-  background: rgba(255,255,255,.92) !important;
+  border-color: rgba(23,59,57,.12) !important;
+  border-radius: 12px 8px 13px 9px !important;
+  background: rgba(255,255,255,.9) !important;
+  color: #54716f !important;
+  font-family: "Patrick Hand", cursive !important;
+  font-size: 16px !important;
 }
 .exams-generated-questions {
   position: relative !important;
@@ -112,107 +135,133 @@
 .exams-generated-exercise {
   min-height: 180px !important;
   padding: 28px 30px 22px !important;
-  border: 1.5px solid #cbd9d2 !important;
-  border-radius: 24px 18px 27px 19px !important;
-  background-color: #fffefa !important;
+  border: 2px solid rgba(23,59,57,.11) !important;
+  border-radius: 25px 19px 28px 20px !important;
+  background-color: rgba(255,255,255,.9) !important;
   background-image:
-    linear-gradient(rgba(15,163,163,.065) 1px, transparent 1px) !important;
-  background-size: 100% 30px !important;
-  box-shadow: 0 11px 0 rgba(7,59,58,.025), 0 18px 34px rgba(7,59,58,.065) !important;
+    linear-gradient(transparent 31px, rgba(23,59,57,.07) 32px) !important;
+  background-size: 100% 32px !important;
+  box-shadow: 7px 9px 0 rgba(23,59,57,.055), 0 18px 35px rgba(23,59,57,.055) !important;
 }
-.exams-generated-exercise:nth-child(2n) { transform: rotate(.22deg) !important; }
+.exams-generated-exercise:nth-child(2n) { transform: rotate(.45deg) translateY(7px) !important; }
 .exams-generated-exercise:nth-child(3n) { transform: rotate(-.18deg) !important; }
 .exams-generated-exercise__tape {
   width: 92px !important;
-  height: 28px !important;
-  top: -12px !important;
-  right: 42px !important;
-  background: rgba(221,245,241,.92) !important;
-  box-shadow: 0 4px 7px rgba(7,59,58,.06) !important;
+  height: 24px !important;
+  top: -10px !important;
+  right: 34px !important;
+  background: rgba(255,241,154,.78) !important;
+  box-shadow: 3px 4px 0 rgba(23,59,57,.06) !important;
 }
 .exams-generated-exercise__header {
   grid-template-columns: auto 1fr auto !important;
   gap: 17px !important;
-  padding-bottom: 18px !important;
+  padding-bottom: 17px !important;
   margin-bottom: 4px !important;
-  border-bottom: 2px dashed #dce4df !important;
+  border-bottom: 2px dashed rgba(23,59,57,.11) !important;
 }
 .exams-generated-exercise__number {
-  width: 56px !important;
-  height: 56px !important;
+  width: 58px !important;
+  height: 58px !important;
   border: 2px solid #073b3a !important;
-  border-radius: 17px 13px 16px 12px !important;
+  border-radius: 17px 12px 19px 14px !important;
   background: #ddf5f1 !important;
-  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive !important;
-  font-size: 16px !important;
+  color: #073b3a !important;
+  font-family: "Kalam", cursive !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  transform: rotate(-1deg) !important;
 }
 .exams-generated-exercise__label {
-  color: #0b817d !important;
-  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive !important;
+  color: #168c83 !important;
+  font-family: "Permanent Marker", cursive !important;
   font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: .07em !important;
 }
 .exams-generated-exercise__header h3 {
   margin-top: 5px !important;
-  color: #173f39 !important;
-  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive !important;
-  font-size: clamp(19px, 2vw, 26px) !important;
-  font-weight: 800 !important;
+  color: #073b3a !important;
+  font-family: "Kalam", cursive !important;
+  font-size: clamp(28px, 3vw, 38px) !important;
+  font-weight: 700 !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.03em !important;
 }
 .exams-generated-exercise__header > strong {
+  align-self: start !important;
   padding: 8px 10px !important;
   border-radius: 10px !important;
-  background: #edf7f4 !important;
-  color: #0b817d !important;
-  font-size: 10px !important;
+  background: #ddf5f1 !important;
+  color: #168c83 !important;
+  font-family: "Kalam", cursive !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
 }
 .exams-generated-subquestion {
-  grid-template-columns: 24px minmax(0, 1fr) auto !important;
+  grid-template-columns: 28px minmax(0,1fr) auto !important;
   gap: 10px !important;
-  padding: 17px 2px !important;
-  border-top: 1px solid rgba(112,143,134,.18) !important;
+  padding: 16px 2px !important;
+  border-top: 1px solid rgba(23,59,57,.09) !important;
 }
 .exams-generated-subquestion:before {
   counter-increment: exam-subquestion !important;
   content: counter(exam-subquestion, lower-alpha) "." !important;
-  padding-top: 2px !important;
-  color: #0b817d !important;
-  font-family: "Segoe Print", "Bradley Hand", cursive !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
+  padding-top: 1px !important;
+  color: #168c83 !important;
+  font-family: "Kalam", cursive !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  transform: rotate(-3deg) !important;
 }
 .exams-generated-exercise__questions { counter-reset: exam-subquestion !important; }
 .exams-generated-subquestion__statement {
-  color: #234f49 !important;
-  font-size: 11px !important;
-  line-height: 1.95 !important;
+  color: #244f4b !important;
+  font-family: "Patrick Hand", cursive !important;
+  font-size: 19px !important;
+  line-height: 1.48 !important;
+  font-weight: 400 !important;
 }
 .exams-generated-subquestion__points {
   align-self: start !important;
-  padding: 3px 7px !important;
-  border-radius: 8px !important;
-  background: #f0f8f6 !important;
-  color: #0b817d !important;
-  font-size: 8px !important;
+  padding: 5px 8px !important;
+  border-radius: 9px !important;
+  background: #fff19a !important;
+  color: #675900 !important;
+  font-family: "Kalam", cursive !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  transform: rotate(-2deg) !important;
 }
 .exams-generated-subquestion:hover { background: transparent !important; }
 .exams-generated-correction {
   grid-column: 2 / -1 !important;
   margin: 9px 0 2px !important;
-  padding: 14px 15px !important;
-  border: 1px solid #d9dfbc !important;
-  border-radius: 13px 10px 15px 9px !important;
-  background: #fff8d7 !important;
-  color: #665b2c !important;
-  box-shadow: 4px 5px 0 rgba(122,135,58,.055) !important;
+  padding: 15px 16px !important;
+  border: 2px solid rgba(231,186,78,.35) !important;
+  border-radius: 18px 12px 20px 14px !important;
+  background: #fff8cc !important;
+  color: #625500 !important;
+  box-shadow: 5px 6px 0 rgba(231,186,78,.08) !important;
+  font-family: "Patrick Hand", cursive !important;
+  font-size: 18px !important;
+  line-height: 1.5 !important;
+}
+.exams-generated-correction > .section-eyebrow {
+  font-family: "Permanent Marker", cursive !important;
+  font-size: 10px !important;
+  font-weight: 400 !important;
+  letter-spacing: .02em !important;
 }
 .exams-generated-weakness {
   position: relative !important;
   z-index: 1 !important;
   margin-top: 34px !important;
   padding: 20px 21px !important;
-  border: 1px dashed #d8cc9f !important;
-  border-radius: 18px 13px 20px 15px !important;
-  background: #fff9e9 !important;
+  border: 2px dashed rgba(23,59,57,.12) !important;
+  border-radius: 22px 17px 24px 18px !important;
+  background: #fff8cc !important;
+  font-family: "Patrick Hand", cursive !important;
 }
 @media (max-width: 980px) {
   .exams-generated-result.card { padding: 36px 28px 40px !important; }
@@ -223,11 +272,11 @@
   .exams-generated-result.card { padding: 30px 16px 32px !important; border-radius: 22px 18px 24px 16px !important; }
   .exams-generated-result.card:before { top: 120px !important; left: 7% !important; right: 7% !important; }
   .exams-generated-result__header { margin-bottom: 42px !important; }
-  .exams-generated-result__header h2 { font-size: 34px !important; }
+  .exams-generated-result__header h2 { font-size: 48px !important; }
   .exams-generated-exercise { padding: 24px 18px 18px !important; }
   .exams-generated-exercise__header { grid-template-columns: auto 1fr !important; }
   .exams-generated-exercise__header > strong { grid-column: 2 !important; justify-self: start !important; margin-top: -2px !important; }
-  .exams-generated-subquestion { grid-template-columns: 22px 1fr !important; }
+  .exams-generated-subquestion { grid-template-columns: 24px 1fr !important; }
   .exams-generated-subquestion__points { grid-column: 2 !important; justify-self: start !important; }
   .exams-generated-correction { grid-column: 2 !important; }
 }
