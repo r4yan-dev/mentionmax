@@ -19,6 +19,12 @@ export type StudioGenerationResponse<T = unknown> = {
   detail?: string;
 };
 
+type LearningContext = { mode: StudioGenerationMode; subject: string | null; chapter: string | null; track: string | null };
+
+declare global {
+  interface Window { __mentionmaxLearningContext?: LearningContext; }
+}
+
 let lastSelectedMode: StudioGenerationMode | null = null;
 
 const modeFromLabel: Record<string, StudioGenerationMode> = {
@@ -61,13 +67,20 @@ export async function generateStudioResource<T = unknown>(input: StudioGeneratio
   if (!text) throw new Error("Le texte source est vide.");
 
   const mode = resolveGenerationMode(input.mode);
+  const context: LearningContext = {
+    mode,
+    subject: input.subject?.trim() || null,
+    chapter: input.chapter?.trim() || null,
+    track: input.track?.trim() || null,
+  };
+
   const { data, error } = await supabase.functions.invoke("ai-studio-generate", {
     body: {
       mode,
       text,
-      subject: input.subject?.trim() || undefined,
-      chapter: input.chapter?.trim() || undefined,
-      track: input.track?.trim() || undefined,
+      subject: context.subject ?? undefined,
+      chapter: context.chapter ?? undefined,
+      track: context.track ?? undefined,
     },
   });
 
@@ -81,17 +94,11 @@ export async function generateStudioResource<T = unknown>(input: StudioGeneratio
     throw new Error(message);
   }
 
+  if (typeof window !== "undefined") window.__mentionmaxLearningContext = context;
+
   if (response.result && typeof response.result === "object" && !Array.isArray(response.result)) {
     const result = response.result as Record<string, unknown>;
-    return {
-      ...result,
-      __mentionmaxContext: {
-        mode,
-        subject: input.subject?.trim() || null,
-        chapter: input.chapter?.trim() || null,
-        track: input.track?.trim() || null,
-      },
-    } as T;
+    return { ...result, __mentionmaxContext: context } as T;
   }
 
   return response.result;
