@@ -2,18 +2,9 @@ import { useEffect } from "react";
 import { recordLearningEvent } from "../../services/learning/weakPointsService";
 
 function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
-
-function getQuizRoot(target: HTMLElement) {
-  return target.closest<HTMLElement>(".generator-quiz");
-}
+function getQuizRoot(target: HTMLElement) { return target.closest<HTMLElement>(".generator-quiz"); }
 
 export default function QuizLearningTelemetry() {
   useEffect(() => {
@@ -22,7 +13,6 @@ export default function QuizLearningTelemetry() {
       if (!(rawTarget instanceof Element)) return;
       const choice = rawTarget.closest<HTMLButtonElement>(".generator-quiz-choice");
       if (!choice) return;
-
       const root = getQuizRoot(choice);
       if (!root) return;
 
@@ -33,13 +23,15 @@ export default function QuizLearningTelemetry() {
       const question = root.querySelector<HTMLElement>(".generator-quiz-card h3")?.textContent?.trim() ?? "";
       const quizTitle = root.closest<HTMLElement>(".generator-result")?.querySelector("h2")?.textContent?.trim() ?? "Quiz";
       const correct = choice.classList.contains("is-correct");
+      const context = typeof window !== "undefined" ? window.__mentionmaxLearningContext : undefined;
       const conceptId = `quiz-${slugify(quizTitle)}-q${itemIndex + 1}`;
 
       void recordLearningEvent({
         source: "quiz",
         outcome: correct ? "correct" : "incorrect",
-        subjectId: "unknown",
-        chapter: quizTitle,
+        subjectId: context?.subject ?? "unknown",
+        trackId: context?.track ?? undefined,
+        chapter: context?.chapter || quizTitle,
         topic: question.slice(0, 180),
         conceptId,
         pointsEarned: correct ? 1 : 0,
@@ -50,7 +42,8 @@ export default function QuizLearningTelemetry() {
           itemIndex,
           totalItems,
           answerCorrect: correct,
-          telemetry: "generator-dom-v1",
+          generationContext: context ?? null,
+          telemetry: "generator-dom-v2",
         },
       });
     };
@@ -58,6 +51,5 @@ export default function QuizLearningTelemetry() {
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
-
   return null;
 }
