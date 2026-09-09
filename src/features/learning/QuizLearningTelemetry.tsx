@@ -36,14 +36,16 @@ export default function QuizLearningTelemetry() {
         conceptId,
         pointsEarned: correct ? 1 : 0,
         pointsPossible: 1,
+        weaknessPoints: correct ? 0 : 2,
         metadata: {
           quizTitle,
           question,
           itemIndex,
           totalItems,
           answerCorrect: correct,
+          weaknessSignal: correct ? "none" : "ai_quiz_mistake",
           generationContext: context ?? null,
-          telemetry: "generator-dom-v2",
+          telemetry: "generator-dom-v3",
         },
       });
     };
