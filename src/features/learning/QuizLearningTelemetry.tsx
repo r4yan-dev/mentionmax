@@ -66,7 +66,7 @@ function addActionButtons(root: HTMLElement, context: ReturnType<typeof getConte
     try {
       const result = await spotWeakPoint({
         subjectId: context?.subject ?? "unknown",
-        trackId: context?.track,
+        trackId: context?.track ?? undefined,
         chapter: context?.chapter || quizTitle,
         topic: question,
         question,
@@ -80,7 +80,7 @@ function addActionButtons(root: HTMLElement, context: ReturnType<typeof getConte
         source: "quiz",
         outcome: "incorrect",
         subjectId: result.subjectId || context?.subject || "unknown",
-        trackId: result.trackId || context?.track,
+        trackId: result.trackId || context?.track || undefined,
         chapter: result.chapter || context?.chapter || quizTitle,
         topic: result.topic || question.slice(0, 180),
         conceptId: result.conceptId || conceptId,
