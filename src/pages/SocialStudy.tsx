@@ -6,7 +6,9 @@ import { useAccount } from "../context/AccountContext";
 import { useFocus } from "../context/FocusContext";
 import { supabase } from "../lib/supabase";
 import { getLeaderboard } from "../features/focus/supabase";
+import SocialStudyFeatures from "../components/social/SocialStudyFeatures";
 import "./SocialStudy.css";
+import "../components/social/SocialStudyFeatures.css";
 
 type PresenceUser = { userId: string; displayName: string; joinedAt: number };
 type LeaderEntry = Awaited<ReturnType<typeof getLeaderboard>>[number];
@@ -88,7 +90,9 @@ export default function SocialStudy() {
         <div className="social-leader-card card"><div className="social-card-heading"><div><span className="section-eyebrow">Cette semaine</span><h2>Qui garde le rythme ?</h2></div><Link to={`/focus/groups/${selectedGroup.id}`}><ArrowRight size={16}/></Link></div><div className="social-leader-list">{leaders.length ? leaders.map((entry, index) => <div className="social-leader-row" key={entry.userId}><strong className="social-leader-rank">#{index + 1}</strong><span className="social-avatar">{entry.avatarUrl ? <img src={entry.avatarUrl} alt=""/> : initials(entry.displayName)}</span><div><strong>{entry.displayName}</strong><span>{formatMinutes(entry.totalSeconds)} de focus</span></div><b>{index === 0 ? "🏆" : index === 1 ? "🥈" : index === 2 ? "🥉" : ""}</b></div>) : <div className="social-muted">Aucune session cette semaine. Quelle occasion de remplir le classement.</div>}</div></div>
       </section>
 
-      <section className="social-feature-strip"><div><span className="section-eyebrow">Collaboration</span><h2>Les outils sociaux sont maintenant reliés au vrai travail.</h2><p>Le focus en groupe nourrit les statistiques, le classement hebdomadaire et la présence en direct. Le chat reste disponible sans quitter ton groupe.</p></div><div className="social-feature-points"><div><CheckCircle2 size={16}/><span>Présence en temps réel</span></div><div><CheckCircle2 size={16}/><span>Focus individuel lié au groupe</span></div><div><CheckCircle2 size={16}/><span>Classement basé sur les sessions réelles</span></div><div><CheckCircle2 size={16}/><span>Chat de groupe instantané</span></div></div></section>
+      <SocialStudyFeatures groupId={selectedGroup.id} />
+
+      <section className="social-feature-strip"><div><span className="section-eyebrow">Collaboration</span><h2>Les outils sociaux sont reliés au vrai travail.</h2><p>Le focus en groupe nourrit les statistiques, le classement hebdomadaire et la présence en direct. Le chat reste disponible sans quitter ton groupe.</p></div><div className="social-feature-points"><div><CheckCircle2 size={16}/><span>Présence en temps réel</span></div><div><CheckCircle2 size={16}/><span>Focus individuel lié au groupe</span></div><div><CheckCircle2 size={16}/><span>Classement basé sur les sessions réelles</span></div><div><CheckCircle2 size={16}/><span>Ressources et annonces partagées</span></div></div></section>
 
       <section className="social-bottom-grid"><Link className="social-bottom-card" to={`/focus/groups/${selectedGroup.id}/chat`}><MessageCircle size={19}/><div><span>Discussion</span><strong>Parler avec le groupe</strong><small>Questions, encouragements et coordination.</small></div><ArrowRight size={15}/></Link><Link className="social-bottom-card" to={`/focus/groups/${selectedGroup.id}/members`}><Users size={19}/><div><span>Membres</span><strong>Voir la classe</strong><small>Retrouve les membres et leurs rôles.</small></div><ArrowRight size={15}/></Link><Link className="social-bottom-card" to={`/focus/groups/${selectedGroup.id}/stats`}><BookOpen size={19}/><div><span>Stats</span><strong>Analyser l'activité</strong><small>Temps de focus et évolution du groupe.</small></div><ArrowRight size={15}/></Link></section>
     </main>
