@@ -1,9 +1,9 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 import type { SubjectId, TrackId } from "../../types/academic";
-import { getWeakPoints, type LearnerMastery } from "./weakPointsService";
+import { getWeakPoints } from "./weakPointsService";
 
-export type DailyPlanTask = {
+type DailyPlanTask = {
   id: string;
   type: "review" | "exercise" | "quiz";
   title: string;
