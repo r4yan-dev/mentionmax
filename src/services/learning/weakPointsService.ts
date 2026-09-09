@@ -2,7 +2,7 @@ import { supabase } from "../../lib/supabase";
 import type { ContentDifficulty } from "../../types/content";
 import type { SubjectId, TrackId } from "../../types/academic";
 
-export type LearningEventSource = "quiz" | "ai_corrector" | "exercise" | "diagnostic";
+export type LearningEventSource = "quiz" | "ai_corrector" | "exercise" | "diagnostic" | "exam" | "flashcard";
 export type LearningOutcome = "correct" | "partial" | "incorrect" | "skipped";
 
 export type LearningEventInput = {
@@ -15,6 +15,7 @@ export type LearningEventInput = {
   outcome: LearningOutcome;
   pointsEarned?: number | null;
   pointsPossible?: number | null;
+  weaknessPoints?: number | null;
   difficulty?: ContentDifficulty | number | null;
   mistakeType?: string | null;
   metadata?: Record<string, unknown>;
@@ -33,6 +34,7 @@ export type LearnerMastery = {
   correct: number;
   partial: number;
   incorrect: number;
+  weakness_points: number;
   recent_mistakes: string[];
   trend: "improving" | "stable" | "declining" | "new";
   last_attempt: string | null;
@@ -115,6 +117,7 @@ export async function recordLearningEvent(input: LearningEventInput) {
     outcome: normalized.outcome,
     points_earned: normalized.pointsEarned ?? null,
     points_possible: normalized.pointsPossible ?? null,
+    weakness_points: Math.max(0, normalized.weaknessPoints ?? 0),
     difficulty: normalized.difficulty ?? null,
     mistake_type: normalized.mistakeType ?? null,
     metadata: normalized.metadata ?? {},
@@ -147,6 +150,7 @@ export async function flushPendingLearningEvents() {
     outcome: event.outcome,
     points_earned: event.pointsEarned ?? null,
     points_possible: event.pointsPossible ?? null,
+    weakness_points: Math.max(0, event.weaknessPoints ?? 0),
     difficulty: event.difficulty ?? null,
     mistake_type: event.mistakeType ?? null,
     metadata: { ...(event.metadata ?? {}), queuedAt: event.queuedAt },
@@ -180,7 +184,7 @@ export async function recordCorrectionOutcome(params: {
   score?: number | null;
   pointsPossible?: number | null;
   verdict: "correct" | "mostly_correct" | "partially_correct" | "incorrect";
-  errors?: Array<{ location?: string; expected?: string; observed?: string; fix?: string }>;
+  errors?: Array<{ location?: string; expected?: string; observed?: string; fix?: string; weaknessPoints?: number; conceptId?: string; chapter?: string; topic?: string }>;
   exerciseId?: string;
 }) {
   const ratio = params.verdict === "correct"
@@ -203,6 +207,7 @@ export async function recordCorrectionOutcome(params: {
     outcome,
     pointsEarned: params.pointsPossible ? ratio * params.pointsPossible : null,
     pointsPossible: params.pointsPossible ?? null,
+    weaknessPoints: outcome === "incorrect" ? 3 : outcome === "partial" ? 1.5 : 0,
     mistakeType: params.errors?.[0]?.location ?? null,
     metadata: {
       exerciseId: params.exerciseId ?? null,
@@ -241,8 +246,44 @@ export async function recordQuizAttempt(params: {
       outcome,
       pointsEarned: item.pointsEarned ?? (item.correct ? 1 : 0),
       pointsPossible: item.pointsPossible ?? 1,
+      weaknessPoints: item.correct ? 0 : item.partial ? 1 : 2,
       difficulty: item.difficulty ?? null,
       metadata: { quizId: params.quizId, itemIndex: index },
     })));
   }));
+}
+
+export async function recordExamErrorFeedback(params: {
+  trackId: TrackId | string;
+  subjectId?: SubjectId | string;
+  chapter?: string;
+  topic?: string;
+  conceptId?: string;
+  weaknessPoints?: number;
+  location?: string;
+  expected?: string;
+  observed?: string;
+  fix?: string;
+  examId?: string;
+}) {
+  return recordLearningEvent({
+    source: "exam",
+    subjectId: params.subjectId ?? "unknown",
+    trackId: params.trackId,
+    chapter: params.chapter,
+    topic: params.topic,
+    conceptId: params.conceptId ?? params.topic ?? params.chapter ?? "general",
+    outcome: "incorrect",
+    weaknessPoints: Math.max(1, Math.min(10, params.weaknessPoints ?? 2)),
+    pointsEarned: 0,
+    pointsPossible: 1,
+    mistakeType: params.location ?? "answer_mismatch",
+    metadata: {
+      examId: params.examId ?? null,
+      confirmedByStudent: true,
+      expected: params.expected ?? null,
+      observed: params.observed ?? null,
+      fix: params.fix ?? null,
+    },
+  });
 }
