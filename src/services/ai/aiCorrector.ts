@@ -2,6 +2,7 @@ import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@s
 import { supabase } from "../../lib/supabase";
 import type { Exercise } from "../../types/content";
 import type { TrackId } from "../../types/academic";
+import { recordCorrectionOutcome } from "../learning/weakPointsService";
 
 export type CorrectionVerdict = "correct" | "mostly_correct" | "partially_correct" | "incorrect";
 export type AICorrectionResult = {
@@ -96,6 +97,17 @@ export async function correctExerciseWithAI(params: { exercise: Exercise; answer
       student_answers: answers,
       result,
       provider: "gemini",
+    });
+    void recordCorrectionOutcome({
+      subjectId: exercise.target.subjectId,
+      trackId,
+      chapter: exercise.target.chapter,
+      topic: exercise.target.topic,
+      conceptIds: exercise.target.conceptIds,
+      score: result.score,
+      verdict: result.verdict,
+      errors: result.errors,
+      exerciseId: exercise.id,
     });
   }
   return result;
