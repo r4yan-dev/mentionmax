@@ -6,6 +6,7 @@ import { pathLabels, resolveUserPath, type UserPath } from "../data/curriculum/s
 import { lessonService } from "../services/lesson/lessonService";
 import PathSwitcher from "../components/curriculum/PathSwitcher";
 import LessonRenderer from "../features/lessons/LessonRenderer";
+import LessonJourneyPanel from "../components/learning/LessonJourneyPanel";
 import "./Lessons.css";
 
 function normalizeSubject(value?: string) {
@@ -35,7 +36,7 @@ export default function Lessons() {
   const index = lessons.findIndex((lesson) => lesson.id === active.id);
   const previous = lessons[index - 1];
   const next = lessons[index + 1];
-  return <main className="lessons-page"><Header path={path} /><div className="lessons-reader-meta"><Link to={`/lecons/${subject}`} className="lessons-back"><ArrowLeft size={15} /> Tous les cours</Link><span>{label} · Leçon {index + 1}/{lessons.length}</span></div><LessonRenderer lesson={active} /><nav className="lessons-reader-nav">{previous ? <Link to={`/lecons/${subject}/${previous.id}`}><span>PRÉCÉDENTE</span><strong>{previous.title}</strong><small><ArrowLeft size={14} /> Revenir</small></Link> : <div />}{next ? <Link to={`/lecons/${subject}/${next.id}`}><span>SUIVANTE</span><strong>{next.title}</strong><small>Continuer <ArrowRight size={14} /></small></Link> : <div />}</nav><section className="lessons-next-step"><div><span className="lessons-eyebrow">ÉTAPE SUIVANTE</span><h2>Maintenant, mets le cours à l’épreuve.</h2><p>Passe directement à la banque d’exercices du même programme.</p></div><Link to={`/exercices?subject=${subject}`} className="lessons-button lessons-button--primary"><PenLine size={16} /> S’entraîner</Link></section></main>;
+  return <main className="lessons-page"><Header path={path} /><div className="lessons-reader-meta"><Link to={`/lecons/${subject}`} className="lessons-back"><ArrowLeft size={15} /> Tous les cours</Link><span>{label} · Leçon {index + 1}/{lessons.length}</span></div><LessonRenderer lesson={active} /><LessonJourneyPanel lesson={active} subjectId={subject} trackId={path} /><nav className="lessons-reader-nav">{previous ? <Link to={`/lecons/${subject}/${previous.id}`}><span>PRÉCÉDENTE</span><strong>{previous.title}</strong><small><ArrowLeft size={14} /> Revenir</small></Link> : <div />}{next ? <Link to={`/lecons/${subject}/${next.id}`}><span>SUIVANTE</span><strong>{next.title}</strong><small>Continuer <ArrowRight size={14} /></small></Link> : <div />}</nav><section className="lessons-next-step"><div><span className="lessons-eyebrow">ÉTAPE SUIVANTE</span><h2>Maintenant, mets le cours à l’épreuve.</h2><p>Passe directement à la banque d’exercices du même programme.</p></div><Link to={`/exercices?subject=${subject}`} className="lessons-button lessons-button--primary"><PenLine size={16} /> S’entraîner</Link></section></main>;
 }
 
 function Header({ path }: { path: UserPath }) {
