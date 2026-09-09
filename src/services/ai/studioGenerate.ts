@@ -41,9 +41,6 @@ if (typeof document !== "undefined") {
 }
 
 function resolveGenerationMode(inputMode: StudioGenerationMode): StudioGenerationMode {
-  // YouTube previously forced handnote inside the page. Keep the user's latest
-  // explicit format selection authoritative, even when that old path still passes
-  // "handnote" to this shared service.
   return lastSelectedMode ?? inputMode;
 }
 
@@ -82,6 +79,19 @@ export async function generateStudioResource<T = unknown>(input: StudioGeneratio
       ? `${response.error ?? "La génération IA a échoué."} ${response.detail}`
       : response?.error ?? "La génération IA a échoué.";
     throw new Error(message);
+  }
+
+  if (response.result && typeof response.result === "object" && !Array.isArray(response.result)) {
+    const result = response.result as Record<string, unknown>;
+    return {
+      ...result,
+      __mentionmaxContext: {
+        mode,
+        subject: input.subject?.trim() || null,
+        chapter: input.chapter?.trim() || null,
+        track: input.track?.trim() || null,
+      },
+    } as T;
   }
 
   return response.result;
