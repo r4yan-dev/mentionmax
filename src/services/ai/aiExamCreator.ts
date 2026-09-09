@@ -1,7 +1,5 @@
 import { supabase } from "../../lib/supabase";
 
-const EXAM_CREATOR_URL = "/api/ai-exam-creator";
-
 export type AIExamQuestion = {
   number: number;
   title: string;
@@ -39,17 +37,8 @@ export async function generateExamWithAI(input: AIExamCreatorInput): Promise<AIE
   const text = input.text.trim();
   if (!text) throw new Error("Le texte source est vide.");
 
-  const session = await supabase.auth.getSession();
-  const headers = new Headers({ "Content-Type": "application/json" });
-  if (session.data.session?.access_token) {
-    headers.set("Authorization", `Bearer ${session.data.session.access_token}`);
-  }
-
-  const response = await fetch(EXAM_CREATOR_URL, {
-    method: "POST",
-    headers,
-    credentials: "same-origin",
-    body: JSON.stringify({
+  const { data, error } = await supabase.functions.invoke("ai-exam-creator", {
+    body: {
       text,
       subject: input.subject?.trim() || undefined,
       chapter: input.chapter?.trim() || undefined,
@@ -58,18 +47,26 @@ export async function generateExamWithAI(input: AIExamCreatorInput): Promise<AIE
       durationMinutes: input.durationMinutes ?? 60,
       questionCount: input.questionCount ?? 10,
       weakPoints: input.weakPoints ?? [],
-    }),
+    },
   });
 
-  const payload = await response.json().catch(() => null) as { success?: boolean; result?: AIExamResult; error?: string; detail?: string } | null;
-
-  if (!response.ok) {
-    throw new Error(payload?.detail ? `${payload.error ?? "La génération a échoué."} ${payload.detail}` : payload?.error ?? `Le générateur a répondu avec une erreur HTTP (${response.status}).`);
+  if (error) {
+    let detail = "";
+    try {
+      const context = (error as { context?: Response }).context;
+      if (context) {
+        const payload = await context.clone().json().catch(() => null) as { error?: string; detail?: string } | null;
+        detail = payload?.detail ? ` ${payload.detail}` : payload?.error ? ` ${payload.error}` : "";
+      }
+    } catch {
+      // Ignore malformed error bodies and use the SDK error message.
+    }
+    throw new Error(`${error.message || "Impossible de contacter le générateur d'examens IA."}${detail}`);
   }
 
-  if (!payload?.success || !payload.result) {
-    throw new Error(payload?.detail ? `${payload.error ?? "La génération a échoué."} ${payload.detail}` : payload?.error ?? "La génération de l'examen a échoué.");
+  if (!data?.success || !data.result) {
+    throw new Error(data?.detail ? `${data.error ?? "La génération a échoué."} ${data.detail}` : data?.error ?? "La génération de l'examen a échoué.");
   }
 
-  return payload.result;
+  return data.result as AIExamResult;
 }
