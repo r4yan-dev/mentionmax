@@ -132,6 +132,7 @@ export default function SocialStudyFeatures({ groupId }: { groupId: string }) {
 
   const visibleChallenge = challenges[0] ?? null;
   const rankedMembers = visibleChallenge ? challenges.filter((row) => row.challenge_id === visibleChallenge.challenge_id).sort((a, b) => a.rank - b.rank).slice(0, 5) : [];
+  const groupProgress = visibleChallenge ? challenges.filter((row) => row.challenge_id === visibleChallenge.challenge_id).reduce((sum, row) => sum + row.progress, 0) : 0;
 
   return (
     <section className="social-community-features">
@@ -145,8 +146,8 @@ export default function SocialStudyFeatures({ groupId }: { groupId: string }) {
           <div className="social-feature-card__head"><div><span className="social-feature-kicker"><Trophy size={14}/> Challenge</span><h3>{visibleChallenge?.title ?? "Lancez votre premier défi"}</h3></div><Flag size={21}/></div>
           {visibleChallenge ? <>
             <p>{visibleChallenge.description}</p>
-            <div className="social-challenge-meter"><span style={{ width: `${Math.min(100, Math.round(((visibleChallenge.progress ?? 0) / Math.max(1, visibleChallenge.target)) * 100))}%` }}/></div>
-            <div className="social-challenge-meta"><strong>{visibleChallenge.progress} / {visibleChallenge.target}</strong><span>{metricLabel(visibleChallenge.metric)}</span><b>{daysLeft(visibleChallenge.ends_at)} j restants</b></div>
+            <div className="social-challenge-meter"><span style={{ width: `${Math.min(100, Math.round((groupProgress / Math.max(1, visibleChallenge.target)) * 100))}%` }}/></div>
+            <div className="social-challenge-meta"><strong>{groupProgress} / {visibleChallenge.target}</strong><span>{metricLabel(visibleChallenge.metric)}</span><b>{daysLeft(visibleChallenge.ends_at)} j restants</b></div>
             <div className="social-mini-rankings">{rankedMembers.map((member) => <div key={`${member.challenge_id}-${member.member_user_id}`}><span>#{member.rank}</span><strong>{member.display_name}</strong><b>{member.progress}</b></div>)}</div>
           </> : <p>Un défi de 7 jours transforme immédiatement le groupe en objectif commun. Les progrès sont calculés à partir des vraies sessions de focus.</p>}
           <div className="social-feature-actions"><button type="button" className="btn btn-primary" onClick={() => setShowChallengeForm((value) => !value)}><Plus size={15}/> {visibleChallenge ? "Nouveau défi" : "Créer le défi"}</button></div>
