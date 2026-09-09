@@ -12,8 +12,6 @@
 .generator-summary__sections .generator-lesson__section-body h3{font-size:34px}
 .generator-summary__sections .generator-lesson-list li{font-size:19px}
 
-/* Keep prose and inline maths in one typographic flow. MathJax's generated spans
-   must behave like inline glyphs, not like a second paragraph sitting below HTML. */
 .generator-handwritten-resource .mjx-container,
 .generator-handwritten-resource mjx-container{display:inline-block!important;margin:0 .12em!important;vertical-align:-.08em!important}
 .generator-handwritten-resource .mjx-container[display="true"],
@@ -46,6 +44,11 @@
 .generator-quiz-choice{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:12px;width:100%;padding:13px 15px;border:1.5px solid rgba(23,59,57,.12);border-radius:15px 11px 17px 13px;background:#fff;color:#173b39;text-align:left;font:inherit;cursor:pointer;transition:.18s ease}
 .generator-quiz-choice:not(:disabled):hover{transform:translateX(3px) rotate(-.2deg);border-color:rgba(15,163,163,.42);box-shadow:4px 5px 0 rgba(23,59,57,.04)}
 .generator-quiz-choice:disabled{cursor:default}
+.generator-quiz-choice.is-correct{border-color:#168c83;background:#e8f7f3;box-shadow:4px 5px 0 rgba(22,140,131,.10);color:#0b655f}
+.generator-quiz-choice.is-correct .generator-quiz-choice__letter{background:#cdeee8;color:#08766f}
+.generator-quiz-choice.is-wrong{border-color:#a52744;background:#fff0f3;box-shadow:4px 5px 0 rgba(165,39,68,.09);color:#8d1f3b}
+.generator-quiz-choice.is-wrong .generator-quiz-choice__letter{background:#ffd9e1;color:#9b2141}
+.generator-quiz-choice:disabled{opacity:1}
 .generator-quiz-choice__letter{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#edf6f3;font-family:"Kalam",cursive;font-size:18px;font-weight:700;color:#073b3a}
 .generator-quiz-choice>span:last-child{display:block;min-width:0;font-size:20px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}
 .generator-quiz-choice>span:last-child .mjx-container,
