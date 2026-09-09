@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import type { ReactNode } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { AccountProvider } from "./context/AccountContext";
+import { AccountProvider, useAccount } from "./context/AccountContext";
 import { FocusProvider } from "./context/FocusContext";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -26,6 +26,7 @@ import FocusGroupJoin from "./pages/FocusGroupJoin";
 import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } from "./pages/FocusGroupTabs";
 import Progression from "./pages/Progression";
 import WeakPoints from "./pages/WeakPoints";
+import StudyAgent from "./pages/StudyAgent";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Preferences from "./pages/Preferences";
@@ -81,6 +82,8 @@ export default function App() {
       <Route path="/progression" element={<Progression />} />
       <Route path="/points-faibles" element={<WeakPoints />} />
       <Route path="/weak-points" element={<WeakPoints />} />
+      <Route path="/session" element={<StudyAgent />} />
+      <Route path="/study-agent" element={<StudyAgent />} />
       <Route path="/classement" element={<Leaderboard />} />
       <Route path="/bibliotheque" element={<Library />} />
       <Route path="/bibliotheque/:itemId" element={<Library />} />
