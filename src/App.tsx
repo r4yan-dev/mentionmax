@@ -25,6 +25,7 @@ import FocusGroupNew from "./pages/FocusGroupNew";
 import FocusGroupJoin from "./pages/FocusGroupJoin";
 import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } from "./pages/FocusGroupTabs";
 import Progression from "./pages/Progression";
+import WeakPoints from "./pages/WeakPoints";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Preferences from "./pages/Preferences";
@@ -77,6 +78,8 @@ export default function App() {
       <Route path="/ai-studio/writing" element={<WritingLab />} />
       <Route path="/ai-help" element={<AIHelp />} />
       <Route path="/progression" element={<Progression />} />
+      <Route path="/points-faibles" element={<WeakPoints />} />
+      <Route path="/weak-points" element={<WeakPoints />} />
       <Route path="/classement" element={<Leaderboard />} />
       <Route path="/bibliotheque" element={<Library />} />
       <Route path="/bibliotheque/:itemId" element={<Library />} />
