@@ -31,6 +31,7 @@ import Profile from "./pages/Profile";
 import Preferences from "./pages/Preferences";
 import Library from "./pages/Library";
 import AuthenticatedShell from "./components/AuthenticatedShell";
+import QuizLearningTelemetry from "./features/learning/QuizLearningTelemetry";
 import "./index.css";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -41,7 +42,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  return <BrowserRouter><AuthProvider><Routes>
+  return <BrowserRouter><AuthProvider><QuizLearningTelemetry /><Routes>
     <Route path="/" element={<Landing />} />
     <Route path="/connexion" element={<Auth />} />
     <Route element={<ProtectedRoute><AuthenticatedShell /></ProtectedRoute>}>
