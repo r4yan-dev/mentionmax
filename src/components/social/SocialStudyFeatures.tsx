@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Bell, BookOpen, Check, ExternalLink, Flag, Plus, Trophy, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { useFocus } from "../../context/FocusContext";
 import { supabase } from "../../lib/supabase";
 import { getMyGroupRole } from "../../features/focus/supabase";
 
@@ -47,7 +46,6 @@ function metricLabel(metric: ChallengeRow["metric"]) {
 
 export default function SocialStudyFeatures({ groupId }: { groupId: string }) {
   const { user } = useAuth();
-  useFocus();
   const [challenges, setChallenges] = useState<ChallengeRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementRow[]>([]);
