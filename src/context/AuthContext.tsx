@@ -12,6 +12,7 @@ import type {
 } from "@supabase/supabase-js";
 
 import { supabase } from "../lib/supabase";
+import { flushPendingLearningEvents } from "../services/learning/weakPointsService";
 
 interface AuthContextValue {
   session: Session | null;
@@ -57,6 +58,7 @@ export function AuthProvider({
 
         setSession(data.session);
         setLoading(false);
+        if (data.session) void flushPendingLearningEvents();
       })
       .catch((error) => {
         console.error(
@@ -75,6 +77,7 @@ export function AuthProvider({
       (_event, nextSession) => {
         setSession(nextSession);
         setLoading(false);
+        if (nextSession) void flushPendingLearningEvents();
       }
     );
 
