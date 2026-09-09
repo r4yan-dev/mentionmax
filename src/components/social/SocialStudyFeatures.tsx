@@ -47,7 +47,7 @@ function metricLabel(metric: ChallengeRow["metric"]) {
 
 export default function SocialStudyFeatures({ groupId }: { groupId: string }) {
   const { user } = useAuth();
-  const { groups } = useFocus();
+  useFocus();
   const [challenges, setChallenges] = useState<ChallengeRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementRow[]>([]);
