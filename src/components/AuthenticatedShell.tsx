@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BarChart3, BookOpen, BrainCircuit, ChevronDown, FileText, Home, LogOut, Menu, Search, Sparkles, Trophy, X, type LucideIcon } from "lucide-react";
+import { BarChart3, BookOpen, BrainCircuit, ChevronDown, FileText, Home, LogOut, Menu, Search, Sparkles, Target, Trophy, X, type LucideIcon } from "lucide-react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAccount } from "../context/AccountContext";
@@ -15,6 +15,7 @@ const navItems = [
   { to: "/ai-studio", label: "AI Studio", icon: Sparkles },
   { to: "/examens", label: "Examens", icon: FileText },
   { to: "/progression", label: "Progression", icon: BarChart3 },
+  { to: "/points-faibles", label: "Points faibles", icon: Target },
   { to: "/classement", label: "Classement", icon: Trophy },
 ];
 
@@ -22,6 +23,7 @@ type SearchTarget = [string, string, string, LucideIcon];
 const searchTargets: SearchTarget[] = [
   ["Cours", "Explorer les matières et les leçons", "/matieres", BookOpen],
   ["Pratique", "Ouvrir la banque d’exercices", "/exercices", BrainCircuit],
+  ["Points faibles", "Voir les notions qui demandent du travail", "/points-faibles", Target],
   ["Focus", "Travailler seul ou avec ton groupe", "/focus", Sparkles],
   ["AI Studio", "Créer une fiche, un résumé ou des flashcards", "/ai-studio", Sparkles],
   ["Ma bibliothèque", "Retrouver tes ressources sauvegardées", "/bibliotheque", BookOpen],
@@ -31,7 +33,7 @@ const searchTargets: SearchTarget[] = [
   ["Progression", "Voir tes statistiques et ta maîtrise", "/progression", BarChart3],
   ["Classement", "Voir ton rang et ton XP", "/classement", Trophy],
 ];
-const pageNames: Record<string, string> = { "/accueil": "Accueil", "/subjects": "Matières", "/matieres": "Matières", "/exercices": "Pratique", "/exercises": "Pratique", "/focus": "Focus", "/examens": "Examens", "/exams": "Examens", "/ai-studio": "AI Studio", "/bibliotheque": "Ma bibliothèque", "/ai-help": "Tuteur IA", "/progression": "Progression", "/classement": "Classement", "/profil": "Profil", "/preferences": "Préférences" };
+const pageNames: Record<string, string> = { "/accueil": "Accueil", "/subjects": "Matières", "/matieres": "Matières", "/exercices": "Pratique", "/exercises": "Pratique", "/focus": "Focus", "/examens": "Examens", "/exams": "Examens", "/ai-studio": "AI Studio", "/bibliotheque": "Ma bibliothèque", "/ai-help": "Tuteur IA", "/progression": "Progression", "/points-faibles": "Points faibles", "/weak-points": "Points faibles", "/classement": "Classement", "/profil": "Profil", "/preferences": "Préférences" };
 
 export default function AuthenticatedShell() {
   const { signOut } = useAuth();
@@ -60,7 +62,7 @@ export default function AuthenticatedShell() {
       <div className="shell-brand-row"><NavLink to="/accueil" className="shell-brand" onClick={() => setMobileOpen(false)}><span className="shell-mark">M</span><span><strong>MentionMax</strong><small>2BAC · Maroc</small></span></NavLink><button className="shell-close" onClick={() => setMobileOpen(false)} aria-label="Fermer"><X size={18}/></button></div>
       <button className="shell-mini-search" type="button" onClick={openSearch}><Search size={15}/><span>Rechercher</span><kbd>⌘K</kbd></button>
       <div className="shell-track"><span>Parcours</span><strong>{trackLabel}</strong><span className="shell-track-dot" /></div>
-      <nav className="shell-nav" aria-label="Navigation principale">{navItems.map(({to,label,icon:Icon})=><NavLink key={to} to={to} onClick={()=>setMobileOpen(false)} className={({isActive})=>`shell-nav-link ${isActive || (to === "/exercices" && location.pathname.startsWith("/exercices")) || (to === "/focus" && location.pathname.startsWith("/focus")) || (to === "/examens" && (location.pathname.startsWith("/examens") || location.pathname.startsWith("/exams"))) ? "active" : ""}`}><Icon size={18} strokeWidth={2}/><span>{label}</span></NavLink>)}</nav>
+      <nav className="shell-nav" aria-label="Navigation principale">{navItems.map(({to,label,icon:Icon})=><NavLink key={to} to={to} onClick={()=>setMobileOpen(false)} className={({isActive})=>`shell-nav-link ${isActive || (to === "/exercices" && location.pathname.startsWith("/exercices")) || (to === "/focus" && location.pathname.startsWith("/focus")) || (to === "/examens" && (location.pathname.startsWith("/examens") || location.pathname.startsWith("/exams"))) || (to === "/points-faibles" && (location.pathname.startsWith("/points-faibles") || location.pathname.startsWith("/weak-points"))) ? "active" : ""}`}><Icon size={18} strokeWidth={2}/><span>{label}</span></NavLink>)}</nav>
       <div className="shell-sidebar-bottom"><NavLink to="/ai-help" className="shell-tutor-card" onClick={()=>setMobileOpen(false)}><span className="shell-tutor-icon"><Sparkles size={15}/></span><span><strong>Besoin d’aide ?</strong><small>Ouvrir le tuteur IA</small></span><ChevronDown size={15}/></NavLink><button className="shell-streak" onClick={()=>go("/progression")}><span>🔥</span><div><strong>5 jours</strong><small>Série actuelle</small></div></button><button className="shell-profile" onClick={()=>go("/profil")}><span className="shell-avatar">{initials}</span><span><strong>{profile?.display_name || "Mon profil"}</strong><small>Compte étudiant · {pageTitle}</small></span><ChevronDown size={15}/></button><button className="shell-logout" onClick={handleSignOut}><LogOut size={16}/> Déconnexion</button></div>
     </aside>
     <div className="shell-main"><header className="shell-topbar"><button className="shell-menu" onClick={()=>setMobileOpen(true)} aria-label="Ouvrir le menu"><Menu size={21}/></button><button className="shell-search" type="button" onClick={openSearch}><Search size={17}/><span>Rechercher un chapitre, exercice...</span><kbd>⌘K</kbd></button><div className="shell-topbar-right"><div className="shell-page-title">{pageTitle}</div><div className="shell-path-chip">{trackLabel}</div><NavLink to="/profil" className="shell-top-profile"><span className="shell-avatar">{initials}</span><span>{profile?.display_name || "Mon profil"}</span></NavLink></div></header><div className="shell-content"><Outlet/></div></div>
