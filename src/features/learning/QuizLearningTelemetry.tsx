@@ -87,9 +87,9 @@ export default function QuizLearningTelemetry() {
         void (async () => {
           try {
             const spotted = await spotWeakPoint({
-              subjectId: context?.subject ?? generated?.subjectId ?? "unknown",
+              subjectId: context?.subject ?? "unknown",
               trackId: context?.track ?? undefined,
-              chapter: context?.chapter || generated?.chapter || quizTitle,
+              chapter: context?.chapter || quizTitle,
               topic: generated?.topic || question.slice(0, 180),
               question,
               selectedAnswer,
@@ -100,9 +100,9 @@ export default function QuizLearningTelemetry() {
             await recordLearningEvent({
               source: "quiz",
               outcome: "incorrect",
-              subjectId: spotted.subjectId || context?.subject || generated?.subjectId || "unknown",
+              subjectId: spotted.subjectId || context?.subject || "unknown",
               trackId: spotted.trackId || context?.track || undefined,
-              chapter: spotted.chapter || context?.chapter || generated?.chapter || quizTitle,
+              chapter: spotted.chapter || context?.chapter || quizTitle,
               topic: spotted.topic || generated?.topic || question.slice(0, 180),
               conceptId: spotted.conceptId,
               pointsEarned: 0,
