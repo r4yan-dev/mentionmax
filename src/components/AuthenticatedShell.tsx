@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BarChart3, BookOpen, BrainCircuit, ChevronDown, FileText, Home, LogOut, Menu, Search, Sparkles, Target, Trophy, Users, X, type LucideIcon } from "lucide-react";
+import { BarChart3, BookOpen, BrainCircuit, ChevronDown, FileText, Home, LogOut, Menu, Search, Sparkles, Target, Trophy, X, type LucideIcon } from "lucide-react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAccount } from "../context/AccountContext";
