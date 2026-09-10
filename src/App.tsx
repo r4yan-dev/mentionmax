@@ -27,7 +27,6 @@ import { GroupLeaderboard, GroupChat, GroupStats, GroupMembers, GroupSettings } 
 import Progression from "./pages/Progression";
 import WeakPoints from "./pages/WeakPoints";
 import StudyAgent from "./pages/StudyAgent";
-import SocialStudy from "./pages/SocialStudy";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Preferences from "./pages/Preferences";
@@ -59,8 +58,8 @@ export default function App() {
       <Route path="/exercises" element={<Exercises />} />
       <Route path="/exercices/:exerciseId" element={<Exercises />} />
       <Route path="/focus" element={<Focus />} />
-      <Route path="/communaute" element={<SocialStudy />} />
-      <Route path="/community" element={<SocialStudy />} />
+      <Route path="/communaute" element={<Focus />} />
+      <Route path="/community" element={<Focus />} />
       <Route path="/focus/groups/new" element={<FocusGroupNew />} />
       <Route path="/focus/groups/join" element={<FocusGroupJoin />} />
       <Route path="/focus/groups/:groupId" element={<FocusGroupDetail />}>
