@@ -20,9 +20,13 @@ export type StudioGenerationResponse<T = unknown> = {
 };
 
 type LearningContext = { mode: StudioGenerationMode; subject: string | null; chapter: string | null; track: string | null };
+type GeneratedQuizConcept = { conceptIds: string[]; topic: string; difficulty: string };
 
 declare global {
-  interface Window { __mentionmaxLearningContext?: LearningContext; }
+  interface Window {
+    __mentionmaxLearningContext?: LearningContext;
+    __mentionmaxGeneratedQuizConcepts?: Record<string, GeneratedQuizConcept>;
+  }
 }
 
 let lastSelectedMode: StudioGenerationMode | null = null;
@@ -33,6 +37,14 @@ const modeFromLabel: Record<string, StudioGenerationMode> = {
   "flashcards": "flashcards",
   "quiz": "quiz",
 };
+
+function slugify(value: string) {
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 100);
+}
+
+function quizConceptKey(title: string, question: string) {
+  return `${slugify(title)}::${slugify(question)}`;
+}
 
 if (typeof document !== "undefined") {
   document.addEventListener("click", (event) => {
@@ -94,7 +106,27 @@ export async function generateStudioResource<T = unknown>(input: StudioGeneratio
     throw new Error(message);
   }
 
-  if (typeof window !== "undefined") window.__mentionmaxLearningContext = context;
+  if (typeof window !== "undefined") {
+    window.__mentionmaxLearningContext = context;
+    if (mode === "quiz") {
+      const rawResult = response.result as Record<string, unknown>;
+      const title = typeof rawResult.title === "string" ? rawResult.title : "Quiz";
+      const questions = Array.isArray(rawResult.questions) ? rawResult.questions : [];
+      window.__mentionmaxGeneratedQuizConcepts = {};
+      for (const item of questions) {
+        if (!item || typeof item !== "object") continue;
+        const question = item as Record<string, unknown>;
+        const questionText = typeof question.question === "string" ? question.question : "";
+        if (!questionText) continue;
+        const conceptIds = Array.isArray(question.conceptIds)
+          ? question.conceptIds.filter((value): value is string => typeof value === "string" && Boolean(value.trim())).slice(0, 4)
+          : [];
+        const topic = typeof question.topic === "string" && question.topic.trim() ? question.topic.trim() : questionText;
+        const difficulty = typeof question.difficulty === "string" ? question.difficulty : "medium";
+        window.__mentionmaxGeneratedQuizConcepts[quizConceptKey(title, questionText)] = { conceptIds, topic, difficulty };
+      }
+    }
+  }
 
   if (response.result && typeof response.result === "object" && !Array.isArray(response.result)) {
     const result = response.result as Record<string, unknown>;
