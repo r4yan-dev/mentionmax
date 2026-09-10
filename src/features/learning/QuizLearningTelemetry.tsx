@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { recordLearningEvent } from "../../services/learning/weakPointsService";
+import { spotWeakPoint } from "../../services/learning/weakPointsSpot";
 
 function slugify(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 100);
@@ -45,34 +46,99 @@ export default function QuizLearningTelemetry() {
         if (!correct && !wrong && !root.querySelector(".generator-quiz-feedback")) return;
 
         const generated = getGeneratedConcepts(quizTitle, question);
-        const conceptIds = generated?.conceptIds?.length ? generated.conceptIds : [`quiz-question-${slugify(question)}`];
-        const topic = generated?.topic || question.slice(0, 180);
         const difficultyMap: Record<string, number> = { easy: 2, medium: 3, hard: 5 };
+        const baseMetadata = {
+          quizTitle,
+          question,
+          itemIndex,
+          totalItems,
+          answerCorrect: correct,
+          generationContext: context ?? null,
+          generatedConcept: generated ?? null,
+          telemetry: "generator-concept-v2",
+        };
 
-        void Promise.all(conceptIds.map((conceptId) => recordLearningEvent({
-          source: "quiz",
-          outcome: correct ? "correct" : "incorrect",
-          subjectId: context?.subject ?? "unknown",
-          trackId: context?.track ?? undefined,
-          chapter: context?.chapter || quizTitle,
-          topic,
-          conceptId,
-          pointsEarned: correct ? 1 : 0,
-          pointsPossible: 1,
-          weaknessPoints: correct ? 0 : 2,
-          difficulty: difficultyMap[generated?.difficulty ?? "medium"] ?? 3,
-          metadata: {
-            quizTitle,
-            question,
-            itemIndex,
-            totalItems,
-            answerCorrect: correct,
-            weaknessSignal: correct ? "none" : "quiz_mistake",
-            generationContext: context ?? null,
-            generatedConcept: generated ?? null,
-            telemetry: "generator-concept-v1",
-          },
-        })));
+        if (correct) {
+          const conceptIds = generated?.conceptIds?.length ? generated.conceptIds : [`quiz-question-${slugify(question)}`];
+          const topic = generated?.topic || question.slice(0, 180);
+          void Promise.all(conceptIds.map((conceptId) => recordLearningEvent({
+            source: "quiz",
+            outcome: "correct",
+            subjectId: context?.subject ?? "unknown",
+            trackId: context?.track ?? undefined,
+            chapter: context?.chapter || quizTitle,
+            topic,
+            conceptId,
+            pointsEarned: 1,
+            pointsPossible: 1,
+            weaknessPoints: 0,
+            difficulty: difficultyMap[generated?.difficulty ?? "medium"] ?? 3,
+            metadata: { ...baseMetadata, weaknessSignal: "none" },
+          })));
+          return;
+        }
+
+        if (!wrong) return;
+
+        const selectedAnswer = choice.textContent?.trim() || "Réponse incorrecte";
+        const correctChoice = root.querySelector<HTMLButtonElement>(".generator-quiz-choice.is-correct");
+        const correctAnswer = correctChoice?.textContent?.trim() || root.querySelector<HTMLElement>(".generator-quiz-feedback")?.textContent?.trim() || "Voir la correction du quiz";
+
+        void (async () => {
+          try {
+            const spotted = await spotWeakPoint({
+              subjectId: context?.subject ?? generated?.subjectId ?? "unknown",
+              trackId: context?.track ?? undefined,
+              chapter: context?.chapter || generated?.chapter || quizTitle,
+              topic: generated?.topic || question.slice(0, 180),
+              question,
+              selectedAnswer,
+              correctAnswer,
+              quizTitle,
+            });
+
+            await recordLearningEvent({
+              source: "quiz",
+              outcome: "incorrect",
+              subjectId: spotted.subjectId || context?.subject || generated?.subjectId || "unknown",
+              trackId: spotted.trackId || context?.track || undefined,
+              chapter: spotted.chapter || context?.chapter || generated?.chapter || quizTitle,
+              topic: spotted.topic || generated?.topic || question.slice(0, 180),
+              conceptId: spotted.conceptId,
+              pointsEarned: 0,
+              pointsPossible: 1,
+              weaknessPoints: spotted.weaknessPoints,
+              difficulty: difficultyMap[generated?.difficulty ?? "medium"] ?? 3,
+              mistakeType: spotted.mistakeType,
+              metadata: {
+                ...baseMetadata,
+                weaknessSignal: "ai_spotted_quiz_mistake",
+                weakPointAnalysis: spotted,
+              },
+            });
+          } catch (error) {
+            const conceptIds = generated?.conceptIds?.length ? generated.conceptIds : [`quiz-question-${slugify(question)}`];
+            const topic = generated?.topic || question.slice(0, 180);
+            await Promise.all(conceptIds.map((conceptId) => recordLearningEvent({
+              source: "quiz",
+              outcome: "incorrect",
+              subjectId: context?.subject ?? "unknown",
+              trackId: context?.track ?? undefined,
+              chapter: context?.chapter || quizTitle,
+              topic,
+              conceptId,
+              pointsEarned: 0,
+              pointsPossible: 1,
+              weaknessPoints: 2,
+              difficulty: difficultyMap[generated?.difficulty ?? "medium"] ?? 3,
+              metadata: {
+                ...baseMetadata,
+                weaknessSignal: "quiz_mistake_fallback",
+                weakPointSpotterError: error instanceof Error ? error.message : String(error),
+              },
+            })));
+          }
+        })();
       }, 0);
     };
 
