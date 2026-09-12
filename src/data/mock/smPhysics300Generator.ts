@@ -60,11 +60,7 @@ function makePart(base:string,num:1|2,title:string,intro:string,visual:ExerciseV
 
 export function buildExercise(index:number, c:Case, variant:number):Exercise {
  const parts=[makePart(`${index}-1`,1,`Partie 1 — ${c.title}`,c.p1,c.v1,index*2,c.kind),makePart(`${index}-2`,2,`Partie 2 — ${suffixes[variant%suffixes.length]}`,c.p2,c.v2,index*2+1,c.kind)];
- const statement=parts.map(p=>`${p.title}\\
-\\
-${p.introduction}`).join("\\
-\\");
- const correction=parts.flatMap(p=>p.questions.flatMap(q=>q.subQuestions.map(s=>`${q.number}${s.label} ${s.correction}`))).join("\\
-");
+ const statement=parts.map(p=>`${p.title}\n\n${p.introduction}`).join("\n\n");
+ const correction=parts.flatMap(p=>p.questions.flatMap(q=>q.subQuestions.map(s=>`${q.number}${s.label} ${s.correction}`))).join("\n");
  return { id:`sm-phys-300-${String(index).padStart(3,"0")}`, mode:"BASE", source:"APPROVED", target:{trackIds:tracks,subjectId,chapter:c.chapter,topic:c.title,conceptIds:["bac-structure","advanced",c.kind]}, type:"multi-step", difficulty:5, title:`${c.title} — ${suffixes[variant%suffixes.length]}`, statement, correction, hint:"Construis le modèle avant le calcul, puis vérifie unités, signes, ordre de grandeur et hypothèses.", examTip:"Niveau bac renforcé: raisonnement multi-étapes, exploitation graphique et validation expérimentale.", estimatedMinutes:55+(variant%4)*5, xpValue:100+(variant%5)*10, tags:["2BAC SM","SMA","SMB","physique-chimie","niveau très difficile","partie 1","partie 2","graphique","schéma"], visual:parts[0].visual, parts };
 }
