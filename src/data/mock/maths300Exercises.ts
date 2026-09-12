@@ -1,149 +1,139 @@
 import type { Exercise, ExerciseType, ContentDifficulty } from "../../types/content";
 
-type Chapter = { name: string; topics: string[] };
+type Chapter = { name: string; topics: string[]; family: string };
 
 const chapters: Chapter[] = [
-  { name: "Limites et continuité", topics: ["Limite rationnelle", "Limite à l’infini", "Limite trigonométrique", "Quantité conjuguée", "Croissances comparées", "Encadrement", "Continuité", "TVI", "Unicité", "Limite d’une suite", "Asymptote oblique", "Limites latérales", "Composition", "Exponentielle et limite", "Partie entière", "Paramètre", "Prolongement", "Seuil critique", "Limite inexistante", "Synthèse"] },
-  { name: "Dérivation et étude des fonctions", topics: ["Nombre dérivé", "Tangente", "Dérivées usuelles", "Produit", "Quotient", "Signe de la dérivée", "Variations", "Extremum", "Paramètre", "Convexité", "Concavité", "Bijection", "Asymptotes", "Fonction logarithmique", "Fonction exponentielle", "Optimisation", "Tangente sous contrainte", "Signe d’un produit", "Minimum global", "Synthèse"] },
-  { name: "Accroissements finis", topics: ["Taux de variation", "TAF", "Rolle", "Borne d’erreur", "Lipschitz", "Application au logarithme", "Application quadratique", "Erreur relative", "Borne de variation", "Rolle polynomial", "Pente du sinus", "Pente du cosinus", "Monotonie quantitative", "Écart entre deux valeurs", "Erreur maximale", "TAF paramétré", "Stabilité", "Composition des erreurs", "Contrôle final", "Synthèse"] },
-  { name: "Suites numériques", topics: ["Premiers termes", "Point fixe", "Monotonie", "Bornitude", "Suite géométrique", "Suite arithmétique", "Somme géométrique", "Récurrence", "Contraction", "Suite définie par une fonction", "Comparaison", "Somme télescopique", "Récurrence forte", "Suite alternée", "Inégalité de suites", "Erreur d’approximation", "Seuil", "Limite rationnelle", "Stabilité", "Synthèse"] },
-  { name: "Fonctions logarithmiques", topics: ["Valeurs usuelles", "Produit", "Quotient", "Puissance", "Domaine", "Équation logarithmique", "Inéquation", "Dérivée", "Limite en zéro", "Croissance comparée", "Composition", "Unicité", "Primitive", "Paramètre", "Valeur absolue", "Convexité", "Inégalité", "Équivalent", "Étude complète", "Synthèse"] },
-  { name: "Fonction exponentielle", topics: ["Valeurs usuelles", "Propriétés", "Équation", "Inéquation", "Décroissance", "Dérivée", "Croissances comparées", "Temps de demi-vie", "Logarithme inverse", "Convexité", "Somme de décroissances", "Composition", "Calibration", "Unicité", "Inégalité", "Taux relatif", "Seuil", "Produit", "Comparaison", "Synthèse"] },
-  { name: "Primitives", topics: ["Primitive polynomiale", "Primitive exponentielle", "Primitive inverse", "Condition initiale", "Primitive d’une racine", "Linéarité", "Changement de variable", "Exponentielle composée", "Logarithme", "Position", "Vitesse", "Famille de primitives", "Vérification", "Trigonométrie", "Paramètre", "Primitive et aire", "Développement", "Racine composée", "Contrôle", "Synthèse"] },
-  { name: "Calcul intégral", topics: ["Intégrale simple", "Théorème fondamental", "Aire algébrique", "Changement de variable", "Aire entre deux courbes", "Valeur moyenne", "Intégrale logarithmique", "Intégrale trigonométrique", "Énergie", "Positivité", "Paramètre", "Relation de Chasles", "Encadrement", "Intégrale impropre simple", "Parité", "Composition", "Aire cumulée", "Deux signaux", "Déplacement", "Synthèse"] },
-  { name: "Équations différentielles", topics: ["y'=ay", "Décroissance", "y'+ay=b", "Condition initiale", "Équation avec second membre", "Vérification", "Équilibre", "Temps caractéristique", "Unicité", "Calibration", "Croissance", "Équation non homogène", "Oscillation", "Stabilité", "Saturation", "Seuil", "Paramètre source", "Comparaison", "Solution complète", "Synthèse"] },
-  { name: "Nombres complexes", topics: ["Parties réelle et imaginaire", "Addition", "Produit", "Inverse", "Module", "Équation", "Forme trigonométrique", "Forme exponentielle", "Module d’un produit", "Argument", "Rotation", "Milieu", "Cercle", "Racines", "De Moivre", "Conjugué", "Module paramétré", "Amplitude-phase", "Équation quadratique", "Synthèse"] },
-  { name: "Géométrie dans l’espace", topics: ["Vecteur", "Distance", "Milieu", "Produit scalaire", "Norme", "Plan", "Droite", "Appartenance", "Parallélisme", "Intersection", "Distance point-plan", "Produit vectoriel", "Angle", "Sphère", "Plan médiateur", "Projection", "Déplacement", "Système", "Droite et plan", "Synthèse"] },
-  { name: "Dénombrement et probabilités", topics: ["Complément", "Indépendance", "Au moins un succès", "Probabilité conditionnelle", "Bayes", "Combinaisons", "Arrangements", "Permutations", "Loi binomiale", "Binomiale exacte", "Espérance", "Variance", "Test d’indépendance", "Probabilité totale", "Sous-ensembles", "Tirage sans remise", "Gain moyen", "Seuil binomial", "Système en série", "Synthèse"] },
-  { name: "Arithmétique dans ℤ", topics: ["Division euclidienne", "Divisibilité", "PGCD", "Bézout", "Congruence", "Puissance modulo", "Inverse modulo", "Congruence linéaire", "PGCD paramétré", "Parité", "Reste d’une puissance", "Divisibilité par 9", "Inverse d’un entier", "Chiffrement", "Déchiffrement", "Théorème de Gauss", "Irrationalité", "Équation diophantienne", "Système de congruences", "Synthèse"] },
-  { name: "Structures algébriques", topics: ["Loi interne", "Commutativité", "Élément neutre", "Inverse", "Sous-groupe", "Morphisme additif", "Noyau", "Image", "Groupe multiplicatif", "Associativité", "Matrices", "Sous-groupe rationnel", "Relation d’équivalence", "Classes modulo", "Composition de morphismes", "Injectivité", "Surjectivité", "Groupe ℝ*", "Contre-exemple", "Synthèse"] },
-  { name: "Espaces vectoriels", topics: ["Base canonique", "Famille libre", "Famille génératrice", "Coordonnées", "Sous-espace", "Dimension", "Intersection", "Somme", "Application linéaire", "Matrice", "Noyau", "Image", "Changement de base", "Décomposition", "Indépendance paramétrée", "Plan vectoriel", "Théorème du rang", "Isomorphisme", "Reconstruction", "Synthèse"] },
+  { name: "Limites et continuité", family: "Analyse", topics: ["Limite rationnelle", "Limite à l’infini", "Limite trigonométrique", "Quantité conjuguée", "Croissances comparées", "Encadrement", "Continuité", "TVI", "Unicité", "Limite d’une suite", "Asymptote oblique", "Limites latérales", "Composition", "Exponentielle et limite", "Partie entière", "Paramètre", "Prolongement", "Seuil critique", "Limite inexistante", "Synthèse"] },
+  { name: "Dérivation et étude des fonctions", family: "Analyse", topics: ["Nombre dérivé", "Tangente", "Dérivées usuelles", "Produit", "Quotient", "Signe de la dérivée", "Variations", "Extremum", "Paramètre", "Convexité", "Concavité", "Bijection", "Asymptotes", "Fonction logarithmique", "Fonction exponentielle", "Optimisation", "Tangente sous contrainte", "Signe d’un produit", "Minimum global", "Synthèse"] },
+  { name: "Accroissements finis", family: "Analyse", topics: ["Taux de variation", "TAF", "Rolle", "Borne d’erreur", "Lipschitz", "Application au logarithme", "Application quadratique", "Erreur relative", "Borne de variation", "Rolle polynomial", "Pente du sinus", "Pente du cosinus", "Monotonie quantitative", "Écart entre deux valeurs", "Erreur maximale", "TAF paramétré", "Stabilité", "Composition des erreurs", "Contrôle final", "Synthèse"] },
+  { name: "Suites numériques", family: "Analyse", topics: ["Premiers termes", "Point fixe", "Monotonie", "Bornitude", "Suite géométrique", "Suite arithmétique", "Somme géométrique", "Récurrence", "Contraction", "Suite définie par une fonction", "Comparaison", "Somme télescopique", "Récurrence forte", "Suite alternée", "Inégalité de suites", "Erreur d’approximation", "Seuil", "Limite rationnelle", "Stabilité", "Synthèse"] },
+  { name: "Fonctions logarithmiques", family: "Analyse", topics: ["Valeurs usuelles", "Produit", "Quotient", "Puissance", "Domaine", "Équation logarithmique", "Inéquation", "Dérivée", "Limite en zéro", "Croissance comparée", "Composition", "Unicité", "Primitive", "Paramètre", "Valeur absolue", "Convexité", "Inégalité", "Équivalent", "Étude complète", "Synthèse"] },
+  { name: "Fonction exponentielle", family: "Analyse", topics: ["Valeurs usuelles", "Propriétés", "Équation", "Inéquation", "Décroissance", "Dérivée", "Croissances comparées", "Temps de demi-vie", "Logarithme inverse", "Convexité", "Somme de décroissances", "Composition", "Calibration", "Unicité", "Inégalité", "Taux relatif", "Seuil", "Produit", "Comparaison", "Synthèse"] },
+  { name: "Primitives", family: "Analyse", topics: ["Primitive polynomiale", "Primitive exponentielle", "Primitive inverse", "Condition initiale", "Primitive d’une racine", "Linéarité", "Changement de variable", "Exponentielle composée", "Logarithme", "Position", "Vitesse", "Famille de primitives", "Vérification", "Trigonométrie", "Paramètre", "Primitive et aire", "Développement", "Racine composée", "Contrôle", "Synthèse"] },
+  { name: "Calcul intégral", family: "Analyse", topics: ["Intégrale simple", "Théorème fondamental", "Aire algébrique", "Changement de variable", "Aire entre deux courbes", "Valeur moyenne", "Intégrale logarithmique", "Intégrale trigonométrique", "Énergie", "Positivité", "Paramètre", "Relation de Chasles", "Encadrement", "Intégrale impropre simple", "Parité", "Composition", "Aire cumulée", "Deux signaux", "Déplacement", "Synthèse"] },
+  { name: "Équations différentielles", family: "Analyse", topics: ["y'=ay", "Décroissance", "y'+ay=b", "Condition initiale", "Équation avec second membre", "Vérification", "Équilibre", "Temps caractéristique", "Unicité", "Calibration", "Croissance", "Équation non homogène", "Oscillation", "Stabilité", "Saturation", "Seuil", "Paramètre source", "Comparaison", "Solution complète", "Synthèse"] },
+  { name: "Nombres complexes", family: "Nombres complexes", topics: ["Parties réelle et imaginaire", "Addition", "Produit", "Inverse", "Module", "Équation", "Forme trigonométrique", "Forme exponentielle", "Module d’un produit", "Argument", "Rotation", "Milieu", "Cercle", "Racines", "De Moivre", "Conjugué", "Module paramétré", "Amplitude-phase", "Équation quadratique", "Synthèse"] },
+  { name: "Géométrie dans l’espace", family: "Géométrie", topics: ["Vecteur", "Distance", "Milieu", "Produit scalaire", "Norme", "Plan", "Droite", "Appartenance", "Parallélisme", "Intersection", "Distance point-plan", "Produit vectoriel", "Angle", "Sphère", "Plan médiateur", "Projection", "Déplacement", "Système", "Droite et plan", "Synthèse"] },
+  { name: "Dénombrement et probabilités", family: "Probabilités", topics: ["Complément", "Indépendance", "Au moins un succès", "Probabilité conditionnelle", "Bayes", "Combinaisons", "Arrangements", "Permutations", "Loi binomiale", "Binomiale exacte", "Espérance", "Variance", "Test d’indépendance", "Probabilité totale", "Sous-ensembles", "Tirage sans remise", "Gain moyen", "Seuil binomial", "Système en série", "Synthèse"] },
+  { name: "Arithmétique dans ℤ", family: "Arithmétique", topics: ["Division euclidienne", "Divisibilité", "PGCD", "Bézout", "Congruence", "Puissance modulo", "Inverse modulo", "Congruence linéaire", "PGCD paramétré", "Parité", "Reste d’une puissance", "Divisibilité par 9", "Inverse d’un entier", "Chiffrement", "Déchiffrement", "Théorème de Gauss", "Irrationalité", "Équation diophantienne", "Système de congruences", "Synthèse"] },
+  { name: "Structures algébriques", family: "Structures algébriques", topics: ["Loi interne", "Commutativité", "Élément neutre", "Inverse", "Sous-groupe", "Morphisme additif", "Noyau", "Image", "Groupe multiplicatif", "Associativité", "Matrices", "Sous-groupe rationnel", "Relation d’équivalence", "Classes modulo", "Composition de morphismes", "Injectivité", "Surjectivité", "Groupe ℝ*", "Contre-exemple", "Synthèse"] },
+  { name: "Espaces vectoriels", family: "Algèbre linéaire", topics: ["Base canonique", "Famille libre", "Famille génératrice", "Coordonnées", "Sous-espace", "Dimension", "Intersection", "Somme", "Application linéaire", "Matrice", "Noyau", "Image", "Changement de base", "Décomposition", "Indépendance paramétrée", "Plan vectoriel", "Théorème du rang", "Isomorphisme", "Reconstruction", "Synthèse"] },
 ];
 
-const leadIns = ["On considère", "Soit", "On pose", "Dans tout l’exercice,", "Pour tout réel x,"];
-const exerciseTypes: ExerciseType[] = ["calculation", "short-answer", "multi-step", "proof", "numeric"];
+const leads = ["On considère", "Soit", "On pose", "Dans tout l’exercice,", "Pour tout réel x,"];
+const types: ExerciseType[] = ["calculation", "short-answer", "multi-step", "proof", "numeric"];
 
-function parameters(ci: number, ei: number) {
-  const n = ci * 20 + ei + 2;
-  return { a: (n % 7) + 2, b: (n % 5) + 1, c: (n % 9) - 4 };
-}
+function params(ci: number, ei: number) { const n = ci * 20 + ei + 2; return { a: (n % 7) + 2, b: (n % 5) + 1, c: (n % 9) - 4 }; }
 
 function makeExercise(chapter: Chapter, ci: number, ei: number): Exercise {
   const topic = chapter.topics[ei];
-  const p = parameters(ci, ei);
-  const lead = leadIns[ei % leadIns.length];
-  const difficulty = (1 + Math.floor(ei / 5)) as ContentDifficulty;
-  const type = exerciseTypes[ei % exerciseTypes.length];
-  const id = `sm-300-d${String(ci + 1).padStart(2, "0")}-e${String(ei + 1).padStart(2, "0")}`;
+  const { a, b, c } = params(ci, ei);
   const synthesis = ei === 19;
-
+  const goal = synthesis ? "Mobiliser plusieurs résultats du chapitre dans une démarche de synthèse proche d’un exercice national." : [
+    "Maîtriser la méthode et savoir justifier chaque transition.",
+    "Passer d’un calcul local à une conclusion globale, comme dans une copie de bac.",
+    "Réutiliser un résultat obtenu dans une question suivante au lieu de recalculer.",
+    "Construire une rédaction complète : hypothèses, calcul, justification et conclusion.",
+    "Développer un réflexe de contrôle pour éviter une réponse correcte obtenue par hasard.",
+  ][ei % 5];
+  const lead = leads[ei % leads.length];
   let statement: string;
   let correction: string;
   let hint: string;
 
   switch (ci) {
     case 0:
-      statement = synthesis
-        ? `${lead} une fonction rationnelle dont le domaine exclut 1. Étudier une limite en un point critique, une limite à l’infini, puis utiliser la continuité et le TVI pour conclure sur une équation.\n1. Déterminer le domaine.\n2. Calculer les limites utiles.\n3. Étudier la continuité.\n4. Déduire une existence de solution.`
-        : `${lead} f(x)=(${p.a}x²-${p.b}x-${p.a})/(x-1). Étudier ${topic.toLowerCase()} puis rédiger une conclusion précise.\n1. Déterminer les conditions de définition.\n2. Calculer la limite ou la valeur demandée.\n3. En déduire le comportement de f.`;
-      correction = "Déterminer d’abord le domaine, puis factoriser ou comparer les termes dominants selon la limite. Pour une conclusion d’existence, invoquer explicitement la continuité et le TVI.";
-      hint = "Le domaine vient avant les transformations de limite.";
+      statement = `${lead} une fonction rationnelle construite autour de $x=${a}$. On cherche à déterminer son comportement puis à utiliser ce comportement pour étudier une équation.\n\n1. Déterminer le domaine de définition et factoriser l’expression utile.\n2. Calculer les limites aux points critiques et à l’infini.\n3. En déduire les éventuelles asymptotes.\n4. Étudier la continuité sur chaque intervalle du domaine.\n5. En utilisant la continuité et les variations obtenues, justifier l’existence ou l’unicité d’une solution de l’équation associée.\n\nObjectif : ${goal}`;
+      correction = "Commencer par le domaine. Factoriser avant une limite indéterminée, puis distinguer limite, asymptote et continuité. Pour l’existence, utiliser le TVI avec des valeurs de signes opposés; pour l’unicité, utiliser une stricte monotonie.";
+      hint = "Ne saute pas directement à la limite : le domaine détermine les points où l’étude est possible.";
       break;
     case 1:
-      statement = synthesis
-        ? `${lead} f(x)=e^(-x)(x+${p.a}) et une fonction auxiliaire polynomiale. Réaliser une étude complète en reliant dérivée, signe, variations, extremum et représentation graphique.\n1. Calculer f'.\n2. Étudier son signe.\n3. Dresser le tableau de variations.\n4. Interpréter l’extremum.`
-        : `${lead} f(x)=x²-${p.a}x+${p.b}. Étudier ${topic.toLowerCase()} et justifier chaque conclusion.\n1. Calculer f'.\n2. Résoudre f'(x)=0 lorsque nécessaire.\n3. Étudier les variations ou la propriété demandée.`;
-      correction = "Calculer la dérivée, factoriser son signe, puis relier ce signe aux variations. Pour un extremum, vérifier le changement de signe ou utiliser la convexité lorsqu’elle est pertinente.";
-      hint = "Le signe de la dérivée commande les variations.";
+      statement = `${lead} $f(x)=x^2-${a}x+${b}$. On veut transformer l’étude de la dérivée en informations géométriques sur la courbe.\n\n1. Calculer $f'(x)$ et déterminer son signe.\n2. Dresser le tableau de variations de $f$.\n3. Déterminer les éventuels extrema et leurs coordonnées.\n4. Déterminer l’équation de la tangente au point d’abscisse $x=${Math.max(1, a - 1)}$.\n5. Expliquer comment le tableau obtenu permet de contrôler le nombre de solutions de $f(x)=k$ selon la valeur de $k$.\n\nObjectif : ${goal}`;
+      correction = "La dérivée donne le sens de variation. Les zéros de $f'$ séparent les intervalles où le signe est constant. Les extrema se lisent ensuite dans le tableau. La tangente en $x_0$ est $y=f(x_0)+f'(x_0)(x-x_0)$.";
+      hint = "Fais le tableau de signe de $f'$ avant le tableau de variations.";
       break;
     case 2:
-      statement = `${lead} une fonction dérivable sur [${p.a},${p.a + 2}]. Traiter ${topic.toLowerCase()} en utilisant le théorème des accroissements finis lorsque celui-ci est adapté.\n1. Écrire le taux de variation.\n2. Énoncer les hypothèses du théorème.\n3. En déduire une égalité ou une majoration.`;
-      correction = "Vérifier continuité et dérivabilité sur l’intervalle, puis appliquer le TAF. Transformer ensuite l’égalité obtenue en la conclusion demandée.";
-      hint = "Écris le TAF avec les bornes exactes avant de calculer.";
+      statement = `${lead} une fonction dérivable sur $[${a},${a + 2}]$. Le but est d’obtenir une borne quantitative plutôt qu’une simple approximation.\n\n1. Écrire le taux de variation entre ${a} et ${a + 2}.\n2. Vérifier les hypothèses du théorème des accroissements finis.\n3. En déduire l’existence d’un $c\in]${a},${a + 2}[$ satisfaisant la relation du TAF.\n4. Si $|f'(x)|\le ${b + 2}$ sur l’intervalle, établir une majoration de $|f(x)-f(${a})|$.\n5. Interpréter cette majoration comme une erreur maximale.\n\nObjectif : ${goal}`;
+      correction = "Écrire le taux de variation $\frac{f(b)-f(a)}{b-a}$. Les hypothèses du TAF donnent un $c$ tel que $f'(c)=\frac{f(b)-f(a)}{b-a}$. Une borne $|f'|\le M$ donne $|f(x)-f(y)|\le M|x-y|$.";
+      hint = "Le TAF transforme une variation globale en information sur une dérivée locale.";
       break;
     case 3:
-      statement = `${lead} u_0=${p.a} et u_(n+1)=(${p.a}u_n+${p.b})/${p.a + 1}. Étudier ${topic.toLowerCase()} puis rechercher une limite éventuelle.\n1. Calculer u_1 et u_2.\n2. Établir une propriété par récurrence.\n3. Étudier la monotonie ou la bornitude.\n4. Déterminer la limite si elle existe.`;
-      correction = "Calculer les premiers termes, identifier le point fixe éventuel, puis utiliser une récurrence pour établir l’intervalle de stabilité. La monotonie et la bornitude permettent ensuite d’utiliser le théorème de convergence des suites monotones.";
-      hint = "Commence par u_1 et u_2, puis cherche un point fixe.";
+      statement = `${lead} la suite $(u_n)$ définie par $u_0=${a}$ et $u_{n+1}=\frac{${a}u_n+${b}}{${a + 1}}$. On cherche à comprendre pourquoi une suite définie récursivement peut converger.\n\n1. Calculer $u_1$ et $u_2$.\n2. Déterminer le point fixe $\ell$ vérifiant $\ell=\frac{${a}\ell+${b}}{${a + 1}}$.\n3. Exprimer $u_{n+1}-\ell$ en fonction de $u_n-\ell$.\n4. En déduire une propriété par récurrence, puis étudier la monotonie et la bornitude de $(u_n)$.\n5. Conclure sur la limite.\n\nObjectif : ${goal}`;
+      correction = "Le point fixe fournit la valeur candidate pour la limite. La relation $u_{n+1}-\ell=\frac{${a}}{${a + 1}}(u_n-\ell)$ permet de conserver le signe et d’établir une propriété par récurrence. Une suite monotone et bornée converge.";
+      hint = "Cherche le point fixe avant de tenter d’étudier directement la monotonie.";
       break;
     case 4:
-      statement = `${lead} une expression logarithmique définie sur son domaine naturel. Traiter ${topic.toLowerCase()} puis résoudre la question proposée.\n1. Déterminer le domaine.\n2. Simplifier avec les propriétés de ln.\n3. Résoudre ou étudier le signe demandé.\n4. Vérifier les solutions dans l’expression initiale.`;
-      correction = "Le domaine doit être déterminé avant toute propriété logarithmique. Utiliser ln(ab)=ln(a)+ln(b), ln(a/b)=ln(a)-ln(b) et ln(a^r)=r ln(a) uniquement lorsque les conditions de définition sont satisfaites.";
-      hint = "Domaine d’abord, logarithmes ensuite.";
+      statement = `${lead} une expression logarithmique. On veut passer du domaine de définition à une résolution rigoureuse.\n\n1. Déterminer le domaine avant toute transformation.\n2. Réécrire l’expression avec les propriétés de $\ln$.\n3. Résoudre l’équation ou l’inéquation associée.\n4. Étudier la dérivée de la fonction obtenue pour justifier l’unicité lorsque nécessaire.\n5. Vérifier les solutions dans l’expression initiale.\n\nObjectif : ${goal}`;
+      correction = "Déterminer d’abord les arguments strictement positifs. Utiliser $\ln(ab)=\ln a+\ln b$, $\ln(a/b)=\ln a-\ln b$ et $\ln(a^r)=r\ln a$ dans leur domaine. La monotonie justifie une unicité.";
+      hint = "Le domaine n’est pas une formalité : il élimine les fausses solutions.";
       break;
     case 5:
-      statement = `${lead} une fonction exponentielle faisant intervenir e^x. Étudier ${topic.toLowerCase()} et relier le calcul à une propriété de l’exponentielle.\n1. Transformer l’expression.\n2. Calculer la dérivée ou résoudre l’équation utile.\n3. Étudier le signe ou les variations.\n4. Conclure.`;
-      correction = "Utiliser e^x>0, (e^x)'=e^x et les règles de composition. Pour une équation exponentielle, isoler l’exponentielle puis prendre ln lorsque le membre est strictement positif.";
-      hint = "La positivité de e^x simplifie beaucoup de signes.";
+      statement = `${lead} une fonction contenant $e^x$. L’objectif est de relier calcul exact, variations et interprétation.\n\n1. Simplifier l’expression avec les propriétés de l’exponentielle.\n2. Calculer la dérivée et factoriser son signe.\n3. Dresser le tableau de variations.\n4. Résoudre une équation issue de l’étude en justifiant l’usage éventuel de $\ln$.\n5. Contrôler le résultat par substitution.\n\nObjectif : ${goal}`;
+      correction = "Utiliser $e^x>0$ et $(e^x)'=e^x$. Pour une équation, isoler l’exponentielle puis appliquer $\ln$ uniquement à un membre strictement positif. Garder la forme exacte.";
+      hint = "La positivité de $e^x$ simplifie les tableaux de signe.";
       break;
     case 6:
-      statement = `${lead} une fonction dont ${topic.toLowerCase()} constitue l’étape principale.\n1. Proposer une primitive adaptée.\n2. La dériver pour vérifier.\n3. Utiliser une condition initiale ou une valeur donnée.\n4. Interpréter le résultat.`;
-      correction = "Reconnaître une primitive usuelle, vérifier par dérivation, puis déterminer la constante avec la condition imposée. Garder une écriture exacte jusqu’à la conclusion.";
-      hint = "Dérive ta primitive pour contrôler le signe et les coefficients.";
+      statement = `${lead} une fonction dont une primitive doit être construite puis utilisée.\n\n1. Identifier une primitive adaptée.\n2. Vérifier explicitement par dérivation que $F'=f$.\n3. Utiliser une condition initiale pour déterminer la constante.\n4. Calculer une variation à l’aide de $F$.\n5. Interpréter le résultat.\n\nObjectif : ${goal}`;
+      correction = "Reconnaître les primitives usuelles, vérifier par dérivation, puis utiliser la condition initiale pour fixer la constante. Une primitive n’est pas une réponse finale tant que la constante et l’interprétation demandée ne sont pas traitées.";
+      hint = "Une dérivation de contrôle évite beaucoup d’erreurs de signe.";
       break;
     case 7:
-      statement = `${lead} une fonction positive sur [${p.a},${p.a + 1}]. Étudier ${topic.toLowerCase()} et calculer l’intégrale demandée.\n1. Déterminer une primitive.\n2. Appliquer la formule de Newton-Leibniz.\n3. Interpréter le résultat comme une aire lorsque c’est justifié.\n4. Comparer avec une borne simple.`;
-      correction = "Trouver une primitive F puis calculer F(b)-F(a). L’interprétation géométrique comme aire nécessite la positivité de la fonction sur l’intervalle.";
-      hint = "Commence par une primitive simple avant de parler d’aire.";
+      statement = `${lead} une fonction positive sur $[${a},${a + 1}]$. On cherche à relier intégrale, primitive et aire.\n\n1. Déterminer une primitive $F$.\n2. Calculer $I=\int_{${a}}^{${a + 1}}f(x)\,dx$.\n3. Justifier l’interprétation géométrique de $I$.\n4. Établir une borne de $I$ à partir d’un encadrement de $f$.\n5. Comparer la valeur exacte et l’encadrement obtenu.\n\nObjectif : ${goal}`;
+      correction = "Utiliser $I=F(${a + 1})-F(${a})$. L’aire sous la courbe est égale à l’intégrale lorsque $f\ge0$. Si $m\le f\le M$, alors $m\le I\le M$ sur un intervalle de longueur 1.";
+      hint = "Une intégrale donne une valeur exacte; un encadrement donne une information robuste sans primitive.";
       break;
     case 8:
-      statement = `${lead} l’équation différentielle correspondant à ${topic.toLowerCase()}.\n1. Écrire la solution générale.\n2. Utiliser la condition initiale si elle est donnée.\n3. Vérifier la solution par substitution.\n4. Interpréter le comportement lorsque x devient grand.`;
-      correction = "Résoudre d’abord l’équation homogène, puis chercher une solution particulière si un second membre apparaît. Déterminer les constantes avec les conditions initiales et vérifier par substitution.";
-      hint = "Commence par la solution générale avant la condition initiale.";
+      statement = `${lead} l’équation différentielle $y'+${a}y=${b}$.\n\n1. Résoudre l’équation homogène associée.\n2. Déterminer une solution particulière constante.\n3. Écrire la solution générale.\n4. Utiliser $y(0)=${Math.max(1, b)}$ pour déterminer la constante.\n5. Vérifier la solution par substitution et étudier sa limite en $+\infty$.\n\nObjectif : ${goal}`;
+      correction = "La solution homogène est $y_h(x)=Ce^{-${a}x}$. Une solution particulière constante vaut $y_p=\frac{${b}}{${a}}$. Donc $y=y_h+y_p$, puis la condition initiale fixe $C$.";
+      hint = "Sépare homogène, particulière, puis condition initiale.";
       break;
     case 9:
-      statement = `${lead} z=${p.a}+${p.b}i et un second complexe construit à partir de z. Étudier ${topic.toLowerCase()}.\n1. Calculer les parties réelle et imaginaire.\n2. Déterminer le module et un argument.\n3. Passer à la forme trigonométrique si nécessaire.\n4. Interpréter géométriquement le résultat.`;
-      correction = "Pour z=a+ib, |z|=√(a²+b²). Déterminer l’argument avec le quadrant correct, puis utiliser la forme trigonométrique pour les produits, quotients ou transformations géométriques.";
-      hint = "Repère le point (Re(z), Im(z)) avant de choisir l’argument.";
+      statement = `${lead} $z=${a}${c >= 0 ? "+" : ""}${c}i$. On veut passer de l’écriture algébrique à une lecture géométrique.\n\n1. Déterminer $\Re(z)$ et $\Im(z)$.\n2. Calculer $|z|$ exactement.\n3. Déterminer un argument en tenant compte du quadrant.\n4. Écrire $z$ sous forme trigonométrique puis exponentielle.\n5. Utiliser cette forme pour calculer une puissance de $z$ et interpréter l’opération dans le plan complexe.\n\nObjectif : ${goal}`;
+      correction = "Le module est $|z|=\sqrt{${a}^2+${c}^2}$. Le quadrant est déterminé par les signes de la partie réelle et imaginaire. La forme trigonométrique permet d’utiliser la formule de De Moivre pour les puissances.";
+      hint = "Détermine le quadrant avant de choisir un argument.";
       break;
     case 10:
-      statement = `${lead} les points A(${p.a},${p.b},${p.c}), B(${p.a + 1},${p.b + 2},${p.c + 1}) et C(${p.a - 1},${p.b + 1},${p.c + 2}). Traiter ${topic.toLowerCase()}.\n1. Calculer les vecteurs utiles.\n2. Établir une distance, un angle ou une orthogonalité.\n3. Déterminer une équation de droite ou de plan lorsque demandé.\n4. Vérifier l’appartenance d’un point.`;
-      correction = "Calculer les vecteurs par différence de coordonnées. Utiliser le produit scalaire pour l’orthogonalité et la distance, puis un vecteur normal pour une équation de plan.";
-      hint = "Écris les vecteurs avant toute équation.";
+      statement = `${lead} dans un repère orthonormé les points $A(${a},${b},${c})$, $B(${a + 1},${b + 2},${c + 1})$ et $C(${a - 1},${b + 1},${c + 2})$.\n\n1. Calculer $\overrightarrow{AB}$ et $\overrightarrow{AC}$.\n2. Déterminer si les trois points sont alignés.\n3. Construire une équation d’un plan contenant $A,B,C$.\n4. Tester l’appartenance d’un point $M$ à ce plan.\n5. Utiliser un produit scalaire pour étudier une orthogonalité ou un angle pertinent.\n\nObjectif : ${goal}`;
+      correction = "Calculer les vecteurs par différence de coordonnées. Pour l’alignement, chercher une proportionnalité. Pour le plan, déterminer un vecteur normal puis une équation cartésienne. Le produit scalaire traite ensuite l’orthogonalité et les angles.";
+      hint = "Les vecteurs $\overrightarrow{AB}$ et $\overrightarrow{AC}$ sont le point de départ.";
       break;
     case 11:
-      statement = `${lead} une expérience aléatoire adaptée à ${topic.toLowerCase()}.\n1. Définir clairement l’univers et les événements.\n2. Calculer une probabilité simple.\n3. Calculer une probabilité conditionnelle ou une probabilité totale.\n4. Interpréter le résultat et vérifier qu’il appartient à [0,1].`;
-      correction = "Nommer les événements, utiliser la formule adaptée puis simplifier exactement. Pour une conditionnelle, P(A|B)=P(A∩B)/P(B) avec P(B)>0.";
-      hint = "Nomme les événements avant d’écrire les probabilités.";
+      statement = `${lead} une expérience aléatoire en plusieurs étapes.\n\n1. Définir précisément l’univers et les événements utiles.\n2. Calculer une probabilité par dénombrement ou complément.\n3. Calculer une probabilité conditionnelle.\n4. Utiliser la formule des probabilités totales pour obtenir une probabilité globale.\n5. Interpréter le résultat et vérifier qu’il appartient à $[0,1]$.\n\nObjectif : ${goal}`;
+      correction = "Nommer les événements avant de calculer. Pour $P(A\mid B)$, utiliser $\frac{P(A\cap B)}{P(B)}$. Pour une partition $(B_i)$, $P(A)=\sum_iP(B_i)P(A\mid B_i)$.";
+      hint = "Écris les événements et leurs relations avant les calculs numériques.";
       break;
     case 12:
-      statement = `${lead} un entier N et une divisibilité liée à ${topic.toLowerCase()}.\n1. Effectuer une division euclidienne ou calculer un PGCD.\n2. Traduire la condition en congruence.\n3. Utiliser Bézout ou une propriété de divisibilité.\n4. Conclure sur les entiers recherchés.`;
-      correction = "Écrire N=mq+r avec 0≤r<m pour une division euclidienne. Pour une congruence, travailler modulo le diviseur puis utiliser les propriétés de divisibilité et de PGCD.";
-      hint = "Passe la question de divisibilité en langage de congruences.";
+      statement = `${lead} un entier $N$ soumis à une division euclidienne et à des contraintes de divisibilité.\n\n1. Écrire la division euclidienne de $N$ par $${a}$.\n2. Traduire une condition de divisibilité en congruence modulo $${a}$.\n3. Utiliser le PGCD pour étudier l’existence de solutions.\n4. Déterminer la classe des solutions et le plus petit entier positif satisfaisant les contraintes.\n5. Vérifier directement le résultat.\n\nObjectif : ${goal}`;
+      correction = "Écrire $N=${a}q+r$ avec $0\le r<${a}$. Traduire la divisibilité par une congruence. Pour $Ax\equiv B\pmod m$, le PGCD de $A$ et $m$ contrôle l’existence de solutions.";
+      hint = "La congruence est la traduction algébrique de la divisibilité.";
       break;
     case 13:
-      statement = `${lead} une loi interne * sur un ensemble E. Étudier ${topic.toLowerCase()}.\n1. Vérifier la stabilité.\n2. Rechercher un élément neutre.\n3. Étudier l’associativité ou la commutativité selon la question.\n4. Déterminer les éléments inversibles et conclure.`;
-      correction = "Traiter chaque propriété séparément avec les quantificateurs corrects. Pour un inverse, résoudre a*x=e puis vérifier aussi x*a=e lorsque la commutativité n’est pas acquise.";
-      hint = "Ne mélange pas stabilité, neutre et inverse: ce sont trois vérifications distinctes.";
+      statement = `${lead} une loi interne $*$ définie sur un ensemble $E$.\n\n1. Vérifier la stabilité de $*$.\n2. Étudier la commutativité et l’associativité.\n3. Rechercher un élément neutre $e$.\n4. Déterminer les éléments inversibles.\n5. Conclure précisément sur la structure obtenue et fournir un contre-exemple lorsqu’une propriété échoue.\n\nObjectif : ${goal}`;
+      correction = "Traiter chaque propriété séparément. La stabilité exige $a*b\in E$, le neutre vérifie $a*e=e*a=a$, et l’inverse de $a$ vérifie $a*x=x*a=e$. Une propriété manquante empêche la conclusion correspondante.";
+      hint = "Ne conclus pas ‘groupe’ avant d’avoir vérifié toutes les propriétés nécessaires.";
       break;
     default:
-      statement = `${lead} une famille de vecteurs de R³ liée à ${topic.toLowerCase()}.\n1. Écrire les coordonnées.\n2. Tester la liberté ou la génération.\n3. Déterminer une base et une dimension lorsque demandé.\n4. Vérifier le résultat par le théorème du rang ou une combinaison linéaire.`;
-      correction = "Traduire la liberté par une combinaison linéaire nulle ou par le déterminant d’une matrice carrée. Pour une application linéaire, relier noyau, image et rang afin de contrôler la dimension obtenue.";
-      hint = "La liberté signifie que la combinaison linéaire nulle n’a qu’une solution triviale.";
-      break;
+      statement = `${lead} une famille de vecteurs dans un espace de dimension finie et une application linéaire associée.\n\n1. Écrire les vecteurs dans une base donnée.\n2. Étudier la liberté ou le caractère générateur de la famille.\n3. Déterminer une base et la dimension du sous-espace engendré.\n4. Déterminer le noyau et l’image de l’application lorsque cela est demandé.\n5. Utiliser le théorème du rang pour contrôler le résultat.\n\nObjectif : ${goal}`;
+      correction = "Traduire la liberté par une combinaison linéaire nulle et la génération par un système. Une matrice organise ces calculs. Pour une application linéaire, $\dim E=\dim\ker f+\dim\operatorname{Im}f$.";
+      hint = "Écris d’abord la matrice des coordonnées : elle révèle la structure du problème.";
   }
 
   return {
-    id,
+    id: `sm-300-d${String(ci + 1).padStart(2, "0")}-e${String(ei + 1).padStart(2, "0")}`,
     mode: "BASE",
     source: "APPROVED",
     target: { trackIds: ["SMA", "SMB"], subjectId: "maths", chapter: chapter.name, topic },
-    type,
-    difficulty,
-    title: `Maths SM — ${topic}`,
+    type: types[ei % types.length],
+    difficulty: Math.min(5, 1 + Math.floor(ei / 4)) as ContentDifficulty,
+    title: `${chapter.family} · ${topic}`,
     statement,
-    expectedAnswer: "Rédaction mathématique complète avec résultat exact et justification.",
     correction,
     hint,
-    examTip: "Rédiger les étapes utiles et réutiliser explicitement les résultats précédents, comme dans une épreuve nationale.",
-    estimatedMinutes: 8 + difficulty * 3,
-    xpValue: 10 + difficulty * 5,
-    tags: ["MATHS_SM", "MOROCCAN_BAC_STYLE", "EXAM_STYLE", synthesis ? "SYNTHESIS" : "LESSON_SPECIFIC"],
+    examTip: goal,
+    estimatedMinutes: synthesis ? 25 : 12 + Math.min(12, Math.floor(ei / 2)),
+    xpValue: synthesis ? 45 : 20 + Math.min(20, ei),
+    tags: ["MATHS_SM", "MOROCCAN_BAC_STYLE", "EXAM_STYLE", "LESSON_SPECIFIC", ...(synthesis ? ["SYNTHESIS"] : [])],
   };
 }
 
-export const maths300Exercises: Exercise[] = chapters.flatMap((chapter, ci) =>
-  chapter.topics.map((_, ei) => makeExercise(chapter, ci, ei)),
-);
-
-export default maths300Exercises;
+export const maths300Exercises: Exercise[] = chapters.flatMap((chapter, ci) => chapter.topics.map((_, ei) => makeExercise(chapter, ci, ei)));
