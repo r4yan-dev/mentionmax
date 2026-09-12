@@ -20,120 +20,227 @@ const chapters: Chapter[] = [
   { name: "Espaces vectoriels", family: "Algèbre linéaire", topics: ["Base canonique", "Famille libre", "Famille génératrice", "Coordonnées", "Sous-espace", "Dimension", "Intersection", "Somme", "Application linéaire", "Matrice", "Noyau", "Image", "Changement de base", "Décomposition", "Indépendance paramétrée", "Plan vectoriel", "Théorème du rang", "Isomorphisme", "Reconstruction", "Synthèse"] },
 ];
 
-const leads = ["On considère", "Soit", "On pose", "Dans tout l’exercice,", "Pour tout réel x,"];
 const types: ExerciseType[] = ["calculation", "short-answer", "multi-step", "proof", "numeric"];
 
-function params(ci: number, ei: number) { const n = ci * 20 + ei + 2; return { a: (n % 7) + 2, b: (n % 5) + 1, c: (n % 9) - 4 }; }
+function params(ci: number, ei: number) {
+  const n = ci * 20 + ei + 2;
+  return { n, a: (n % 6) + 2, b: (n % 5) + 1, c: (n % 7) - 3, d: (n % 4) + 2 };
+}
 
 function makeExercise(chapter: Chapter, ci: number, ei: number): Exercise {
   const topic = chapter.topics[ei];
-  const { a, b, c } = params(ci, ei);
+  const { n, a, b, c, d } = params(ci, ei);
   const synthesis = ei === 19;
-  const goal = synthesis ? "Mobiliser plusieurs résultats du chapitre dans une démarche de synthèse proche d’un exercice national." : [
-    "Maîtriser la méthode et savoir justifier chaque transition.",
-    "Passer d’un calcul local à une conclusion globale, comme dans une copie de bac.",
-    "Réutiliser un résultat obtenu dans une question suivante au lieu de recalculer.",
-    "Construire une rédaction complète : hypothèses, calcul, justification et conclusion.",
-    "Développer un réflexe de contrôle pour éviter une réponse correcte obtenue par hasard.",
-  ][ei % 5];
-  const lead = leads[ei % leads.length];
-  let statement: string;
-  let correction: string;
-  let hint: string;
+  const difficulty = Math.min(5, 1 + Math.floor(ei / 4)) as ContentDifficulty;
+  const type = types[ei % types.length];
+  let statement = "", correction = "", hint = "", examTip = "";
 
   switch (ci) {
     case 0:
-      statement = `${lead} une fonction rationnelle construite autour de $x=${a}$. On cherche à déterminer son comportement puis à utiliser ce comportement pour étudier une équation.\n\n1. Déterminer le domaine de définition et factoriser l’expression utile.\n2. Calculer les limites aux points critiques et à l’infini.\n3. En déduire les éventuelles asymptotes.\n4. Étudier la continuité sur chaque intervalle du domaine.\n5. En utilisant la continuité et les variations obtenues, justifier l’existence ou l’unicité d’une solution de l’équation associée.\n\nObjectif : ${goal}`;
-      correction = "Commencer par le domaine. Factoriser avant une limite indéterminée, puis distinguer limite, asymptote et continuité. Pour l’existence, utiliser le TVI avec des valeurs de signes opposés; pour l’unicité, utiliser une stricte monotonie.";
-      hint = "Ne saute pas directement à la limite : le domaine détermine les points où l’étude est possible.";
+      statement = `On considère la fonction f définie par f(x)=(x^2+${a}x+${b})/(x-${d}).
+1. Déterminer D_f et factoriser le numérateur si possible.
+2. Calculer les limites aux bornes de D_f et déterminer les asymptotes.
+3. Effectuer la division du numérateur par x-${d} pour obtenir une écriture adaptée à l’étude à l’infini.
+4. Calculer f'(x), étudier son signe et dresser le tableau de variations.
+5. À l’aide du tableau, déterminer le nombre de solutions de f(x)=${a} et justifier l’existence ou l’unicité.
+Objectif : réaliser une étude complète d’une fonction rationnelle et exploiter ses variations.`;
+      correction = `Le domaine est R\\{${d}}. On effectue la division polynomiale puis on calcule les limites en ${d} et à ±∞. La dérivée se met sous la forme d’un quotient dont le dénominateur est un carré; son signe se lit donc au numérateur. Le tableau de variations permet enfin de compter les intersections avec la droite y=${a}.`;
+      hint = "Commencer par le domaine, puis faire la division polynomiale avant les limites à l’infini.";
+      examTip = "Une étude de fonction utile doit aboutir à une conclusion exploitable, pas seulement à un tableau.";
       break;
     case 1:
-      statement = `${lead} $f(x)=x^2-${a}x+${b}$. On veut transformer l’étude de la dérivée en informations géométriques sur la courbe.\n\n1. Calculer $f'(x)$ et déterminer son signe.\n2. Dresser le tableau de variations de $f$.\n3. Déterminer les éventuels extrema et leurs coordonnées.\n4. Déterminer l’équation de la tangente au point d’abscisse $x=${Math.max(1, a - 1)}$.\n5. Expliquer comment le tableau obtenu permet de contrôler le nombre de solutions de $f(x)=k$ selon la valeur de $k$.\n\nObjectif : ${goal}`;
-      correction = "La dérivée donne le sens de variation. Les zéros de $f'$ séparent les intervalles où le signe est constant. Les extrema se lisent ensuite dans le tableau. La tangente en $x_0$ est $y=f(x_0)+f'(x_0)(x-x_0)$.";
-      hint = "Fais le tableau de signe de $f'$ avant le tableau de variations.";
+      statement = `On considère f(x)=x^3-${a}x^2+${b}x+${c}.
+1. Calculer f'(x) et factoriser ou étudier son discriminant.
+2. Étudier le signe de f' et dresser le tableau de variations.
+3. Déterminer les extrema locaux.
+4. Écrire l’équation de la tangente en x=${d}.
+5. Discuter, selon k, le nombre de solutions de f(x)=k à partir du tableau de variations.
+Objectif : passer de la dérivée à la géométrie puis au nombre de solutions.`;
+      correction = `On calcule f'(x)=3x²-${2*a}x+${b}. Les zéros de f' découpent R en intervalles de monotonie. Les extrema sont les images des points critiques. La tangente en ${d} est obtenue par y=f(${d})+f'(${d})(x-${d}). La dernière question se traite graphiquement avec les valeurs extrêmes.`;
+      hint = "Pour compter les solutions, utilise les variations plutôt que de résoudre l’équation cubique.";
+      examTip = "Le tableau de variations est une machine à compter les solutions.";
       break;
     case 2:
-      statement = `${lead} une fonction dérivable sur $[${a},${a + 2}]$. Le but est d’obtenir une borne quantitative plutôt qu’une simple approximation.\n\n1. Écrire le taux de variation entre ${a} et ${a + 2}.\n2. Vérifier les hypothèses du théorème des accroissements finis.\n3. En déduire l’existence d’un $c\in]${a},${a + 2}[$ satisfaisant la relation du TAF.\n4. Si $|f'(x)|\le ${b + 2}$ sur l’intervalle, établir une majoration de $|f(x)-f(${a})|$.\n5. Interpréter cette majoration comme une erreur maximale.\n\nObjectif : ${goal}`;
-      correction = "Écrire le taux de variation $\frac{f(b)-f(a)}{b-a}$. Les hypothèses du TAF donnent un $c$ tel que $f'(c)=\frac{f(b)-f(a)}{b-a}$. Une borne $|f'|\le M$ donne $|f(x)-f(y)|\le M|x-y|$.";
-      hint = "Le TAF transforme une variation globale en information sur une dérivée locale.";
+      statement = `On considère f(x)=√(x+${a}) sur [${a},${a+2}].
+1. Vérifier les conditions de continuité et de dérivabilité nécessaires.
+2. Calculer le taux de variation entre ${a} et ${a+2}.
+3. Appliquer le théorème des accroissements finis et déterminer c∈]${a},${a+2}[.
+4. Montrer que |f'(x)|≤${b} sur l’intervalle.
+5. En déduire une majoration de |f(x)-f(y)| pour x,y dans l’intervalle.
+Objectif : utiliser le TAF pour transformer une variation globale en borne quantitative.`;
+      correction = `f'(x)=1/(2√(x+${a})). Le TAF donne f'(c)=[f(${a+2})-f(${a})]/2. La borne sur f' entraîne |f(x)-f(y)|≤M|x-y| avec une constante M adaptée à l’intervalle.`;
+      hint = "Écris d’abord le taux de variation exact, puis seulement après invoque le TAF.";
+      examTip = "Le TAF doit produire une information concrète : une valeur intermédiaire ou une borne.";
       break;
     case 3:
-      statement = `${lead} la suite $(u_n)$ définie par $u_0=${a}$ et $u_{n+1}=\frac{${a}u_n+${b}}{${a + 1}}$. On cherche à comprendre pourquoi une suite définie récursivement peut converger.\n\n1. Calculer $u_1$ et $u_2$.\n2. Déterminer le point fixe $\ell$ vérifiant $\ell=\frac{${a}\ell+${b}}{${a + 1}}$.\n3. Exprimer $u_{n+1}-\ell$ en fonction de $u_n-\ell$.\n4. En déduire une propriété par récurrence, puis étudier la monotonie et la bornitude de $(u_n)$.\n5. Conclure sur la limite.\n\nObjectif : ${goal}`;
-      correction = "Le point fixe fournit la valeur candidate pour la limite. La relation $u_{n+1}-\ell=\frac{${a}}{${a + 1}}(u_n-\ell)$ permet de conserver le signe et d’établir une propriété par récurrence. Une suite monotone et bornée converge.";
-      hint = "Cherche le point fixe avant de tenter d’étudier directement la monotonie.";
+      statement = `On considère u_0=${a} et u_{n+1}=((u_n+${b})/${d+2}).
+1. Calculer u_1 et u_2.
+2. Déterminer le point fixe ℓ de la fonction g(x)=(x+${b})/${d+2}.
+3. Exprimer u_{n+1}-ℓ en fonction de u_n-ℓ.
+4. En déduire par récurrence une expression de u_n-ℓ puis étudier la monotonie et la convergence.
+5. Donner un rang N tel que |u_N-ℓ|<10^{-3}.
+Objectif : relier point fixe, récurrence, monotonie et approximation d’une limite.`;
+      correction = `Le point fixe vérifie ℓ=(ℓ+${b})/${d+2}. En soustrayant ℓ à la relation de récurrence, on obtient une relation multiplicative sur u_n-ℓ. Sa valeur absolue décroît géométriquement, ce qui permet de contrôler l’erreur et de choisir N.`;
+      hint = "Soustraire le point fixe aux deux membres de la relation de récurrence.";
+      examTip = "Une suite affine se traite souvent mieux en étudiant u_n-ℓ qu’en développant les premiers termes.";
       break;
     case 4:
-      statement = `${lead} une expression logarithmique. On veut passer du domaine de définition à une résolution rigoureuse.\n\n1. Déterminer le domaine avant toute transformation.\n2. Réécrire l’expression avec les propriétés de $\ln$.\n3. Résoudre l’équation ou l’inéquation associée.\n4. Étudier la dérivée de la fonction obtenue pour justifier l’unicité lorsque nécessaire.\n5. Vérifier les solutions dans l’expression initiale.\n\nObjectif : ${goal}`;
-      correction = "Déterminer d’abord les arguments strictement positifs. Utiliser $\ln(ab)=\ln a+\ln b$, $\ln(a/b)=\ln a-\ln b$ et $\ln(a^r)=r\ln a$ dans leur domaine. La monotonie justifie une unicité.";
-      hint = "Le domaine n’est pas une formalité : il élimine les fausses solutions.";
+      statement = `On considère f(x)=ln(x+${a})-ln(${b}x+${d}).
+1. Déterminer D_f.
+2. Réduire f à un seul logarithme.
+3. Résoudre f(x)=0 puis vérifier les solutions dans l’expression initiale.
+4. Calculer f'(x) et étudier son signe.
+5. Déduire le nombre de solutions de f(x)=${c}.
+Objectif : maîtriser domaine, propriétés du logarithme, dérivée et unicité.`;
+      correction = `Le domaine impose x+${a}>0 et ${b}x+${d}>0. Sur ce domaine, f=ln((x+${a})/(${b}x+${d})). La dérivée se calcule terme à terme puis son signe permet d’établir la monotonie et donc l’unicité éventuelle.`;
+      hint = "Ne transforme jamais une expression logarithmique avant d’avoir déterminé son domaine.";
+      examTip = "Domaine → simplification → résolution → dérivée → unicité.";
       break;
     case 5:
-      statement = `${lead} une fonction contenant $e^x$. L’objectif est de relier calcul exact, variations et interprétation.\n\n1. Simplifier l’expression avec les propriétés de l’exponentielle.\n2. Calculer la dérivée et factoriser son signe.\n3. Dresser le tableau de variations.\n4. Résoudre une équation issue de l’étude en justifiant l’usage éventuel de $\ln$.\n5. Contrôler le résultat par substitution.\n\nObjectif : ${goal}`;
-      correction = "Utiliser $e^x>0$ et $(e^x)'=e^x$. Pour une équation, isoler l’exponentielle puis appliquer $\ln$ uniquement à un membre strictement positif. Garder la forme exacte.";
-      hint = "La positivité de $e^x$ simplifie les tableaux de signe.";
+      statement = `On considère f(x)=e^{${a}x}-${b}e^x+${c}.
+1. Factoriser par la puissance exponentielle adaptée.
+2. Résoudre f(x)=0 en posant t=e^x.
+3. Déterminer les solutions réelles acceptables après retour à x.
+4. Calculer f'(x) et étudier les variations.
+5. Vérifier avec les variations que le nombre de solutions trouvé est cohérent.
+Objectif : transformer une équation exponentielle en problème algébrique puis contrôler le résultat par l’étude de fonction.`;
+      correction = `On pose t=e^x>0. L’équation devient une équation polynomiale en t. Seules les racines strictement positives donnent des solutions x=ln(t). L’étude de f' fournit ensuite un contrôle indépendant du nombre de solutions.`;
+      hint = "Le changement t=e^x est utile uniquement si tu gardes la contrainte t>0.";
+      examTip = "Après un changement de variable exponentiel, toujours revenir au domaine réel de la variable initiale.";
       break;
     case 6:
-      statement = `${lead} une fonction dont une primitive doit être construite puis utilisée.\n\n1. Identifier une primitive adaptée.\n2. Vérifier explicitement par dérivation que $F'=f$.\n3. Utiliser une condition initiale pour déterminer la constante.\n4. Calculer une variation à l’aide de $F$.\n5. Interpréter le résultat.\n\nObjectif : ${goal}`;
-      correction = "Reconnaître les primitives usuelles, vérifier par dérivation, puis utiliser la condition initiale pour fixer la constante. Une primitive n’est pas une réponse finale tant que la constante et l’interprétation demandée ne sont pas traitées.";
-      hint = "Une dérivation de contrôle évite beaucoup d’erreurs de signe.";
+      statement = `On cherche une primitive de f(x)=${a}x^2-${b}x+${c}+${d}e^x.
+1. Déterminer une primitive générale F.
+2. Vérifier par dérivation que F'=f.
+3. Déterminer la primitive F_0 telle que F_0(0)=${a}.
+4. Étudier les variations de F_0.
+5. Calculer la variation F_0(${d})-F_0(0) et l’interpréter comme une accumulation.
+Objectif : construire, contrôler et exploiter une primitive plutôt que seulement appliquer une formule.`;
+      correction = `Une primitive est F(x)=${a}x^3/3-${b}x²/2+${c}x+${d}e^x+C. La condition initiale détermine C. On vérifie ensuite par dérivation et on étudie F_0' à l’aide de f.`;
+      hint = "La constante C n’est déterminée qu’après utilisation de la condition initiale.";
+      examTip = "Toujours vérifier une primitive en dérivant la réponse.";
       break;
     case 7:
-      statement = `${lead} une fonction positive sur $[${a},${a + 1}]$. On cherche à relier intégrale, primitive et aire.\n\n1. Déterminer une primitive $F$.\n2. Calculer $I=\int_{${a}}^{${a + 1}}f(x)\,dx$.\n3. Justifier l’interprétation géométrique de $I$.\n4. Établir une borne de $I$ à partir d’un encadrement de $f$.\n5. Comparer la valeur exacte et l’encadrement obtenu.\n\nObjectif : ${goal}`;
-      correction = "Utiliser $I=F(${a + 1})-F(${a})$. L’aire sous la courbe est égale à l’intégrale lorsque $f\ge0$. Si $m\le f\le M$, alors $m\le I\le M$ sur un intervalle de longueur 1.";
-      hint = "Une intégrale donne une valeur exacte; un encadrement donne une information robuste sans primitive.";
+      statement = `On considère f(x)=x^2-${a}x+${b} sur [0,${d}].
+1. Étudier le signe de f sur l’intervalle.
+2. Calculer I=∫_0^${d} f(x)dx.
+3. Interpréter I comme une aire algébrique.
+4. Si nécessaire, déterminer l’aire géométrique en séparant les intervalles où f change de signe.
+5. Calculer la valeur moyenne de f sur [0,${d}].
+Objectif : passer de l’intégrale calculée à une interprétation géométrique et quantitative.`;
+      correction = `On cherche les zéros de f avant de parler d’aire géométrique. Une primitive est x³/3-${a}x²/2+${b}x. L’intégrale donne l’aire algébrique; si le signe change, on additionne les valeurs absolues des intégrales sur les sous-intervalles.`;
+      hint = "Une aire géométrique n’est pas toujours égale à l’intégrale signée.";
+      examTip = "Étudier le signe avant d’interpréter une intégrale comme une aire.";
       break;
     case 8:
-      statement = `${lead} l’équation différentielle $y'+${a}y=${b}$.\n\n1. Résoudre l’équation homogène associée.\n2. Déterminer une solution particulière constante.\n3. Écrire la solution générale.\n4. Utiliser $y(0)=${Math.max(1, b)}$ pour déterminer la constante.\n5. Vérifier la solution par substitution et étudier sa limite en $+\infty$.\n\nObjectif : ${goal}`;
-      correction = "La solution homogène est $y_h(x)=Ce^{-${a}x}$. Une solution particulière constante vaut $y_p=\frac{${b}}{${a}}$. Donc $y=y_h+y_p$, puis la condition initiale fixe $C$.";
-      hint = "Sépare homogène, particulière, puis condition initiale.";
+      statement = `On étudie l’équation différentielle y'+${a}y=${b}.
+1. Résoudre l’équation homogène associée.
+2. Déterminer une solution particulière constante.
+3. Donner la solution générale.
+4. Déterminer la solution vérifiant y(0)=${d}.
+5. Étudier sa limite et déterminer le temps à partir duquel |y-${b/a}|<10^{-2} lorsque c’est possible.
+Objectif : relier résolution, condition initiale, équilibre et comportement asymptotique.`;
+      correction = `La solution homogène est Ce^{-(${a})x}. Une solution particulière constante vaut ${b}/${a}. Ainsi y=${b}/${a}+Ce^{-(${a})x}. La condition y(0)=${d} donne C=${d}-${b}/${a}. La limite est l’équilibre ${b}/${a}.`;
+      hint = "Pour y'+ay=b, commence par l’équation homogène puis cherche une solution constante.";
+      examTip = "Dans une équation différentielle linéaire, l’équilibre est souvent la limite naturelle de la solution.";
       break;
     case 9:
-      statement = `${lead} $z=${a}${c >= 0 ? "+" : ""}${c}i$. On veut passer de l’écriture algébrique à une lecture géométrique.\n\n1. Déterminer $\Re(z)$ et $\Im(z)$.\n2. Calculer $|z|$ exactement.\n3. Déterminer un argument en tenant compte du quadrant.\n4. Écrire $z$ sous forme trigonométrique puis exponentielle.\n5. Utiliser cette forme pour calculer une puissance de $z$ et interpréter l’opération dans le plan complexe.\n\nObjectif : ${goal}`;
-      correction = "Le module est $|z|=\sqrt{${a}^2+${c}^2}$. Le quadrant est déterminé par les signes de la partie réelle et imaginaire. La forme trigonométrique permet d’utiliser la formule de De Moivre pour les puissances.";
-      hint = "Détermine le quadrant avant de choisir un argument.";
+      statement = `On considère z=${a}+${b}i et w=${c}+${d}i.
+1. Calculer z+w et zw.
+2. Déterminer |z| et un argument de z.
+3. Écrire z sous forme trigonométrique puis exponentielle.
+4. Résoudre l’équation u^2=z^2 dans C et interpréter géométriquement les solutions.
+5. Déterminer l’image de z par la rotation de centre O et d’angle π/${d+1}.
+Objectif : passer des calculs algébriques aux formes géométriques et trigonométriques des nombres complexes.`;
+      correction = `Les calculs algébriques donnent directement les parties réelle et imaginaire. Le module vaut √(a²+b²) et l’argument est déterminé avec le quadrant. La forme trigonométrique permet ensuite d’utiliser les propriétés des produits, puissances et rotations.`;
+      hint = "Pour l’argument, ne te contente pas de tan(θ)=b/a : vérifie le quadrant.";
+      examTip = "Module + argument donnent immédiatement une lecture géométrique du complexe.";
       break;
     case 10:
-      statement = `${lead} dans un repère orthonormé les points $A(${a},${b},${c})$, $B(${a + 1},${b + 2},${c + 1})$ et $C(${a - 1},${b + 1},${c + 2})$.\n\n1. Calculer $\overrightarrow{AB}$ et $\overrightarrow{AC}$.\n2. Déterminer si les trois points sont alignés.\n3. Construire une équation d’un plan contenant $A,B,C$.\n4. Tester l’appartenance d’un point $M$ à ce plan.\n5. Utiliser un produit scalaire pour étudier une orthogonalité ou un angle pertinent.\n\nObjectif : ${goal}`;
-      correction = "Calculer les vecteurs par différence de coordonnées. Pour l’alignement, chercher une proportionnalité. Pour le plan, déterminer un vecteur normal puis une équation cartésienne. Le produit scalaire traite ensuite l’orthogonalité et les angles.";
-      hint = "Les vecteurs $\overrightarrow{AB}$ et $\overrightarrow{AC}$ sont le point de départ.";
+      statement = `Dans l’espace muni d’un repère orthonormé, on considère A(${a};0;${b}), B(0;${d};0) et C(${c};1;${a}).
+1. Calculer les vecteurs AB et AC.
+2. Calculer AB·AC et en déduire si l’angle BAC est droit.
+3. Déterminer une équation paramétrique de (AB).
+4. Déterminer une équation cartésienne du plan (ABC) ou vérifier l’appartenance d’un point M(${d};${a};${c}).
+5. Étudier l’intersection de (AB) avec le plan x+y+z=${a+b}.
+Objectif : enchaîner vecteurs, produit scalaire, droite et plan dans une situation spatiale concrète.`;
+      correction = `On calcule les coordonnées des vecteurs par différence. Le produit scalaire permet de tester l’orthogonalité. Une représentation paramétrique de la droite s’obtient à partir de A et du vecteur AB; pour le plan, on cherche un vecteur normal orthogonal à AB et AC puis on utilise l’équation du plan.`;
+      hint = "Les coordonnées des vecteurs sont toujours obtenues par point d’arrivée moins point de départ.";
+      examTip = "Dans l’espace, les vecteurs servent de pont entre calcul et géométrie.";
       break;
     case 11:
-      statement = `${lead} une expérience aléatoire en plusieurs étapes.\n\n1. Définir précisément l’univers et les événements utiles.\n2. Calculer une probabilité par dénombrement ou complément.\n3. Calculer une probabilité conditionnelle.\n4. Utiliser la formule des probabilités totales pour obtenir une probabilité globale.\n5. Interpréter le résultat et vérifier qu’il appartient à $[0,1]$.\n\nObjectif : ${goal}`;
-      correction = "Nommer les événements avant de calculer. Pour $P(A\mid B)$, utiliser $\frac{P(A\cap B)}{P(B)}$. Pour une partition $(B_i)$, $P(A)=\sum_iP(B_i)P(A\mid B_i)$.";
-      hint = "Écris les événements et leurs relations avant les calculs numériques.";
+      statement = `Une urne contient ${a} boules rouges et ${b+3} boules blanches. On tire ${d} boules simultanément.
+1. Calculer le nombre total de tirages.
+2. Calculer la probabilité d’obtenir exactement deux boules rouges lorsque cela est possible.
+3. Calculer la probabilité d’obtenir au moins une boule rouge.
+4. Définir A = « obtenir une rouge au premier tirage » et B = « obtenir exactement deux rouges ». Étudier P(B|A).
+5. Comparer P(B|A) et P(B) et interpréter le résultat.
+Objectif : mobiliser dénombrement, complément et probabilité conditionnelle dans une même expérience.`;
+      correction = `Les tirages simultanés se comptent avec des combinaisons. Pour « au moins une rouge », on utilise le complément « aucune rouge ». La probabilité conditionnelle se calcule par P(B|A)=P(A∩B)/P(A), puis on compare aux probabilités non conditionnelles.`;
+      hint = "Choisis d’abord si l’ordre compte. Ici, le tirage simultané conduit naturellement aux combinaisons.";
+      examTip = "En probabilités, définir clairement l’univers et les événements évite la majorité des erreurs de dénombrement.";
       break;
     case 12:
-      statement = `${lead} un entier $N$ soumis à une division euclidienne et à des contraintes de divisibilité.\n\n1. Écrire la division euclidienne de $N$ par $${a}$.\n2. Traduire une condition de divisibilité en congruence modulo $${a}$.\n3. Utiliser le PGCD pour étudier l’existence de solutions.\n4. Déterminer la classe des solutions et le plus petit entier positif satisfaisant les contraintes.\n5. Vérifier directement le résultat.\n\nObjectif : ${goal}`;
-      correction = "Écrire $N=${a}q+r$ avec $0\le r<${a}$. Traduire la divisibilité par une congruence. Pour $Ax\equiv B\pmod m$, le PGCD de $A$ et $m$ contrôle l’existence de solutions.";
-      hint = "La congruence est la traduction algébrique de la divisibilité.";
+      statement = `On travaille dans Z avec les entiers m=${a*10+b} et n=${d*10+c+4}.
+1. Effectuer la division euclidienne de m par n.
+2. Calculer PGCD(m,n) par l’algorithme d’Euclide.
+3. Déterminer des entiers u,v tels que um+vn=PGCD(m,n).
+4. Résoudre la congruence mx≡${b} [n] lorsque cela est possible.
+5. Vérifier la solution obtenue et préciser l’ensemble des solutions modulo n.
+Objectif : faire circuler une même relation entre division euclidienne, PGCD, Bézout et congruences.`;
+      correction = `L’algorithme d’Euclide donne le PGCD. Les remontées successives fournissent une identité de Bézout. Si le coefficient de x est inversible modulo n, on multiplie par son inverse; sinon on vérifie la condition de divisibilité par le PGCD.`;
+      hint = "La remontée de l’algorithme d’Euclide est la méthode la plus sûre pour construire Bézout.";
+      examTip = "Ne cherche pas un inverse modulo n avant d’avoir vérifié que le PGCD vaut 1.";
       break;
     case 13:
-      statement = `${lead} une loi interne $*$ définie sur un ensemble $E$.\n\n1. Vérifier la stabilité de $*$.\n2. Étudier la commutativité et l’associativité.\n3. Rechercher un élément neutre $e$.\n4. Déterminer les éléments inversibles.\n5. Conclure précisément sur la structure obtenue et fournir un contre-exemple lorsqu’une propriété échoue.\n\nObjectif : ${goal}`;
-      correction = "Traiter chaque propriété séparément. La stabilité exige $a*b\in E$, le neutre vérifie $a*e=e*a=a$, et l’inverse de $a$ vérifie $a*x=x*a=e$. Une propriété manquante empêche la conclusion correspondante.";
-      hint = "Ne conclus pas ‘groupe’ avant d’avoir vérifié toutes les propriétés nécessaires.";
+      statement = `Sur E=Z/(${a+3})Z, on définit une loi ⋆ par [x]⋆[y]=[x+y+${b}].
+1. Vérifier que ⋆ est une loi interne.
+2. Déterminer son élément neutre.
+3. Déterminer le symétrique de [x].
+4. Vérifier l’associativité et la commutativité.
+5. Conclure sur la structure algébrique de (E,⋆) et donner un contre-exemple à toute propriété non satisfaite.
+Objectif : ne pas réciter les axiomes, mais les tester sur une loi explicitement définie.`;
+      correction = `La loi est bien définie modulo ${a+3}. Le neutre e vérifie [x]⋆e=[x], donc [e]=[-${b}]. L’inverse de [x] vérifie [x]⋆[y]=[-${b}], ce qui donne [y]=[-x-2${b}]. L’associativité et la commutativité se vérifient par calcul modulo ${a+3}.`;
+      hint = "Pour chaque axiome, écris l’égalité exacte à vérifier avant de simplifier.";
+      examTip = "Une structure algébrique se démontre par une liste d’axiomes vérifiés sur la loi donnée.";
       break;
-    default:
-      statement = `${lead} une famille de vecteurs dans un espace de dimension finie et une application linéaire associée.\n\n1. Écrire les vecteurs dans une base donnée.\n2. Étudier la liberté ou le caractère générateur de la famille.\n3. Déterminer une base et la dimension du sous-espace engendré.\n4. Déterminer le noyau et l’image de l’application lorsque cela est demandé.\n5. Utiliser le théorème du rang pour contrôler le résultat.\n\nObjectif : ${goal}`;
-      correction = "Traduire la liberté par une combinaison linéaire nulle et la génération par un système. Une matrice organise ces calculs. Pour une application linéaire, $\dim E=\dim\ker f+\dim\operatorname{Im}f$.";
-      hint = "Écris d’abord la matrice des coordonnées : elle révèle la structure du problème.";
+    case 14:
+      statement = `Dans R^3, on considère u=(${a};1;0), v=(0;${b};1) et w=(${c};${d};${a}).
+1. Étudier si (u,v,w) est libre.
+2. Déterminer une base et la dimension du sous-espace engendré par u et v.
+3. Donner les coordonnées de p=(${a+c};${b+1};${d}) dans cette base lorsqu’elles existent.
+4. Définir T(x,y,z)=(x+${a}y; y+${b}z) et déterminer Ker(T).
+5. Utiliser le théorème du rang pour contrôler le résultat.
+Objectif : relier familles libres, coordonnées, application linéaire, noyau et rang dans un seul problème.`;
+      correction = `La liberté se teste par au+bv+cw=0 et résolution du système. Pour T, on résout simultanément x+${a}y=0 et y+${b}z=0 afin d’obtenir le noyau, puis le théorème du rang contrôle la dimension de l’image.`;
+      hint = "Transforme chaque question de linéarité en un système d’équations sur les coordonnées.";
+      examTip = "Le théorème du rang est un outil de contrôle : utilise-le pour vérifier, pas seulement pour conclure.";
+      break;
+  }
+
+  if (synthesis) {
+    statement += `\n\nSynthèse : après les calculs précédents, rédiger une conclusion structurée de 8 à 12 lignes expliquant le lien entre les résultats et le thème « ${topic} ».`;
+    examTip += " La dernière question doit réutiliser les résultats précédents, comme dans une vraie partie de synthèse.";
   }
 
   return {
-    id: `sm-300-d${String(ci + 1).padStart(2, "0")}-e${String(ei + 1).padStart(2, "0")}`,
+    id: `maths-sm-${String(ci * 20 + ei + 1).padStart(3, "0")}`,
     mode: "BASE",
-    source: "APPROVED",
+    source: "AI_GENERATED",
     target: { trackIds: ["SMA", "SMB"], subjectId: "maths", chapter: chapter.name, topic },
-    type: types[ei % types.length],
-    difficulty: Math.min(5, 1 + Math.floor(ei / 4)) as ContentDifficulty,
-    title: `${chapter.family} · ${topic}`,
+    type,
+    difficulty,
+    title: `${topic} — exercice ${ei + 1}`,
     statement,
     correction,
     hint,
-    examTip: goal,
-    estimatedMinutes: synthesis ? 25 : 12 + Math.min(12, Math.floor(ei / 2)),
-    xpValue: synthesis ? 45 : 20 + Math.min(20, ei),
+    examTip,
+    estimatedMinutes: 12 + difficulty * 3,
+    xpValue: 30 + difficulty * 10,
     tags: ["MATHS_SM", "MOROCCAN_BAC_STYLE", "EXAM_STYLE", "LESSON_SPECIFIC", ...(synthesis ? ["SYNTHESIS"] : [])],
   };
 }
 
-export const maths300Exercises: Exercise[] = chapters.flatMap((chapter, ci) => chapter.topics.map((_, ei) => makeExercise(chapter, ci, ei)));
+export const maths300Exercises: Exercise[] = chapters.flatMap((chapter, ci) =>
+  chapter.topics.map((_, ei) => makeExercise(chapter, ci, ei))
+);
