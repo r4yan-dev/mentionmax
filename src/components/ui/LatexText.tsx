@@ -16,7 +16,7 @@ function loadMathJax(): Promise<void> {
   if (window.MathJax?.typesetPromise) return Promise.resolve();
   if (mathJaxPromise) return mathJaxPromise;
   window.MathJax = window.MathJax || {};
-  window.MathJax.tex = { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] };
+  window.MathJax.tex = { inlineMath: [["\\(", "\\)"], ["$", "$"], ["\\[", "\\]"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]] };
   mathJaxPromise = new Promise<void>((resolve, reject) => {
     const existing = document.querySelector('script[data-mentionmax-mathjax="true"]');
     if (existing) {
@@ -40,11 +40,6 @@ const SUBS: Record<string, string> = {"₀":"0","₁":"1","₂":"2","₃":"3","�
 const GREEK: Record<string, string> = {α:"\\alpha",β:"\\beta",γ:"\\gamma",δ:"\\delta",ε:"\\varepsilon",ϵ:"\\epsilon",ζ:"\\zeta",η:"\\eta",θ:"\\theta",ϑ:"\\vartheta",ι:"\\iota",κ:"\\kappa",λ:"\\lambda",μ:"\\mu",ν:"\\nu",ξ:"\\xi",π:"\\pi",ϖ:"\\varpi",ρ:"\\rho",ϱ:"\\varrho",σ:"\\sigma",ς:"\\varsigma",τ:"\\tau",υ:"\\upsilon",φ:"\\varphi",ϕ:"\\phi",χ:"\\chi",ψ:"\\psi",ω:"\\omega",Γ:"\\Gamma",Δ:"\\Delta",Θ:"\\Theta",Λ:"\\Lambda",Ξ:"\\Xi",Π:"\\Pi",Σ:"\\Sigma",Υ:"\\Upsilon",Φ:"\\Phi",Ψ:"\\Psi",Ω:"\\Omega"};
 function mapChars(value: string, map: Record<string,string>) { return [...value].map((c) => map[c] ?? c).join(""); }
 
-/** Recover LaTeX commands that were damaged while JSON was parsed. For example,
- * a raw "\\to" can become tab + "o" and "\\frac" can become form-feed + "rac".
- * This pass is deliberately applied only inside protected math so normal prose
- * whitespace is never rewritten into LaTeX commands.
- */
 function repairEscapedLatexControls(value: string) {
   return value
     .replace(/[\u0008\u0009\u000b\u000c\u000d]/g, "\\")
@@ -63,12 +58,21 @@ function normalize(value: string) {
   result = result.replace(/[αβγδεϵζηθϑικλμνξοπϖρϱσςτυφϕχψωΓΔΘΛΞΠΣΥΦΨΩ]/g,(c)=>GREEK[c] ?? c);
   return result;
 }
+
 function sanitizeProtectedMath(value: string) {
   return normalize(value).replace(/\\left\s*/g, "").replace(/\\right\s*/g, "").replace(/\\middle\s*/g, "");
 }
+
+function normalizeDollarDelimiters(text: string) {
+  return text
+    .replace(/\$\$([\s\S]*?)\$\$/g, (_m, body) => `\\[${body}\\]`)
+    .replace(/\$([^$\n]+)\$/g, (_m, body) => `\\(${body}\\)`);
+}
+
 function protectLatex(text: string): { source: string; tokens: string[] } {
   const tokens: string[] = [];
-  const source = text.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)/g,(match)=>{ const token=`@@MM_LATEX_${tokens.length}@@`; tokens.push(sanitizeProtectedMath(match)); return token; });
+  const normalized = normalizeDollarDelimiters(text);
+  const source = normalized.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)/g,(match)=>{ const token=`@@MM_LATEX_${tokens.length}@@`; tokens.push(sanitizeProtectedMath(match)); return token; });
   return { source, tokens };
 }
 function restoreLatex(text: string, tokens: string[]) { return text.replace(/@@MM_LATEX_(\d+)@@/g,(_m,i)=>tokens[Number(i)] ?? _m); }
@@ -87,7 +91,7 @@ function toLatex(text: string) {
   let source = protectedValue.source;
   source = source.replace(/\b(?:lim\s*\([^)]*\)|sin\s*\([^)]*\)|cos\s*\([^)]*\)|tan\s*\([^)]*\)|cot\s*\([^)]*\)|arcsin\s*\([^)]*\)|arccos\s*\([^)]*\)|arctan\s*\([^)]*\)|ln\s*\([^)]*\)|log\s*\([^)]*\)|exp\s*\([^)]*\)|sqrt\s*\([^)]*\)|√\s*\([^)]*\)|P\s*\([^)]*\)|A\s*\([^)]*\)|C\s*\([^)]*\))/g,wrapFormula);
   source = source.replace(/\b[A-Za-z](?:\^[-+]?\d+|\^[A-Za-z0-9]+|\^\{[^}]+\}|[_][A-Za-z0-9]+|[_]\{[^}]+\})/g,wrapFormula);
-  source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱᶦᶠʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g,wrapFormula);
+  source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g,wrapFormula);
   source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g,(_m,n,d)=>`\\(\\frac{${n}}{${d}}\\)`);
   source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*([A-Za-z0-9]+)/g,(_m,n,d)=>`\\(\\frac{${n}}{${d}}\\)`);
   source = source.replace(/(^|[(:]\s*)([A-Za-z0-9α-ωΑ-Ω][^,.;!?]*?(?:=|<|>|≤|≥|≠|≈|→|↦)[^,.;!?]*)(?=\s*[,.;!?]|$)/g,(_m,prefix,formula)=>`${prefix}${wrapFormula(formula)}`);
@@ -108,5 +112,5 @@ export function LatexText({ children, className, display=false }: { children: st
     void loadMathJax().then(async()=>{ if (!cancelled && window.MathJax?.typesetPromise && ref.current) await window.MathJax.typesetPromise([ref.current]); }).catch(()=>undefined);
     return ()=>{cancelled=true;};
   },[latex]);
-  return <span ref={ref} className={className} data-latex-display={display || undefined} style={{ fontSize: display ? "1.10em" : "1em" }} />;
+  return <span ref={ref} className={className} data-latex-display={display || undefined} style={{ fontSize: display ? "1.10em" : "1em", whiteSpace: "pre-wrap" }} />;
 }
