@@ -135,8 +135,9 @@ function protectDelimitedMath(text: string): { source: string; tokens: string[] 
   return { source, tokens };
 }
 
-function restoreDelimitedMath(text: string, tokens: string[]) {
-  return text.replace(/@@MM_LATEX_(\d+)@@/g, (_m, index) => tokens[Number(index)] ?? _m);
+function restoreTokens(text: string, tokens: string[], prefix: string) {
+  const pattern = new RegExp(`${prefix}_(\\d+)@@`, "g");
+  return text.replace(pattern, (_m, index) => tokens[Number(index)] ?? _m);
 }
 
 function toLatex(text: string) {
@@ -144,18 +145,24 @@ function toLatex(text: string) {
 
   const protectedValue = protectDelimitedMath(text);
   let source = protectedValue.source;
+  const equationTokens: string[] = [];
 
-  // Only wrap unambiguously mathematical constructs. Never consume arbitrary prose.
+  // Protect complete equations before handling powers or fractions inside them.
+  // Otherwise x² gets isolated first and the surrounding f(x)=... equation is lost.
+  source = source.replace(/(^|[(:]\s*)([A-Za-z][A-Za-z0-9_]*(?:\([^)]*\))?\s*=\s*[-+A-Za-z0-9().√^_⁺⁻²³⁴⁵⁶⁷⁸⁹*/]+)(?=\s*(?:[,.;!?]|$))/gm, (_m, prefix, formula) => {
+    const token = `@@MM_EQUATION_${equationTokens.length}@@`;
+    equationTokens.push(`${prefix}${wrapFormula(formula)}`);
+    return token;
+  });
+
+  // Only transform compact, unambiguous mathematical constructs that remain in prose.
   source = source.replace(/\b(?:lim|sin|cos|tan|cot|arcsin|arccos|arctan|ln|log|exp|sqrt)\s*\([^)]*\)/g, wrapFormula);
+  source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g, (_m, numerator, denominator) => `\\(\\frac{${normalize(numerator)}}{${normalize(denominator)}}\\)`);
   source = source.replace(/\b[A-Za-z](?:\^[-+]?\d+|\^[A-Za-z0-9]+|\^\{[^}]+\}|_[A-Za-z0-9]+|_\{[^}]+\})/g, wrapFormula);
   source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g, wrapFormula);
 
-  // A complete equation is only considered math when it starts with a math-like token.
-  source = source.replace(/(^|[(:]\s*)([A-Za-z][A-Za-z0-9_]*(?:\([^)]*\))?\s*=\s*[-+A-Za-z0-9().√^_⁺⁻²³⁴⁵⁶⁷⁸⁹*/]+)(?=\s*(?:[,.;!?]|$))/g, (_m, prefix, formula) => `${prefix}${wrapFormula(formula)}`);
-
-  // Fractions written as a/b are handled only when both sides are compact.
-  source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g, (_m, numerator, denominator) => `\\(\\frac{${normalize(numerator)}}{${normalize(denominator)}}\\)`);
   source = normalize(source);
+  source = restoreTokens(source, equationTokens, "@@MM_EQUATION");
   return restoreDelimitedMath(source, protectedValue.tokens);
 }
 
