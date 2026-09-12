@@ -4,6 +4,7 @@ import { base2BacSPCMathsFlashcards } from "../../data/mock/base2BacSPCMathsFlas
 import { basePCHardExercises } from "../../data/mock/basePCHardExercises";
 import { baseSMMathExercises } from "../../data/mock/baseSMMathExercises";
 import { baseSMPCExercises } from "../../data/mock/baseSMPCExercises";
+import { smPhysics300Exercises } from "../../data/mock/smPhysics300Exercises";
 import { base2BacHumanExercises } from "../../data/mock/base2BacHumanExercises";
 import { extended2BacExercises } from "../../data/mock/base2BacHumanExercisesExtended";
 import { base2BacSPMathLessonExercises } from "../../data/mock/base2BacSPMathLessonExercises";
@@ -95,6 +96,9 @@ const matchesTarget = (trackId: TrackId, subjectId: SubjectId, chapter?: string,
 const getExercisesFor = (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) => {
   if ((trackId === "SMA" || trackId === "SMB") && subjectId === "maths") {
     return maths300Exercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
+  }
+  if ((trackId === "SMA" || trackId === "SMB") && subjectId === "physique-chimie") {
+    return smPhysics300Exercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
   }
   return allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
 };
