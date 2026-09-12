@@ -29,7 +29,7 @@ import { base2BacSMExponentialExercises } from "../../data/mock/base2BacSMExpone
 import { base2BacSMDifferentialEquationsExercises } from "../../data/mock/base2BacSMDifferentialEquationsExercises";
 import { base2BacSMIntegralExercises } from "../../data/mock/base2BacSMIntegralExercises";
 import { base2BacSMSpaceGeometryExercises } from "../../data/mock/base2BacSMSpaceGeometryExercises";
-import { helios300MathExercises } from "../../data/mock/helios300MathExercises";
+import { maths300Exercises } from "../../data/mock/maths300Exercises";
 import { base2BacPhilosophyIdentityFlashcards } from "../../data/mock/base2BacPhilosophyIdentityFlashcards";
 import { base2BacPhilosophyMethodologyFlashcards } from "../../data/mock/base2BacPhilosophyMethodologyFlashcards";
 import { base2BacPhilosophyIdentityExercises } from "../../data/mock/base2BacPhilosophyIdentityExercises";
@@ -45,16 +45,8 @@ const allFlashcards: Flashcard[] = [
   ...base2BacPhilosophyIdentityFlashcards,
 ];
 
-const normalSM300Exercises: Exercise[] = helios300MathExercises.map((exercise) => ({
-  ...exercise,
-  id: exercise.id.replace(/^helios-/, "sm-300-"),
-  target: { ...exercise.target, trackIds: ["SMA", "SMB"] as TrackId[] },
-  tags: exercise.tags.filter((tag) => !tag.includes("MISSION_HELIOS") && !tag.startsWith("JOUR_")),
-}));
-
-if (import.meta.env.DEV && normalSM300Exercises.length !== 300) {
-  console.error(`Normal SM bank must contain exactly 300 exercises. Found ${normalSM300Exercises.length}.`);
-}
+const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
+const allRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
 
 const allExercises: Exercise[] = [
   ...basePCExercises,
@@ -84,12 +76,12 @@ const allExercises: Exercise[] = [
   ...base2BacSMDifferentialEquationsExercises,
   ...base2BacSMIntegralExercises,
   ...base2BacSMSpaceGeometryExercises,
-  ...normalSM300Exercises,
+  ...maths300Exercises,
   ...base2BacPhilosophyMethodologyExercises,
   ...base2BacPhilosophyIdentityExercises,
 ];
 
- type TargetedItem = {
+type TargetedItem = {
   target: { trackIds: readonly TrackId[]; subjectId: SubjectId; chapter: string; topic: string };
 };
 
@@ -102,7 +94,7 @@ const matchesTarget = (trackId: TrackId, subjectId: SubjectId, chapter?: string,
 
 const getExercisesFor = (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) => {
   if ((trackId === "SMA" || trackId === "SMB") && subjectId === "maths") {
-    return normalSM300Exercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
+    return maths300Exercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
   }
   return allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
 };
@@ -110,15 +102,11 @@ const getExercisesFor = (trackId: TrackId, subjectId: SubjectId, chapter?: strin
 export const contentCatalogService = {
   getBaseFlashcards: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic)),
-
   getBaseExercises: getExercisesFor,
-
   getBaseQuizzes: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic)),
-
   getBaseRevisionSheets: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allRevisionSheets.filter(matchesTarget(trackId, subjectId, chapter, topic)),
-
   getCounts(trackId: TrackId, subjectId: SubjectId) {
     return {
       flashcards: this.getBaseFlashcards(trackId, subjectId).length,
@@ -128,6 +116,3 @@ export const contentCatalogService = {
     };
   },
 };
-
-const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
-const allRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
