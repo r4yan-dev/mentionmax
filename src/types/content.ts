@@ -69,6 +69,29 @@ export type ExerciseVisual =
       links: ExerciseSchemeLink[];
     };
 
+export interface ExerciseSubQuestion {
+  id: string;
+  label: string;
+  prompt: string;
+  correction?: string;
+}
+
+export interface ExerciseQuestion {
+  id: string;
+  number: number;
+  prompt?: string;
+  subQuestions: ExerciseSubQuestion[];
+}
+
+export interface ExercisePart {
+  id: string;
+  number: 1 | 2;
+  title: string;
+  introduction?: string;
+  questions: ExerciseQuestion[];
+  visual?: ExerciseVisual;
+}
+
 export interface Flashcard {
   id: string;
   mode: ContentMode;
@@ -105,6 +128,7 @@ export interface Exercise {
   xpValue: number;
   tags: string[];
   visual?: ExerciseVisual;
+  parts?: ExercisePart[];
 }
 
 export interface Quiz {
