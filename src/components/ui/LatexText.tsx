@@ -76,9 +76,6 @@ function mapChars(value: string, map: Record<string, string>) {
 
 function convertFractions(value: string) {
   let result = value;
-
-  // Handle the common French-school notation first: (numerator)/(denominator).
-  // Repeating lets nested/simple fractions settle without touching surrounding prose.
   for (let i = 0; i < 4; i += 1) {
     const previous = result;
     result = result.replace(/\(([^()]+)\)\s*\/\s*\(([^()]+)\)/g, "\\frac{$1}{$2}");
@@ -86,20 +83,17 @@ function convertFractions(value: string) {
     result = result.replace(/\(([^()]+)\)\s*\/\s*([A-Za-z0-9]+)/g, "\\frac{$1}{$2}");
     if (result === previous) break;
   }
-
   return result;
 }
 
 function normalize(value: string) {
   let result = value.trim();
-
   result = convertFractions(result);
   result = result.replace(/([A-Za-z0-9)\]])([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ]+)/g, (_m, base, power) => `${base}^{${mapChars(power, SUPERS)}}`);
   result = result.replace(/([A-Za-z0-9)\]])([₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+)/g, (_m, base, sub) => `${base}_{${mapChars(sub, SUBS)}}`);
   result = result.replace(/√\s*\(([^()]*)\)/g, "\\sqrt{$1}");
   result = result.replace(/√\s*([A-Za-z0-9]+)/g, "\\sqrt{$1}");
   result = result.replace(/\b(sin|cos|tan|cot|arcsin|arccos|arctan|ln|log|exp)\s*\(([^)]*)\)/g, "\\$1($2)");
-
   const symbols: Array<[RegExp, string]> = [
     [/≤/g, "\\leq"], [/≥/g, "\\geq"], [/≠/g, "\\neq"], [/≈/g, "\\approx"],
     [/±/g, "\\pm"], [/∞/g, "\\infty"], [/∈/g, "\\in"], [/∉/g, "\\notin"],
@@ -111,7 +105,6 @@ function normalize(value: string) {
     [/ℂ/g, "\\mathbb{C}"], [/∂/g, "\\partial"], [/∇/g, "\\nabla"], [/∑/g, "\\sum"],
     [/∏/g, "\\prod"], [/∫/g, "\\int"], [/∮/g, "\\oint"],
   ];
-
   for (const [pattern, replacement] of symbols) result = result.replace(pattern, replacement);
   result = result.replace(/[αβγδεϵζηθϑικλμνξοπϖρϱσςτυφϕχψωΓΔΘΛΞΠΣΥΦΨΩ]/g, (char) => GREEK[char] ?? char);
   return result;
@@ -121,33 +114,37 @@ function wrapFormula(value: string) {
   return `\\(${normalize(value)}\\)`;
 }
 
+function isLikelyFormula(value: string) {
+  const raw = value.trim();
+  if (!raw) return false;
+  if (/\\(?:frac|sqrt|int|sum|prod|lim|sin|cos|tan|ln|log|exp|mathbb|mathbf|mathrm|partial|nabla|infty|alpha|beta|gamma|delta|theta|lambda|mu|pi|sigma|phi|omega|to|mapsto|leq|geq|neq|approx|pm|times|cdot|div)/.test(raw)) return true;
+  if (/[=<>≤≥≠≈]/.test(raw)) return true;
+  if (/\b(?:f|g|h|u|v|w|F|G)\s*\([^)]*\)/.test(raw)) return true;
+  if (/[⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉]/.test(raw)) return true;
+  if (/[+*/^]|\b(?:sin|cos|tan|cot|ln|log|exp)\s*\(/.test(raw) && /\d|[A-Za-z]\s*\(/.test(raw)) return true;
+  if (/^\s*[A-Za-z](?:\s*[A-Za-z])?\s*\(?[A-Za-z0-9]*\)?\s*$/.test(raw) && raw.length <= 12) return true;
+  return false;
+}
+
 function protectDelimitedMath(text: string): { source: string; tokens: string[] } {
   const tokens: string[] = [];
   let source = text;
 
-  source = source.replace(/\\\[[\s\S]*?\\\]/g, (match) => {
+  const protect = (content: string, display: boolean) => {
     const token = `@@MM_LATEX_${tokens.length}@@`;
-    tokens.push(match);
+    if (isLikelyFormula(content)) {
+      tokens.push(display ? `\\[${content}\\]` : `\\(${content}\\)`);
+    } else {
+      // Delimiters around prose are treated as an authoring mistake, not as math.
+      tokens.push(content);
+    }
     return token;
-  });
+  };
 
-  source = source.replace(/\\\([\s\S]*?\\\)/g, (match) => {
-    const token = `@@MM_LATEX_${tokens.length}@@`;
-    tokens.push(match);
-    return token;
-  });
-
-  source = source.replace(/\$\$[\s\S]*?\$\$/g, (match) => {
-    const token = `@@MM_LATEX_${tokens.length}@@`;
-    tokens.push(match.replace(/^\$\$/, "\\[").replace(/\$\$$/, "\\]"));
-    return token;
-  });
-
-  source = source.replace(/\$[^$\n]+\$/g, (match) => {
-    const token = `@@MM_LATEX_${tokens.length}@@`;
-    tokens.push(match.replace(/^\$/, "\\(").replace(/\$$/, "\\)"));
-    return token;
-  });
+  source = source.replace(/\\\[([\s\S]*?)\\\]/g, (_match, content) => protect(content, true));
+  source = source.replace(/\\\(([\s\S]*?)\\\)/g, (_match, content) => protect(content, false));
+  source = source.replace(/\$\$([\s\S]*?)\$\$/g, (_match, content) => protect(content, true));
+  source = source.replace(/\$([^$\n]+)\$/g, (_match, content) => protect(content, false));
 
   return { source, tokens };
 }
@@ -159,61 +156,44 @@ function restoreTokens(text: string, tokens: string[], prefix: string) {
 
 function toLatex(text: string) {
   if (!text) return text;
-
   const protectedValue = protectDelimitedMath(text);
   let source = protectedValue.source;
   const equationTokens: string[] = [];
 
-  // Protect the whole equation before touching powers, fractions, or symbols.
-  // This is critical for French expressions such as:
-  // f(x) = (x² + 4x + 3)/(x − 4)
+  // Only the equation itself is math. French words before/after it remain HTML text.
   source = source.replace(/(^|[\s(,:;])([A-Za-z][A-Za-z0-9_]*(?:\([^()\n]*\))?\s*=\s*[^.!?;\n]+?)(?=[.!?;]|$)/gm, (_m, prefix, formula) => {
     const token = `@@MM_EQUATION_${equationTokens.length}@@`;
     equationTokens.push(`${prefix}${wrapFormula(formula)}`);
     return token;
   });
 
-  // Explicit function/limit expressions occurring in prose.
   source = source.replace(/\b(?:lim|sin|cos|tan|cot|arcsin|arccos|arctan|ln|log|exp|sqrt)\s*\([^)]*\)/g, wrapFormula);
-
-  // Standalone parenthesized fractions in prose.
   source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g, (_m, numerator, denominator) => wrapFormula(`\\frac{${normalize(numerator)}}{${normalize(denominator)}}`));
-
-  // Remaining compact powers/subscripts.
   source = source.replace(/\b[A-Za-z](?:\^[-+]?\d+|\^[A-Za-z0-9]+|\^\{[^}]+\}|_[A-Za-z0-9]+|_\{[^}]+\})/g, wrapFormula);
   source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g, wrapFormula);
 
-  source = normalize(source);
   source = restoreTokens(source, equationTokens, "@@MM_EQUATION");
   return restoreTokens(source, protectedValue.tokens, "@@MM_LATEX");
 }
 
 export function LatexText({ children, className, display = false }: { children: string; className?: string; display?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const latex = useMemo(
-    () => display ? `\\[${normalize(children)}\\]` : toLatex(children),
-    [children, display],
-  );
+  const latex = useMemo(() => display ? `\\[${normalize(children)}\\]` : toLatex(children), [children, display]);
 
   useEffect(() => {
     let cancelled = false;
     const element = ref.current;
     if (!element) return;
-
     element.textContent = latex;
     if (!latex.includes("\\(") && !latex.includes("\\[")) return;
 
-    void loadMathJax()
-      .then(async () => {
-        if (!cancelled && window.MathJax?.typesetPromise && ref.current) {
-          await window.MathJax.typesetPromise([ref.current]);
-        }
-      })
-      .catch(() => undefined);
+    void loadMathJax().then(async () => {
+      if (!cancelled && window.MathJax?.typesetPromise && ref.current) {
+        await window.MathJax.typesetPromise([ref.current]);
+      }
+    }).catch(() => undefined);
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [latex]);
 
   return (
@@ -221,12 +201,7 @@ export function LatexText({ children, className, display = false }: { children: 
       ref={ref}
       className={className}
       data-latex-display={display || undefined}
-      style={{
-        fontSize: display ? "1.10em" : "1em",
-        whiteSpace: "pre-wrap",
-        wordBreak: "normal",
-        overflowWrap: "normal",
-      }}
+      style={{ fontSize: display ? "1.10em" : "1em", whiteSpace: "pre-wrap", wordBreak: "normal", overflowWrap: "normal" }}
     />
   );
 }
