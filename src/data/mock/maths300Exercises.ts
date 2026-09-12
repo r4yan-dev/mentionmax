@@ -29,7 +29,7 @@ function params(ci: number, ei: number) {
 
 function makeExercise(chapter: Chapter, ci: number, ei: number): Exercise {
   const topic = chapter.topics[ei];
-  const { n, a, b, c, d } = params(ci, ei);
+  const { a, b, c, d } = params(ci, ei);
   const synthesis = ei === 19;
   const difficulty = Math.min(5, 1 + Math.floor(ei / 4)) as ContentDifficulty;
   const type = types[ei % types.length];
