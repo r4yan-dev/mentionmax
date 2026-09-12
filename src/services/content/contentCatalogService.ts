@@ -44,6 +44,18 @@ const allFlashcards: Flashcard[] = [
   ...base2BacPhilosophyMethodologyFlashcards,
   ...base2BacPhilosophyIdentityFlashcards,
 ];
+
+const normalSM300Exercises: Exercise[] = helios300MathExercises.map((exercise) => ({
+  ...exercise,
+  id: exercise.id.replace(/^helios-/, "sm-300-"),
+  target: { ...exercise.target, trackIds: ["SMA", "SMB"] as TrackId[] },
+  tags: exercise.tags.filter((tag) => !tag.includes("MISSION_HELIOS") && !tag.startsWith("JOUR_")),
+}));
+
+if (import.meta.env.DEV && normalSM300Exercises.length !== 300) {
+  console.error(`Normal SM bank must contain exactly 300 exercises. Found ${normalSM300Exercises.length}.`);
+}
+
 const allExercises: Exercise[] = [
   ...basePCExercises,
   ...basePCHardExercises,
@@ -72,14 +84,12 @@ const allExercises: Exercise[] = [
   ...base2BacSMDifferentialEquationsExercises,
   ...base2BacSMIntegralExercises,
   ...base2BacSMSpaceGeometryExercises,
-  ...helios300MathExercises,
+  ...normalSM300Exercises,
   ...base2BacPhilosophyMethodologyExercises,
   ...base2BacPhilosophyIdentityExercises,
 ];
-const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
-const allRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
 
-type TargetedItem = {
+ type TargetedItem = {
   target: { trackIds: readonly TrackId[]; subjectId: SubjectId; chapter: string; topic: string };
 };
 
@@ -90,12 +100,18 @@ const matchesTarget = (trackId: TrackId, subjectId: SubjectId, chapter?: string,
     (!chapter || item.target.chapter === chapter) &&
     (!topic || item.target.topic === topic);
 
+const getExercisesFor = (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) => {
+  if ((trackId === "SMA" || trackId === "SMB") && subjectId === "maths") {
+    return normalSM300Exercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
+  }
+  return allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic));
+};
+
 export const contentCatalogService = {
   getBaseFlashcards: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allFlashcards.filter(matchesTarget(trackId, subjectId, chapter, topic)),
 
-  getBaseExercises: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
-    allExercises.filter(matchesTarget(trackId, subjectId, chapter, topic)),
+  getBaseExercises: getExercisesFor,
 
   getBaseQuizzes: (trackId: TrackId, subjectId: SubjectId, chapter?: string, topic?: string) =>
     allQuizzes.filter(matchesTarget(trackId, subjectId, chapter, topic)),
@@ -112,3 +128,6 @@ export const contentCatalogService = {
     };
   },
 };
+
+const allQuizzes: Quiz[] = [...baseContent.quizzes, ...basePCQuizzes];
+const allRevisionSheets: RevisionSheet[] = [...baseContent.revisionSheets, ...basePCRevisionSheets];
