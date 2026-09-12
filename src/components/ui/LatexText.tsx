@@ -121,8 +121,8 @@ function isLikelyFormula(value: string) {
   if (/[=<>≤≥≠≈]/.test(raw)) return true;
   if (/\b(?:f|g|h|u|v|w|F|G)\s*\([^)]*\)/.test(raw)) return true;
   if (/[⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉]/.test(raw)) return true;
-  if (/[+*/^]|\b(?:sin|cos|tan|cot|ln|log|exp)\s*\(/.test(raw) && /\d|[A-Za-z]\s*\(/.test(raw)) return true;
-  if (/^\s*[A-Za-z](?:\s*[A-Za-z])?\s*\(?[A-Za-z0-9]*\)?\s*$/.test(raw) && raw.length <= 12) return true;
+  if (/[+*/^]/.test(raw) && /\d|[A-Za-z]\s*\(/.test(raw)) return true;
+  if (/^(?:[A-Za-z]|[A-Za-z][0-9]|[A-Za-z]_[A-Za-z0-9]+)$/.test(raw)) return true;
   return false;
 }
 
@@ -160,8 +160,11 @@ function toLatex(text: string) {
   let source = protectedValue.source;
   const equationTokens: string[] = [];
 
-  // Only the equation itself is math. French words before/after it remain HTML text.
-  source = source.replace(/(^|[\s(,:;])([A-Za-z][A-Za-z0-9_]*(?:\([^()\n]*\))?\s*=\s*[^.!?;\n]+?)(?=[.!?;]|$)/gm, (_m, prefix, formula) => {
+  // Stop an equation before a French connector when the next phrase is another equation.
+  // Example: "z=2+4i et w=-1+4i" becomes two independent MathJax expressions with "et" as HTML text.
+  const equationPattern = /(^|[\s(,:;])([A-Za-z][A-Za-z0-9_]*(?:\([^()\n]*\))?\s*=\s*[^.!?;\n]+?)(?=(?:[.!?;]|$|\s+(?:et|ou|puis|mais|avec|ainsi|donc|alors|où)\s+[A-Za-z][A-Za-z0-9_]*(?:\([^()\n]*\))?\s*=))/gmi;
+
+  source = source.replace(equationPattern, (_m, prefix, formula) => {
     const token = `@@MM_EQUATION_${equationTokens.length}@@`;
     equationTokens.push(`${prefix}${wrapFormula(formula)}`);
     return token;
