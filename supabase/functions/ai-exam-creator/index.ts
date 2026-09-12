@@ -16,7 +16,7 @@ const FALLBACK_PROFILE = {
     language: "fr",
     core_principle: "Generate authentic Moroccan 2BAC mathematical papers, not generic textbook quizzes.",
     structure: [
-      "Prefer 2 to 4 coherent exercises over many isolated micro-questions.",
+      "Prefer a coherent number of exercises matched to the requested duration.",
       "Within one exercise, keep every question inside the same exercise container.",
       "Use question numbering 1., 2., 3., subquestions a), b), c), and sub-subquestions i), ii), iii) only when needed.",
       "Never turn a subquestion into a new exercise.",
@@ -29,7 +29,17 @@ const FALLBACK_PROFILE = {
       "Neutral academic exercise titles.",
       "No metadata, Markdown, HTML, emojis or literal QUESTION labels in student statements."
     ],
-    math_notation: { latex: true, raw_latex: true, no_math_delimiters_in_json: true }
+    math_notation: { latex: true, raw_latex: true, no_math_delimiters_in_json: true },
+    exam_duration_modes: [
+      { minutes: 20, recommendedExercises: 1 },
+      { minutes: 30, recommendedExercises: 1 },
+      { minutes: 45, recommendedExercises: 2 },
+      { minutes: 60, recommendedExercises: 2 },
+      { minutes: 90, recommendedExercises: 2 },
+      { minutes: 120, recommendedExercises: 3 },
+      { minutes: 180, recommendedExercises: 3 },
+      { minutes: 240, recommendedExercises: 4, fullPaper: true }
+    ]
   }
 };
 
@@ -114,13 +124,24 @@ async function loadProfile(subject?: string) {
   } catch { return FALLBACK_PROFILE; }
 }
 
-function buildPrompt(i: { text:string; subject?:string; chapter?:string; track?:string; difficulty:string; durationMinutes:number; questionCount:number; weakPoints:string[]; profile:any }) {
+function getExamPlan(durationMinutes: number, requestedExerciseCount: number) {
+  if (durationMinutes >= 210) return { durationMinutes: 240, exerciseCount: 4, totalPoints: 20, pointDistribution: [10, 3.5, 3, 3.5], fullPaper: true };
+  if (durationMinutes <= 20) return { durationMinutes: 20, exerciseCount: 1, totalPoints: 20, pointDistribution: [20], fullPaper: false };
+  if (durationMinutes <= 30) return { durationMinutes: 30, exerciseCount: 1, totalPoints: 20, pointDistribution: [20], fullPaper: false };
+  if (durationMinutes <= 45) return { durationMinutes, exerciseCount: 2, totalPoints: 20, pointDistribution: [10, 10], fullPaper: false };
+  if (durationMinutes <= 90) return { durationMinutes, exerciseCount: 2, totalPoints: 20, pointDistribution: [10, 10], fullPaper: false };
+  if (durationMinutes <= 120) return { durationMinutes, exerciseCount: 3, totalPoints: 20, pointDistribution: [8, 6, 6], fullPaper: false };
+  return { durationMinutes, exerciseCount: Math.max(3, Math.min(4, requestedExerciseCount || 3)), totalPoints: 20, pointDistribution: [], fullPaper: false };
+}
+
+function buildPrompt(i: { text:string; subject?:string; chapter?:string; track?:string; difficulty:string; durationMinutes:number; questionCount:number; weakPoints:string[]; profile:any; plan:any }) {
   const meta = [
     i.subject && `Matière: ${i.subject}`,
     i.chapter && `Chapitre(s): ${i.chapter}`,
     i.track && `Parcours: ${i.track}`,
     `Niveau: ${i.difficulty}`,
-    `Durée: ${i.durationMinutes} minutes`,
+    `Durée demandée: ${i.durationMinutes} minutes`,
+    `Plan retenu: ${i.plan.exerciseCount} exercice(s)`,
     `Cible: ${i.questionCount} questions`
   ].filter(Boolean).join("\n");
   const training = JSON.stringify({
@@ -128,7 +149,10 @@ function buildPrompt(i: { text:string; subject?:string; chapter?:string; track?:
     rules: i.profile?.rules ?? FALLBACK_PROFILE.rules,
     exemplars: Array.isArray(i.profile?.exemplars) ? i.profile.exemplars.slice(0, 24) : []
   });
-  return `Tu construis un vrai devoir marocain 2BAC, pas une liste de questions.\n\n${meta}\n\nPROFILE ACTIF:\n${training}\n\nRÈGLE DE STRUCTURE ABSOLUE:\n- Le sujet contient 2 à 4 EXERCICES.\n- Un EXERCICE est un problème complet et cohérent.\n- TOUS les éléments d'un même exercice restent ensemble.\n- Un exercice peut contenir plusieurs questions 1., 2., 3.\n- Une question peut contenir a), b), c).\n- Une sous-question peut contenir i), ii), iii).\n- JAMAIS créer un nouvel exercice pour a), b), c), i), ii), iii) ou pour une question appartenant au même problème.\n- Le titre doit être EXACTEMENT identique pour toutes les questions appartenant au même exercice.\n- Les questions d'un même exercice doivent être consécutives dans le tableau JSON.\n- Le champ number est le numéro global de la question, mais la numérotation visible fine sera gérée par l'interface.\n\nEXEMPLE:\nExercice 1 — Nombres complexes\n  1. ...\n  2. ...\n    a) ...\n    b) ...\n  3. ...\n\nExercice 2 — Étude d'une fonction\n  1. ...\n  2. ...\n    a) ...\n    b) ...\n\nIMPORTANT: « Exercice 1 — ... » est un titre de GROUPE, pas le titre de chaque petite question. Ne crée jamais « Exercice 2 — Question 1.b ».\n\nRÉDACTION:\n- Français académique compact.\n- Utilise Soit, On considère, Montrer que, Vérifier que, Déterminer, Calculer, Résoudre, Étudier, En déduire, Interpréter géométriquement.\n- Aucun Markdown, HTML, emoji, QUESTION 1, easy, medium, hard ou métadonnée dans le texte élève.\n- LaTeX brut sans délimiteurs.\n- Barème cohérent sur 20 pour un devoir complet.\n- Pour SMB, aucun contenu SVT.\n\nAvant de répondre, vérifie: 2-4 exercices, titres répétés exactement à l'intérieur d'un exercice, exercices consécutifs, aucune sous-question transformée en exercice.\nRetourne UNIQUEMENT le JSON conforme au schéma.\n\nSOURCE:\n${i.text}`;
+  const durationInstruction = i.plan.fullPaper
+    ? `MODE NATIONAL SM 4H OBLIGATOIRE:\n- Durée exactement 240 minutes.\n- EXACTEMENT 4 exercices indépendants.\n- Total exactement 20 points.\n- Architecture cible: Exercice 1 Analyse = 10 pts; Exercice 2 Nombres complexes = 3,5 pts; Exercice 3 Arithmétique / probabilités = 3 pts; Exercice 4 Structures algébriques = 3,5 pts.\n- Les exercices sont des problèmes cohérents, chacun avec une chaîne de questions numérotées.\n- N’ajoute pas de SVT au parcours SMB.`
+    : `MODE ENTRAÎNEMENT ${i.plan.durationMinutes} MIN:\n- Respecte exactement la durée demandée.\n- Utilise environ ${i.plan.exerciseCount} exercice(s), avec de vraies chaînes de sous-questions plutôt qu’une liste de micro-questions.\n- Garde une densité réaliste: une séance courte doit rester faisable dans son temps.`;
+  return `Tu construis un vrai devoir marocain 2BAC, pas une liste de questions.\n\n${meta}\n\nPROFILE ACTIF:\n${training}\n\n${durationInstruction}\n\nRÈGLE DE STRUCTURE ABSOLUE:\n- Un EXERCICE est un problème complet et cohérent.\n- TOUS les éléments d'un même exercice restent ensemble.\n- Un exercice peut contenir plusieurs questions 1., 2., 3.\n- Une question peut contenir a), b), c).\n- Une sous-question peut contenir i), ii), iii).\n- JAMAIS créer un nouvel exercice pour a), b), c), i), ii), iii) ou pour une question appartenant au même problème.\n- Le titre doit être EXACTEMENT identique pour toutes les questions appartenant au même exercice.\n- Les questions d'un même exercice doivent être consécutives dans le tableau JSON.\n- Le champ number est le numéro global de la question, mais la numérotation visible fine sera gérée par l'interface.\n\nEXEMPLE:\nExercice 1 — Nombres complexes\n  1. ...\n  2. ...\n    a) ...\n    b) ...\n  3. ...\n\nExercice 2 — Étude d'une fonction\n  1. ...\n  2. ...\n    a) ...\n    b) ...\n\nIMPORTANT: « Exercice 1 — ... » est un titre de GROUPE, pas le titre de chaque petite question. Ne crée jamais « Exercice 2 — Question 1.b ».\n\nRÉDACTION:\n- Français académique compact.\n- Utilise Soit, On considère, Montrer que, Vérifier que, Déterminer, Calculer, Résoudre, Étudier, En déduire, Interpréter géométriquement.\n- Aucun Markdown, HTML, emoji, QUESTION 1, easy, medium, hard ou métadonnée dans le texte élève.\n- LaTeX brut sans délimiteurs.\n- Total sur 20.\n- Pour SMB, aucun contenu SVT.\n\nAvant de répondre, vérifie: nombre d’exercices conforme au plan, titres répétés exactement à l'intérieur d'un exercice, exercices consécutifs, aucune sous-question transformée en exercice, et durée compatible avec la charge de travail.\nRetourne UNIQUEMENT le JSON conforme au schéma.\n\nSOURCE:\n${i.text}`;
 }
 
 function extractText(payload:any) {
@@ -200,14 +224,17 @@ Deno.serve(async (req) => {
     const text = typeof body?.text === "string" ? body.text.trim() : "";
     if (!text) return response({ success:false, error:"Le texte source est vide." }, 400);
     if (text.length > MAX_INPUT) return response({ success:false, error:"Texte source trop long." }, 413);
-    const questionCount = Math.max(1, Math.min(12, Number(body?.questionCount)||10));
-    const durationMinutes = Math.max(15, Math.min(180, Number(body?.durationMinutes)||60));
+    const requestedQuestionCount = Math.max(1, Math.min(12, Number(body?.questionCount)||10));
+    const requestedDuration = Math.max(20, Math.min(240, Number(body?.durationMinutes)||60));
     const difficulty = typeof body?.difficulty === "string" ? body.difficulty : "bac";
     const weakPoints = Array.isArray(body?.weakPoints) ? body.weakPoints.filter((x:unknown)=>typeof x === "string").slice(0,12) : [];
     const subject = typeof body?.subject === "string" ? body.subject : undefined;
     const track = typeof body?.track === "string" ? body.track : undefined;
+    const requestedExerciseCount = Math.max(1, Math.min(4, Number(body?.exerciseCount)||3));
+    const plan = getExamPlan(requestedDuration, requestedExerciseCount);
+    const questionCount = plan.fullPaper ? 12 : Math.min(12, Math.max(plan.exerciseCount * 3, requestedQuestionCount));
     const profile = await loadProfile(subject);
-    const prompt = buildPrompt({ text, subject, chapter:typeof body?.chapter === "string" ? body.chapter : undefined, track, difficulty, durationMinutes, questionCount, weakPoints, profile });
+    const prompt = buildPrompt({ text, subject, chapter:typeof body?.chapter === "string" ? body.chapter : undefined, track, difficulty, durationMinutes:plan.durationMinutes, questionCount, weakPoints, profile, plan });
     const upstream = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method:"POST",
       headers:{"Content-Type":"application/json","x-goog-api-key":apiKey,"Api-Revision":"2026-05-20"},
@@ -228,6 +255,8 @@ Deno.serve(async (req) => {
     }
     try {
       const result = normalizeExerciseTitles(normalizeMath(parseJson(extractText(payload))));
+      result.durationMinutes = plan.durationMinutes;
+      result.totalPoints = 20;
       return response({success:true,result,model:MODEL,profile:`moroccan-${subject?.toLowerCase().includes("math") ? "maths" : "2bac"}-v${profile.version ?? 2}`});
     } catch (error) {
       console.error("ai-exam-creator parse failure", error);
