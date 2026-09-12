@@ -74,9 +74,26 @@ function mapChars(value: string, map: Record<string, string>) {
   return [...value].map((char) => map[char] ?? char).join("");
 }
 
-function normalize(value: string) {
+function convertFractions(value: string) {
   let result = value;
 
+  // Handle the common French-school notation first: (numerator)/(denominator).
+  // Repeating lets nested/simple fractions settle without touching surrounding prose.
+  for (let i = 0; i < 4; i += 1) {
+    const previous = result;
+    result = result.replace(/\(([^()]+)\)\s*\/\s*\(([^()]+)\)/g, "\\frac{$1}{$2}");
+    result = result.replace(/([A-Za-z0-9]+)\s*\/\s*\(([^()]+)\)/g, "\\frac{$1}{$2}");
+    result = result.replace(/\(([^()]+)\)\s*\/\s*([A-Za-z0-9]+)/g, "\\frac{$1}{$2}");
+    if (result === previous) break;
+  }
+
+  return result;
+}
+
+function normalize(value: string) {
+  let result = value.trim();
+
+  result = convertFractions(result);
   result = result.replace(/([A-Za-z0-9)\]])([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ]+)/g, (_m, base, power) => `${base}^{${mapChars(power, SUPERS)}}`);
   result = result.replace(/([A-Za-z0-9)\]])([₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+)/g, (_m, base, sub) => `${base}_{${mapChars(sub, SUBS)}}`);
   result = result.replace(/√\s*\(([^()]*)\)/g, "\\sqrt{$1}");
@@ -101,7 +118,7 @@ function normalize(value: string) {
 }
 
 function wrapFormula(value: string) {
-  return `\\(${normalize(value.trim())}\\)`;
+  return `\\(${normalize(value)}\\)`;
 }
 
 function protectDelimitedMath(text: string): { source: string; tokens: string[] } {
@@ -147,29 +164,34 @@ function toLatex(text: string) {
   let source = protectedValue.source;
   const equationTokens: string[] = [];
 
-  // Protect complete equations before handling powers or fractions inside them.
-  // Otherwise x² gets isolated first and the surrounding f(x)=... equation is lost.
-  source = source.replace(/(^|[(:]\s*)([A-Za-z][A-Za-z0-9_]*(?:\([^)]*\))?\s*=\s*[-+A-Za-z0-9().√^_⁺⁻²³⁴⁵⁶⁷⁸⁹*/]+)(?=\s*(?:[,.;!?]|$))/gm, (_m, prefix, formula) => {
+  // Protect the whole equation before touching powers, fractions, or symbols.
+  // This is critical for French expressions such as:
+  // f(x) = (x² + 4x + 3)/(x − 4)
+  source = source.replace(/(^|[\s(,:;])([A-Za-z][A-Za-z0-9_]*(?:\([^()\n]*\))?\s*=\s*[^.!?;\n]+?)(?=[.!?;]|$)/gm, (_m, prefix, formula) => {
     const token = `@@MM_EQUATION_${equationTokens.length}@@`;
     equationTokens.push(`${prefix}${wrapFormula(formula)}`);
     return token;
   });
 
-  // Only transform compact, unambiguous mathematical constructs that remain in prose.
+  // Explicit function/limit expressions occurring in prose.
   source = source.replace(/\b(?:lim|sin|cos|tan|cot|arcsin|arccos|arctan|ln|log|exp|sqrt)\s*\([^)]*\)/g, wrapFormula);
-  source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g, (_m, numerator, denominator) => `\\(\\frac{${normalize(numerator)}}{${normalize(denominator)}}\\)`);
+
+  // Standalone parenthesized fractions in prose.
+  source = source.replace(/\b([A-Za-z0-9]+)\s*\/\s*\(([A-Za-z0-9+\-*/.^_= ]+)\)/g, (_m, numerator, denominator) => wrapFormula(`\\frac{${normalize(numerator)}}{${normalize(denominator)}}`));
+
+  // Remaining compact powers/subscripts.
   source = source.replace(/\b[A-Za-z](?:\^[-+]?\d+|\^[A-Za-z0-9]+|\^\{[^}]+\}|_[A-Za-z0-9]+|_\{[^}]+\})/g, wrapFormula);
   source = source.replace(/\b[A-Za-z][⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉₊₋ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ]+/g, wrapFormula);
 
   source = normalize(source);
   source = restoreTokens(source, equationTokens, "@@MM_EQUATION");
-  return restoreDelimitedMath(source, protectedValue.tokens);
+  return restoreTokens(source, protectedValue.tokens, "@@MM_LATEX");
 }
 
 export function LatexText({ children, className, display = false }: { children: string; className?: string; display?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   const latex = useMemo(
-    () => display ? `\\[${normalize(children.trim())}\\]` : toLatex(children),
+    () => display ? `\\[${normalize(children)}\\]` : toLatex(children),
     [children, display],
   );
 
@@ -199,7 +221,12 @@ export function LatexText({ children, className, display = false }: { children: 
       ref={ref}
       className={className}
       data-latex-display={display || undefined}
-      style={{ fontSize: display ? "1.10em" : "1em", whiteSpace: "pre-wrap" }}
+      style={{
+        fontSize: display ? "1.10em" : "1em",
+        whiteSpace: "pre-wrap",
+        wordBreak: "normal",
+        overflowWrap: "normal",
+      }}
     />
   );
 }
