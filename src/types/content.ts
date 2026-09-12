@@ -21,6 +21,54 @@ export interface ContentTarget {
   conceptIds?: string[];
 }
 
+export interface ExerciseGraphPoint {
+  x: number;
+  y: number;
+  label?: string;
+}
+
+export interface ExerciseGraphCurve {
+  points: ExerciseGraphPoint[];
+  label?: string;
+  dashed?: boolean;
+}
+
+export interface ExerciseSchemeNode {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
+export interface ExerciseSchemeLink {
+  from: string;
+  to: string;
+  label?: string;
+  dashed?: boolean;
+}
+
+export type ExerciseVisual =
+  | {
+      kind: "graph";
+      title?: string;
+      ariaLabel?: string;
+      xLabel?: string;
+      yLabel?: string;
+      xMin?: number;
+      xMax?: number;
+      yMin?: number;
+      yMax?: number;
+      curves?: ExerciseGraphCurve[];
+      points?: ExerciseGraphPoint[];
+    }
+  | {
+      kind: "scheme";
+      title?: string;
+      ariaLabel?: string;
+      nodes: ExerciseSchemeNode[];
+      links: ExerciseSchemeLink[];
+    };
+
 export interface Flashcard {
   id: string;
   mode: ContentMode;
@@ -56,6 +104,7 @@ export interface Exercise {
   estimatedMinutes: number;
   xpValue: number;
   tags: string[];
+  visual?: ExerciseVisual;
 }
 
 export interface Quiz {
