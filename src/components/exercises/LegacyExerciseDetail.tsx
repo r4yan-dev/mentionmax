@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { LatexText } from "../ui/LatexText";
 import type { Exercise } from "../../types/content";
 import { tracks } from "../../data/curriculum/tracks";
+import "./ExerciseBrand.css";
 
 const difficultyLabels = ["", "Très facile", "Facile", "Intermédiaire", "Difficile", "Très difficile"];
 
