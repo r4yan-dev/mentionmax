@@ -3,6 +3,8 @@ import type { SubjectId, TrackId } from "../../types/academic";
 import { supabase } from "../../lib/supabase";
 import { getWeakPoints, type LearnerMastery } from "./weakPointsService";
 
+export { getWeakPoints, type LearnerMastery } from "./weakPointsService";
+
 export type StudyAgentTask = {
   id: string;
   type: "review" | "exercise" | "quiz" | "lesson";
