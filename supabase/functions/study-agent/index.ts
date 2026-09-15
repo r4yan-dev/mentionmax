@@ -82,13 +82,7 @@ async function callGemini(apiKey: string, input: string) {
   const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey, "Api-Revision": "2026-05-20" },
-    body: JSON.stringify({
-      model: MODEL,
-      input,
-      store: false,
-      response_format: { type: "text", mime_type: "application/json", schema: sessionSchema },
-      generation_config: { max_output_tokens: 3500, thinking_level: "minimal" },
-    }),
+    body: JSON.stringify({ model: MODEL, input, store: false, response_format: { type: "text", mime_type: "application/json", schema: sessionSchema }, generation_config: { max_output_tokens: 3500, thinking_level: "minimal" } }),
     signal: AbortSignal.timeout(45000),
   });
   const raw = await response.text();
@@ -132,7 +126,10 @@ async function fetchPlanningProfile(req: Request, userId: string) {
   return Array.isArray(rows) ? rows[0] ?? null : null;
 }
 async function fetchStudentExams(req: Request, userId: string) {
-  return await fetchJson(req, "student_exams", "title,exam_date,subjects,coverage,mastery,notes", userId, "&exam_date=gte.current_date&order=exam_date.asc&limit=8") ?? [];
+  const rows = await fetchJson(req, "student_exams", "title,exam_date,subjects,coverage,mastery,notes", userId, "&order=exam_date.asc&limit=12");
+  if (!Array.isArray(rows)) return [];
+  const today = new Date().toISOString().slice(0, 10);
+  return rows.filter((exam) => typeof exam?.exam_date === "string" && exam.exam_date >= today).slice(0, 8);
 }
 
 async function saveSession(req: Request, session: any, trackId: string, minutes: number) {
@@ -157,39 +154,16 @@ function normalizeSession(session: any, minutes: number, mastery: any[]) {
     const type = ["review", "exercise", "quiz", "lesson"].includes(task?.type) ? task.type : "exercise";
     const subjectId = typeof task?.subjectId === "string" ? task.subjectId : "maths";
     const chapter = typeof task?.chapter === "string" ? task.chapter : "";
-    const route = type === "quiz"
-      ? `/exercices?subject=${encodeURIComponent(subjectId)}&mode=quiz`
-      : type === "exercise"
-        ? `/exercices?subject=${encodeURIComponent(subjectId)}${chapter ? `&chapter=${encodeURIComponent(chapter)}` : ""}`
-        : `/lecons/${encodeURIComponent(subjectId)}${chapter ? `?chapter=${encodeURIComponent(chapter)}` : ""}`;
-    return {
-      id: typeof task?.id === "string" ? task.id : `agent-${index + 1}`,
-      type,
-      subjectId,
-      chapter,
-      title: typeof task?.title === "string" ? task.title : "Travail ciblé",
-      reason: typeof task?.reason === "string" ? task.reason : "Renforcer une notion prioritaire.",
-      minutes: Math.max(5, Math.min(45, Number(task?.minutes) || 10)),
-      route,
-      conceptIds: Array.isArray(task?.conceptIds) ? task.conceptIds.filter((x: unknown) => typeof x === "string").slice(0, 5) : [],
-    };
+    const route = type === "quiz" ? `/exercices?subject=${encodeURIComponent(subjectId)}&mode=quiz` : type === "exercise" ? `/exercices?subject=${encodeURIComponent(subjectId)}${chapter ? `&chapter=${encodeURIComponent(chapter)}` : ""}` : `/lecons/${encodeURIComponent(subjectId)}${chapter ? `?chapter=${encodeURIComponent(chapter)}` : ""}`;
+    return { id: typeof task?.id === "string" ? task.id : `agent-${index + 1}`, type, subjectId, chapter, title: typeof task?.title === "string" ? task.title : "Travail ciblé", reason: typeof task?.reason === "string" ? task.reason : "Renforcer une notion prioritaire.", minutes: Math.max(5, Math.min(45, Number(task?.minutes) || 10)), route, conceptIds: Array.isArray(task?.conceptIds) ? task.conceptIds.filter((x: unknown) => typeof x === "string").slice(0, 5) : [] };
   });
   if (!safeTasks.length) {
     const weak = mastery[0];
     safeTasks.push({ id: "agent-1", type: "quiz", subjectId: weak?.subject_id ?? "maths", chapter: weak?.chapter ?? "", title: "Diagnostic ciblé", reason: "Commencer par mesurer la notion la plus fragile.", minutes: Math.min(15, minutes), route: `/exercices?subject=${encodeURIComponent(weak?.subject_id ?? "maths")}&mode=quiz`, conceptIds: weak?.concept_id ? [weak.concept_id] : [] });
   }
   let total = safeTasks.reduce((sum: number, task: any) => sum + task.minutes, 0);
-  if (total > minutes) {
-    const factor = minutes / total;
-    safeTasks.forEach((task: any) => { task.minutes = Math.max(5, Math.floor(task.minutes * factor)); });
-  }
-  return {
-    title: String(session?.title || "Ta session adaptive"),
-    subtitle: String(session?.subtitle || "Une session construite à partir de ton profil et de tes résultats."),
-    explanation: String(session?.explanation || "J'ai privilégié les notions qui semblent les plus utiles maintenant selon ton profil, tes résultats et le contexte de ta semaine."),
-    priorities: Array.isArray(session?.priorities) ? session.priorities.filter((x: unknown) => typeof x === "string").slice(0, 4) : [],
-    tasks: safeTasks,
-  };
+  if (total > minutes) { const factor = minutes / total; safeTasks.forEach((task: any) => { task.minutes = Math.max(5, Math.floor(task.minutes * factor)); }); }
+  return { title: String(session?.title || "Ta session adaptive"), subtitle: String(session?.subtitle || "Une session construite à partir de ton profil et de tes résultats."), explanation: String(session?.explanation || "J'ai privilégié les notions qui semblent les plus utiles maintenant selon ton profil, tes résultats et le contexte de ta semaine."), priorities: Array.isArray(session?.priorities) ? session.priorities.filter((x: unknown) => typeof x === "string").slice(0, 4) : [], tasks: safeTasks };
 }
 
 function academicContext(date: Date) {
@@ -197,18 +171,7 @@ function academicContext(date: Date) {
   if (date.getMonth() < 8) start.setFullYear(date.getFullYear() - 1);
   const days = Math.max(0, Math.floor((date.getTime() - start.getTime()) / 86400000));
   const month = Math.max(0, Math.min(9, Math.floor(days / 30)));
-  const phases = [
-    "début d'année : diagnostic, bases et premiers chapitres",
-    "consolidation des premiers chapitres et rattrapage des lacunes",
-    "avancement dans le programme tout en récupérant les notions fragiles",
-    "rattrapage des chapitres non couverts et pratique régulière",
-    "consolidation avancée et récupération espacée",
-    "approfondissement avec davantage d'exercices niveau Bac",
-    "entraînement transversal et premières annales régulières",
-    "révision structurée et ciblage des points à fort enjeu",
-    "préparation finale avec annales et examens blancs",
-    "dernière ligne droite : erreurs récurrentes et notions indispensables",
-  ];
+  const phases = ["début d'année : diagnostic, bases et premiers chapitres", "consolidation des premiers chapitres et rattrapage des lacunes", "avancement dans le programme tout en récupérant les notions fragiles", "rattrapage des chapitres non couverts et pratique régulière", "consolidation avancée et récupération espacée", "approfondissement avec davantage d'exercices niveau Bac", "entraînement transversal et premières annales régulières", "révision structurée et ciblage des points à fort enjeu", "préparation finale avec annales et examens blancs", "dernière ligne droite : erreurs récurrentes et notions indispensables"];
   return { today: date.toISOString().slice(0, 10), academicStart: start.toISOString().slice(0, 10), monthIndex: month, phase: phases[month] };
 }
 
@@ -228,13 +191,7 @@ Deno.serve(async (req) => {
     const profile = await fetchPlanningProfile(req, userId);
     const exams = await fetchStudentExams(req, userId);
     const context = academicContext(new Date());
-    const profileSummary = profile ? {
-      strongSubjects: profile.strong_subjects ?? [],
-      weakSubjects: profile.weak_subjects ?? [],
-      prioritySubjects: profile.priority_subjects ?? [],
-      subjectStatus: profile.subject_status ?? {},
-      onboardingCompleted: Boolean(profile.onboarding_completed),
-    } : { onboardingCompleted: false };
+    const profileSummary = profile ? { strongSubjects: profile.strong_subjects ?? [], weakSubjects: profile.weak_subjects ?? [], prioritySubjects: profile.priority_subjects ?? [], subjectStatus: profile.subject_status ?? {}, onboardingCompleted: Boolean(profile.onboarding_completed) } : { onboardingCompleted: false };
 
     const prompt = `Tu es l'agent personnel de travail de MentionMax pour un élève marocain de 2BAC. Compose UNE SEULE SESSION réaliste pour aujourd'hui.
 
