@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Copy, MessageCircle, Radio, Sparkles, Users } from "lucide-react";
 import { FocusTimer } from "../components/focus/FocusTimer";
+import FocusSessionPlanner from "../components/focus/FocusSessionPlanner";
 import SocialStudyFeatures from "../components/social/SocialStudyFeatures";
 import collaboratingPerson from "../assets/people/students-collaborating.webp";
 import collaboratingBg from "../assets/people-bg/students-collaborating-bg.webp";
@@ -108,11 +109,12 @@ export default function Focus() {
   return (
     <main className="app-page">
       <header className="page-header">
-        <span className="section-eyebrow">Focus · Communauté</span>
+        <span className="section-eyebrow">Focus · Travail</span>
         <h1 className="page-title">Ton espace pour travailler seul ou ensemble.</h1>
-        <p className="page-lead">Lance un focus, retrouve ton groupe, vois qui travaille en direct et garde toute la vie sociale de tes révisions au même endroit.</p>
+        <p className="page-lead">Construis d'abord une session adaptée, lance ensuite ton focus, puis retrouve ton groupe et ta progression au même endroit.</p>
       </header>
 
+      <FocusSessionPlanner />
       <FocusTimer />
 
       {selectedGroup ? (
@@ -134,7 +136,7 @@ export default function Focus() {
                 {online.map((person) => <div className="social-online-person" key={`${person.userId}-${person.joinedAt}`}><span className="social-avatar">{getInitials(person.displayName)}</span><div><strong>{person.displayName}{person.userId === user?.id ? " · toi" : ""}</strong><span>En train de travailler</span></div><span className="social-online-dot"/></div>)}
               </div>
               <div className="social-room-actions">
-                <button type="button" className="btn btn-primary" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Sparkles size={15}/> Continuer mon focus</button>
+                <button type="button" className="btn btn-primary" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><Sparkles size={15}/> Revenir à ma session</button>
                 <Link className="btn btn-secondary" to={`/focus/groups/${selectedGroup.id}/chat`}><MessageCircle size={15}/> Ouvrir le chat</Link>
                 <button type="button" className="btn btn-ghost" onClick={() => void copyCode()}><Copy size={15}/> {copied ? "Copié" : "Inviter"}</button>
               </div>
